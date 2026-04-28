@@ -579,12 +579,48 @@ body::before{
 /* AP CARDS */
 .ap-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:16px 14px;margin-bottom:14px;backdrop-filter:blur(16px);transition:background .4s;}
 .ap-card-hdr{font-size:13px;font-weight:900;margin-bottom:14px;color:var(--txt);display:flex;align-items:center;justify-content:space-between;letter-spacing:-.1px;}
+.folder-drop-target{transition:background .2s,border-color .2s,transform .15s;}
+.folder-drop-target.drag-over{border-color:var(--yellow)!important;background:rgba(255,202,44,0.12)!important;transform:scale(1.02);}
+.folder-drop-hint{font-style:italic;opacity:0.7;}
 .ap-hint{font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:.2px;}
 .ap-row2{display:flex;gap:10px;}
 .ap-subj-group{margin-bottom:16px;}
 .ap-subj-hdr{font-size:11px;font-weight:900;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;padding:0 2px;}
 .ap-subj-cnt{background:rgba(91,154,255,0.15);color:var(--blue);font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;}
 .ap-drag-list{display:flex;flex-direction:column;gap:7px;}
+
+/* FOLDER ORGANIZER */
+.fo-subj-sec{margin-bottom:18px;}
+.fo-subj-hdr{font-size:11px;font-weight:900;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.fo-folder-block{margin-bottom:12px;border:1px solid var(--br2);border-radius:16px;overflow:hidden;}
+.fo-folder-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,202,44,0.07);border-bottom:1px solid var(--br);font-size:12.5px;font-weight:800;}
+.fo-folder-hdr span{flex:1;}
+.fo-folder-hdr .fo-cnt{font-size:10px;font-weight:700;color:var(--txt2);}
+.fo-no-folder{border-color:rgba(91,154,255,0.2);background:rgba(91,154,255,0.03);}
+.fo-no-folder .fo-folder-hdr{background:rgba(91,154,255,0.06);}
+.fo-file-list{display:flex;flex-direction:column;gap:0;}
+.fo-file-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--br);cursor:pointer;transition:background .15s;}
+.fo-file-row:last-child{border-bottom:none;}
+.fo-file-row:active{background:rgba(91,154,255,0.1);}
+.fo-file-name{flex:1;font-size:12px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fo-file-cat{font-size:10px;font-weight:700;color:var(--blue);background:rgba(91,154,255,0.12);padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.fo-file-arrow{font-size:14px;color:var(--txt3);}
+
+/* FILE ASSIGN MODAL */
+#fo-modal{position:fixed;inset:0;z-index:950;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .3s;}
+#fo-modal.open{opacity:1;pointer-events:all;}
+.fo-modal-card{width:100%;max-width:480px;background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 18px 32px;border:1px solid var(--br2);transform:translateY(40px);transition:transform .38s var(--spring);}
+#fo-modal.open .fo-modal-card{transform:translateY(0);}
+.fo-modal-title{font-size:15px;font-weight:900;margin-bottom:4px;letter-spacing:-.2px;}
+.fo-modal-sub{font-size:11.5px;color:var(--txt2);margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fo-modal-label{font-size:10px;font-weight:800;color:var(--txt2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;display:block;margin-top:12px;}
+.fo-modal-sel{width:100%;padding:11px 12px;background:var(--sf);border:1px solid var(--br2);border-radius:13px;color:var(--txt);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;outline:none;appearance:none;-webkit-appearance:none;}
+.fo-modal-sel:focus{border-color:var(--blue);}
+.fo-modal-btns{display:flex;gap:10px;margin-top:18px;}
+.fo-modal-save{flex:1;padding:13px;border-radius:14px;border:none;background:var(--grd-blue);color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;cursor:pointer;transition:transform .2s var(--bounce);}
+.fo-modal-save:active{transform:scale(0.95);}
+.fo-modal-cancel{padding:13px 18px;border-radius:14px;border:1px solid var(--br2);background:transparent;color:var(--txt2);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+
 
 /* DRAG ROWS */
 .afrow{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.04);border:1px solid var(--br);border-radius:14px;padding:9px 12px;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;animation:fcIn .3s var(--spring) both;cursor:default;}
@@ -865,6 +901,12 @@ body::before{
       <div class="tname">Aarambh Batch <span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
+      <!-- WeChat button - animated -->
+      <a class="wechat-fab-top" id="wechat-top-btn" href="https://wechat-u17.pages.dev/" target="_blank" rel="noopener">
+        <span class="wc-ico">💬</span>
+        <span class="wc-lbl">WeChat</span>
+        <span class="wc-pulse"></span>
+      </a>
       <div id="admin-badge" style="display:none;align-items:center;gap:6px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="document.getElementById('apanel').classList.add('open');renderAF&&renderAF();">
         <span style="font-size:11px;font-weight:900;color:#ff6b6b;">⚡ ADMIN</span>
         <button style="background:none;border:none;color:#ff6b6b;font-size:11px;font-weight:800;cursor:pointer;padding:0 2px;" onclick="event.stopPropagation();adminOut()">✕ Logout</button>
@@ -982,9 +1024,18 @@ body::before{
   <div id="pg-profile" class="pg">
     <div class="pscroll">
       <div class="profcard">
-        <div class="ava">S</div>
-        <div class="pname">Student</div>
+        <div class="ava" id="prof-ava">S</div>
+        <div class="pname" id="prof-name-display">Student</div>
         <div class="pbatch">Aarambh Batch 2026–27</div>
+        <!-- Name edit row -->
+        <div id="prof-name-edit" style="display:none;flex-direction:column;gap:8px;width:100%;margin-top:8px;">
+          <input id="prof-name-inp" class="fi" placeholder="Enter your name…" maxlength="32" style="text-align:center;font-size:14px;font-weight:700;">
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="saveStudentName()" class="btnm" style="padding:8px 22px;font-size:12px;">✅ Save</button>
+            <button onclick="cancelEditName()" class="btng" style="padding:8px 16px;font-size:12px;">Cancel</button>
+          </div>
+        </div>
+        <button id="prof-edit-btn" onclick="startEditName()" style="margin-top:10px;background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.3);color:var(--blue);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:6px 16px;border-radius:99px;cursor:pointer;transition:background .2s;">✏️ Edit Name</button>
         <div class="pstats">
           <div class="pst"><div class="pstn" id="pf-cnt">0</div><div class="pstl">Files</div></div>
           <div class="pst"><div class="pstn" style="color:var(--purple)">3</div><div class="pstl">Subjects</div></div>
@@ -1080,6 +1131,7 @@ body::before{
   <div class="ap-tabs">
     <button class="ap-tab on" id="apt-files" onclick="apSwitchTab('files')">📁 Files</button>
     <button class="ap-tab" id="apt-folders" onclick="apSwitchTab('folders')">🗂 Folders</button>
+    <button class="ap-tab" id="apt-cats" onclick="apSwitchTab('cats')">🏷 Categories</button>
     <button class="ap-tab" id="apt-yt" onclick="apSwitchTab('yt')">▶️ YouTube</button>
   </div>
 
@@ -1099,7 +1151,7 @@ body::before{
         <div class="fg"><label class="fl">File Name</label><input class="fi" id="af-n" placeholder="e.g. Chapter 1 DPP"></div>
         <div class="ap-row2">
           <div class="fg" style="flex:1"><label class="fl">Subject</label>
-            <select class="fi fi-sel" id="af-s" onchange="updateAPFolderSelect()">
+            <select class="fi fi-sel" id="af-s" onchange="updateAPFolderSelect();updateCatDropdown()">
               <option value="maths">Maths</option>
               <option value="science">Science</option>
               <option value="sst">Social Studies</option>
@@ -1107,11 +1159,6 @@ body::before{
           </div>
           <div class="fg" style="flex:1"><label class="fl">Category</label>
             <select class="fi fi-sel" id="af-c">
-              <option value="WPP">WPP</option>
-              <option value="DPP">DPP</option>
-              <option value="MODULE">MODULE</option>
-              <option value="NOTES">NOTES</option>
-              <option value="ACP">ACP</option>
             </select>
           </div>
         </div>
@@ -1148,6 +1195,12 @@ body::before{
         <div class="ap-card-hdr">📋 Manage Files <span class="ap-hint">Drag ⠿ to reorder</span></div>
         <div id="apfiles"></div>
       </div>
+
+      <!-- FOLDER ORGANIZER -->
+      <div class="ap-card" id="ap-folder-organizer-card" style="display:none;">
+        <div class="ap-card-hdr">📁 Assign Files to Folders <span class="ap-hint">Tap a file to move it</span></div>
+        <div id="ap-folder-organizer"></div>
+      </div>
     </div>
 
     <!-- ─── FOLDERS TAB ─── -->
@@ -1172,6 +1225,28 @@ body::before{
       <div class="ap-card">
         <div class="ap-card-hdr">📁 Manage Folders</div>
         <div id="ap-folder-list"></div>
+      </div>
+    </div>
+
+    <!-- ─── CATEGORIES TAB ─── -->
+    <div class="ap-tabpane" id="aptp-cats">
+      <div class="ap-card">
+        <div class="ap-card-hdr">🏷 Add New Category</div>
+        <div class="fg"><label class="fl">Category Name</label>
+          <input class="fi" id="cat-name" placeholder="e.g. TEST PAPER" style="text-transform:uppercase;">
+        </div>
+        <div class="fg"><label class="fl">Add to Subject(s)</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-maths" value="maths" checked> 📘 Maths</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-science" value="science"> 🔬 Science</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-sst" value="sst"> 🌏 SST</label>
+          </div>
+        </div>
+        <button class="btnm" onclick="addCategory()">🏷 Add Category</button>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-hdr">📋 Current Categories</div>
+        <div id="ap-cats-list"></div>
       </div>
     </div>
 
@@ -1225,6 +1300,22 @@ body::before{
   <div class="lsico">🔒</div>
   <div class="lstitle">Access Denied</div>
   <div class="lssub">You must agree to the Terms &amp; Conditions to access this app.</div>
+</div>
+
+<!-- FILE ASSIGN MODAL (folder + category) -->
+<div id="fo-modal">
+  <div class="fo-modal-card">
+    <div class="fo-modal-title">✏️ Move / Reassign File</div>
+    <div class="fo-modal-sub" id="fo-modal-fname">—</div>
+    <label class="fo-modal-label">📁 Folder</label>
+    <select class="fo-modal-sel" id="fo-modal-folder"></select>
+    <label class="fo-modal-label">🏷 Category</label>
+    <select class="fo-modal-sel" id="fo-modal-cat"></select>
+    <div class="fo-modal-btns">
+      <button class="fo-modal-cancel" onclick="foModalClose()">Cancel</button>
+      <button class="fo-modal-save" onclick="foModalSave()">✅ Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -1703,16 +1794,27 @@ function closeSearch(){
 
 /* ADMIN PANEL TAB SWITCHER */
 function apSwitchTab(t){
-  ['files','folders','yt'].forEach(k=>{
+  ['files','folders','cats','yt'].forEach(k=>{
     document.getElementById('apt-'+k)?.classList.toggle('on',k===t);
     document.getElementById('aptp-'+k)?.classList.toggle('on',k===t);
   });
+  if(t==='files'){renderAF();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();}
   if(t==='folders')renderAPFolders();
+  if(t==='cats')renderAPCats();
   if(t==='yt')renderAPYT();
 }
 
 /* ADMIN */
-function openAL(){document.getElementById('almodal').classList.add('open');}
+function openAL(){
+  if(isAdmin){
+    // Already logged in — just open admin panel directly
+    document.getElementById('apanel').classList.add('open');
+    apSwitchTab('files');
+    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();
+    return;
+  }
+  document.getElementById('almodal').classList.add('open');
+}
 function closeAL(){
   document.getElementById('almodal').classList.remove('open');
   document.getElementById('ai-id').value='';
@@ -1727,7 +1829,7 @@ function tryLogin(){
     document.getElementById('apanel').classList.add('open');
     document.getElementById('admin-badge').style.display='flex';
     apSwitchTab('files');
-    renderAF();renderAPFolders();updateAPFolderSelect();toast('✅ Admin logged in');
+    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();toast('✅ Admin logged in');
   }else{
     ['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.add('err'));
     setTimeout(()=>['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.remove('err')),1500);
@@ -1795,6 +1897,8 @@ function renderAF(){
   });
   renderAPYT();
   updateAPFolderSelect();
+  updateCatDropdown();
+  renderFolderOrganizer();
 }
 
 // Drag state
@@ -1850,6 +1954,7 @@ async function addFolder(){
     await fbLoadFolders();
     renderAF();
     renderAPFolders();
+    updateAPFolderSelect();
     if(curSubj)renderFiles(curSubj);
     document.getElementById('fld-name').value='';
     toast('✅ Folder created!');
@@ -1879,11 +1984,33 @@ function renderAPFolders(){
   if(!allFolders.length){list.innerHTML='<div class="ecatxt">No folders yet.</div>';return;}
   allFolders.forEach(fo=>{
     const row=document.createElement('div');
-    row.className='afrow';
+    row.className='afrow folder-drop-target';
+    row.dataset.folderId=fo.id;
+    row.dataset.folderSubj=fo.subject;
     row.innerHTML=`<div class="afth" style="background:rgba(255,202,44,0.15);font-size:22px;">📁</div>
-      <div class="afnm">${esc(fo.name)}<span>${SUBJ[fo.subject]?.name||fo.subject}</span></div>
+      <div class="afnm">${esc(fo.name)}<span class="folder-drop-hint">${SUBJ[fo.subject]?.name||fo.subject} · Drop files here</span></div>
       <button class="afdel" data-id="${fo.id}">🗑</button>`;
     row.querySelector('.afdel').addEventListener('click',()=>delFolder(fo.id));
+    // Make folder rows drop targets for files
+    row.addEventListener('dragover',(e)=>{
+      if(_dragSrc&&_dragSrc.dataset.subj===fo.subject){
+        e.preventDefault();row.classList.add('drag-over');
+      }
+    });
+    row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+    row.addEventListener('drop',async(e)=>{
+      e.preventDefault();row.classList.remove('drag-over');
+      if(!_dragSrc)return;
+      if(_dragSrc.dataset.subj!==fo.subject){toast('⚠️ File subject does not match folder subject');return;}
+      const fileId=_dragSrc.dataset.id;
+      try{
+        await updateDoc(doc(db,'files',fileId),{folder:fo.id});
+        await fbLoadFiles();
+        renderAF();
+        if(curSubj)renderFiles(curSubj);
+        toast('📁 File moved to folder!');
+      }catch(err){toast('❌ '+err.message);}
+    });
     list.appendChild(row);
   });
 }
@@ -1893,12 +2020,15 @@ function updateAPFolderSelect(){
   const subjSel=document.getElementById('af-s');
   if(!sel||!subjSel)return;
   const subj=subjSel.value;
+  const cur=sel.value;
   sel.innerHTML='<option value="">— No folder —</option>';
   (FOLDERS_DB[subj]||[]).forEach(fo=>{
     const opt=document.createElement('option');
     opt.value=fo.id;opt.textContent=fo.name;
     sel.appendChild(opt);
   });
+  // Restore selection if still valid
+  if(cur&&sel.querySelector(`option[value="${cur}"]`))sel.value=cur;
 }
 window.updateAPFolderSelect=updateAPFolderSelect;
 
@@ -1921,7 +2051,7 @@ async function addFile(){
 
   const btn = document.getElementById('af-submit-btn');
   const setBusy = (msg) => { btn.textContent=msg; btn.disabled=true; };
-  const setFree = () => { btn.textContent='Add File'; btn.disabled=false; };
+  const setFree = () => { btn.textContent='✅ Add File'; btn.disabled=false; };
 
   try {
     let finalLink = '';
@@ -2114,6 +2244,139 @@ function toast(msg){
   clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600);
 }
 
+/* ═══════════════════════════════════════════
+   CUSTOM CATEGORIES — localStorage
+═══════════════════════════════════════════ */
+const DEFAULT_CATS = {
+  maths: ['WPP','DPP','MODULE','NOTES','ACP'],
+  science: ['WPP','DPP','MODULE','NOTES','ACP'],
+  sst: ['WPP','DPP','MODULE','NOTES','ACP']
+};
+
+function loadCategories(){
+  try{
+    const saved=localStorage.getItem('ab_cats');
+    if(saved){
+      const parsed=JSON.parse(saved);
+      // Merge with defaults — add any new subjects if missing
+      ['maths','science','sst'].forEach(k=>{
+        if(!parsed[k])parsed[k]=DEFAULT_CATS[k].slice();
+        SUBJ[k].cats=parsed[k];
+      });
+    } else {
+      // Use SUBJ cats as-is (already set at init), also add defaults
+      ['maths','science','sst'].forEach(k=>{
+        if(!SUBJ[k].cats.length)SUBJ[k].cats=DEFAULT_CATS[k].slice();
+      });
+      saveCategories();
+    }
+  }catch(e){ console.error(e); }
+}
+
+function saveCategories(){
+  const data={};
+  ['maths','science','sst'].forEach(k=>data[k]=SUBJ[k].cats);
+  localStorage.setItem('ab_cats',JSON.stringify(data));
+}
+
+function addCategory(){
+  const raw=document.getElementById('cat-name').value.trim();
+  if(!raw){toast('⚠️ Category name required');return;}
+  const name=raw.toUpperCase();
+  const subjects=['maths','science','sst'].filter(k=>document.getElementById('cat-subj-'+k)?.checked);
+  if(!subjects.length){toast('⚠️ Select at least one subject');return;}
+  let added=false;
+  subjects.forEach(k=>{
+    if(!SUBJ[k].cats.includes(name)){
+      SUBJ[k].cats.push(name);
+      added=true;
+    }
+  });
+  if(!added){toast('⚠️ Category already exists in selected subjects');return;}
+  saveCategories();
+  document.getElementById('cat-name').value='';
+  renderAPCats();
+  updateCatDropdown();
+  toast('✅ Category added!');
+}
+
+function deleteCategory(subj, cat){
+  // Don't allow deleting if files use this category
+  const inUse=(DB[subj]||[]).some(f=>f.category===cat);
+  if(inUse){toast('⚠️ Cannot delete — files use this category');return;}
+  SUBJ[subj].cats=SUBJ[subj].cats.filter(c=>c!==cat);
+  saveCategories();
+  renderAPCats();
+  updateCatDropdown();
+  toast('🗑 Category removed');
+}
+
+function renderAPCats(){
+  const list=document.getElementById('ap-cats-list');
+  if(!list)return;
+  list.innerHTML='';
+  ['maths','science','sst'].forEach(subj=>{
+    const cats=SUBJ[subj].cats||[];
+    const sg=document.createElement('div');
+    sg.className='ap-subj-group';
+    sg.innerHTML=`<div class="ap-subj-hdr">${SUBJ[subj].icon} ${SUBJ[subj].name}</div>`;
+    const inner=document.createElement('div');inner.style.cssText='display:flex;flex-wrap:wrap;gap:7px;';
+    cats.forEach(cat=>{
+      const chip=document.createElement('div');
+      chip.style.cssText='display:flex;align-items:center;gap:5px;background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.25);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:800;';
+      chip.innerHTML=`<span style="color:var(--txt)">${esc(cat)}</span><button onclick="deleteCategory('${subj}','${cat}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:0;line-height:1;">✕</button>`;
+      inner.appendChild(chip);
+    });
+    if(!cats.length)inner.innerHTML='<span style="font-size:11px;color:var(--txt3)">No categories</span>';
+    sg.appendChild(inner);
+    list.appendChild(sg);
+  });
+}
+
+function updateCatDropdown(){
+  const sel=document.getElementById('af-c');
+  const subj=document.getElementById('af-s')?.value||'maths';
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='';
+  (SUBJ[subj].cats||DEFAULT_CATS[subj]).forEach(cat=>{
+    const opt=document.createElement('option');
+    opt.value=cat;opt.textContent=cat;
+    sel.appendChild(opt);
+  });
+  if(sel.querySelector(`option[value="${cur}"]`))sel.value=cur;
+}
+window.updateCatDropdown=updateCatDropdown;
+window.addCategory=addCategory;
+window.deleteCategory=deleteCategory;
+
+/* STUDENT NAME — saved to localStorage */
+function loadStudentName(){
+  const n=localStorage.getItem('ab_student_name')||'Student';
+  document.getElementById('prof-name-display').textContent=n;
+  document.getElementById('prof-ava').textContent=n.charAt(0).toUpperCase();
+}
+function startEditName(){
+  const cur=localStorage.getItem('ab_student_name')||'';
+  document.getElementById('prof-name-inp').value=cur;
+  document.getElementById('prof-name-edit').style.display='flex';
+  document.getElementById('prof-edit-btn').style.display='none';
+  setTimeout(()=>document.getElementById('prof-name-inp').focus(),80);
+}
+function cancelEditName(){
+  document.getElementById('prof-name-edit').style.display='none';
+  document.getElementById('prof-edit-btn').style.display='';
+}
+function saveStudentName(){
+  const v=document.getElementById('prof-name-inp').value.trim();
+  if(!v){toast('⚠️ Please enter your name');return;}
+  localStorage.setItem('ab_student_name',v);
+  loadStudentName();
+  cancelEditName();
+  toast('✅ Name saved!');
+}
+window.startEditName=startEditName;window.cancelEditName=cancelEditName;window.saveStudentName=saveStudentName;
+
 /* UTILS */
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -2131,9 +2394,597 @@ window.toggleTheme=toggleTheme;window.ripple=ripple;
 window.addFolder=addFolder;window.delFolder=delFolder;
 window.apSwitchTab=apSwitchTab;
 
+/* ═══════════════════════════════════════════
+   FOLDER ORGANIZER — assign files to folders
+═══════════════════════════════════════════ */
+function renderFolderOrganizer(){
+  const card=document.getElementById('ap-folder-organizer-card');
+  const el=document.getElementById('ap-folder-organizer');
+  if(!card||!el)return;
+  const allFolders=[...Object.values(FOLDERS_DB)].flat();
+  // Only show if there are folders
+  if(!allFolders.length){card.style.display='none';return;}
+  card.style.display='';
+  el.innerHTML='';
+
+  ['maths','science','sst'].forEach(subj=>{
+    const subjFiles=DB[subj]||[];
+    const subjFolders=FOLDERS_DB[subj]||[];
+    if(!subjFiles.length&&!subjFolders.length)return;
+
+    const sec=document.createElement('div');
+    sec.className='fo-subj-sec';
+    sec.innerHTML=`<div class="fo-subj-hdr">${SUBJ[subj].icon} ${SUBJ[subj].name}</div>`;
+
+    // "No folder" bucket
+    const noFolderFiles=subjFiles.filter(f=>!f.folder);
+    const noFolderBlock=document.createElement('div');
+    noFolderBlock.className='fo-folder-block fo-no-folder';
+    noFolderBlock.innerHTML=`<div class="fo-folder-hdr"><span>📂 Unassigned files</span><span class="fo-cnt">${noFolderFiles.length} file${noFolderFiles.length!==1?'s':''}</span></div><div class="fo-file-list" id="fo-nf-${subj}"></div>`;
+    const nfList=noFolderBlock.querySelector(`#fo-nf-${subj}`);
+    if(!noFolderFiles.length){
+      nfList.innerHTML=`<div style="padding:10px 12px;font-size:11px;color:var(--txt3);font-weight:600;">All files are in folders ✓</div>`;
+    } else {
+      noFolderFiles.forEach(f=>{
+        nfList.appendChild(mkFoFileRow(f,subj));
+      });
+    }
+    sec.appendChild(noFolderBlock);
+
+    // Each folder bucket
+    subjFolders.forEach(fo=>{
+      const folderFiles=subjFiles.filter(f=>f.folder===fo.id);
+      const block=document.createElement('div');
+      block.className='fo-folder-block';
+      block.innerHTML=`<div class="fo-folder-hdr"><span>📁 ${esc(fo.name)}</span><span class="fo-cnt">${folderFiles.length} file${folderFiles.length!==1?'s':''}</span></div><div class="fo-file-list" id="fo-fl-${fo.id}"></div>`;
+      const fList=block.querySelector(`#fo-fl-${fo.id}`);
+      if(!folderFiles.length){
+        fList.innerHTML=`<div style="padding:10px 12px;font-size:11px;color:var(--txt3);font-weight:600;font-style:italic;">Empty — tap a file above to move it here</div>`;
+      } else {
+        folderFiles.forEach(f=>fList.appendChild(mkFoFileRow(f,subj)));
+      }
+      sec.appendChild(block);
+    });
+
+    el.appendChild(sec);
+  });
+}
+
+function mkFoFileRow(f, subj){
+  const row=document.createElement('div');
+  row.className='fo-file-row';
+  const folderName=f.folder?(FOLDERS_DB[subj]||[]).find(fo=>fo.id===f.folder)?.name||'':'';
+  row.innerHTML=`
+    <span style="font-size:16px;">${f.thumb&&f.thumb.length<=4&&/\p{Emoji}/u.test(f.thumb)?f.thumb:'📄'}</span>
+    <span class="fo-file-name">${esc(f.name)}</span>
+    <span class="fo-file-cat">${esc(f.category)}</span>
+    <span class="fo-file-arrow">✏️</span>`;
+  row.addEventListener('click',()=>foModalOpen(f,subj));
+  return row;
+}
+
+/* File assign modal state */
+let _foFile=null,_foSubj=null;
+
+function foModalOpen(f,subj){
+  _foFile=f;_foSubj=subj;
+  document.getElementById('fo-modal-fname').textContent=f.name;
+
+  // Populate folder select
+  const fSel=document.getElementById('fo-modal-folder');
+  fSel.innerHTML='<option value="">— No folder —</option>';
+  (FOLDERS_DB[subj]||[]).forEach(fo=>{
+    const opt=document.createElement('option');
+    opt.value=fo.id;opt.textContent='📁 '+fo.name;
+    fSel.appendChild(opt);
+  });
+  fSel.value=f.folder||'';
+
+  // Populate category select
+  const cSel=document.getElementById('fo-modal-cat');
+  cSel.innerHTML='';
+  (SUBJ[subj].cats||[]).forEach(cat=>{
+    const opt=document.createElement('option');
+    opt.value=cat;opt.textContent=cat;
+    cSel.appendChild(opt);
+  });
+  cSel.value=f.category||'';
+
+  document.getElementById('fo-modal').classList.add('open');
+}
+
+async function foModalSave(){
+  if(!_foFile||!_foSubj)return;
+  const newFolder=document.getElementById('fo-modal-folder').value;
+  const newCat=document.getElementById('fo-modal-cat').value;
+  try{
+    await updateDoc(doc(db,'files',_foFile.id),{folder:newFolder,category:newCat});
+    await fbLoadFiles();
+    foModalClose();
+    renderAF();
+    renderFolderOrganizer();
+    updateAPFolderSelect();
+    if(curSubj)renderFiles(curSubj);
+    toast('✅ File updated!');
+  }catch(e){toast('❌ '+e.message);}
+}
+
+function foModalClose(){
+  document.getElementById('fo-modal').classList.remove('open');
+  _foFile=null;_foSubj=null;
+}
+window.foModalClose=foModalClose;
+window.foModalSave=foModalSave;
+
 /* INIT */
+loadCategories();
 updateCounts();
 renderYTHome();
+loadStudentName();
+</script>
+<!-- ═══════════ WECHAT CSS ═══════════ -->
+<style>
+/* WeChat animated button in topbar */
+.wechat-fab-top{
+  position:relative;display:flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,#0077b6,#00c8ff);
+  border:none;color:#fff;border-radius:99px;padding:6px 13px;
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:900;
+  cursor:pointer;letter-spacing:.3px;
+  box-shadow:0 0 0 0 rgba(0,200,255,0.5);
+  animation:wcTopPulse 2.2s ease-in-out infinite;
+  transition:transform .2s var(--bounce);
+  overflow:visible;
+}
+.wechat-fab-top:active{transform:scale(0.9);}
+.wc-ico{font-size:14px;}
+.wc-lbl{white-space:nowrap;}
+.wc-pulse{
+  position:absolute;inset:-3px;border-radius:99px;
+  border:2px solid rgba(0,200,255,0.6);
+  animation:wcRing 2.2s ease-out infinite;
+  pointer-events:none;
+}
+@keyframes wcTopPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,200,255,0.5),0 4px 14px rgba(0,150,255,0.4);}
+  50%{box-shadow:0 0 0 8px rgba(0,200,255,0),0 6px 20px rgba(0,200,255,0.5);}
+}
+@keyframes wcRing{
+  0%{transform:scale(1);opacity:.8;}
+  70%{transform:scale(1.35);opacity:0;}
+  100%{transform:scale(1.35);opacity:0;}
+}
+
+/* WeChat panel — full screen slide in */
+#wechat-panel{
+  position:fixed;inset:0;z-index:900;
+  display:flex;flex-direction:column;
+  background:#040e1c;
+  transform:translateX(100%);
+  transition:transform .42s cubic-bezier(0.22,1,0.36,1);
+  will-change:transform;
+}
+#wechat-panel.open{transform:translateX(0);}
+
+/* WeChat header */
+.wc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 10px;
+  background:rgba(4,14,28,0.88);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(0,200,255,0.12);
+  flex-shrink:0;
+}
+.wc-header-left{display:flex;align-items:center;gap:10px;}
+.wc-live-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;animation:blink2 2s infinite;}
+@keyframes blink2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.wc-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:#00c8ff;text-shadow:0 0 20px rgba(0,200,255,.5);}
+.wc-admin-badge{display:none;font-size:.62rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);padding:2px 8px;border-radius:20px;}
+.wc-admin-badge.show{display:inline-block;}
+.wc-header-right{display:flex;align-items:center;gap:7px;}
+.wc-hbtn{background:none;border:1px solid rgba(0,200,255,0.12);color:#4a7a96;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.wc-hbtn:hover{border-color:#00c8ff;color:#00c8ff;}
+.wc-back{background:none;border:none;color:#00c8ff;font-size:22px;cursor:pointer;padding:0;transition:transform .2s;font-weight:900;}
+.wc-back:active{transform:scale(0.85);}
+#wc-msg-count{font-size:.7rem;color:#4a7a96;background:rgba(0,180,255,0.1);border:1px solid rgba(0,200,255,0.12);padding:3px 9px;border-radius:20px;font-weight:600;}
+
+/* admin bar */
+#wc-admin-bar{display:none;background:rgba(4,14,28,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,158,11,.2);padding:8px 16px;gap:10px;align-items:center;justify-content:space-between;flex-shrink:0;}
+#wc-admin-bar.show{display:flex;}
+.wc-admin-label{font-size:.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.1em;}
+.wc-admin-actions{display:flex;gap:8px;}
+.wc-aabtn{font-size:.73rem;font-weight:500;padding:5px 13px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;}
+.wc-aabtn:active{transform:scale(.95);}
+#wc-clear-btn{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+#wc-logout-btn{background:rgba(0,180,255,.1);border:1px solid rgba(0,200,255,.15);color:#4a7a96;}
+
+/* messages */
+#wc-messages{flex:1;overflow-y:auto;padding:14px 12px 6px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth;background:transparent;}
+#wc-messages::-webkit-scrollbar{width:3px;}
+#wc-messages::-webkit-scrollbar-thumb{background:rgba(0,200,255,.15);border-radius:3px;}
+.wc-day-div{text-align:center;font-size:.65rem;color:#4a7a96;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 4px;position:relative;}
+.wc-day-div::before,.wc-day-div::after{content:'';position:absolute;top:50%;width:28%;height:1px;background:rgba(0,200,255,0.12);}
+.wc-day-div::before{left:0}.wc-day-div::after{right:0}
+.wc-mw{display:flex;flex-direction:column;max-width:78%;animation:wcMsgIn .28s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes wcMsgIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+.wc-mw.mine{align-self:flex-end;align-items:flex-end;}
+.wc-mw.other{align-self:flex-start;align-items:flex-start;}
+.wc-msg-name{font-size:.67rem;font-weight:500;color:#4a7a96;margin-bottom:3px;padding:0 4px;}
+.wc-msg-name.an{color:#f59e0b;font-weight:700;}
+.wc-reply-preview{background:rgba(0,200,255,.1);border-left:3px solid #00c8ff;border-radius:8px;padding:5px 9px;margin-bottom:6px;font-size:.72rem;color:#4a7a96;line-height:1.4;}
+.wc-reply-preview .wc-rp-name{color:#00c8ff;font-weight:600;font-size:.68rem;margin-bottom:2px;}
+.wc-reply-preview .wc-rp-text{color:#e0f4ff;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.wc-msg-row{display:flex;align-items:flex-end;gap:5px;}
+.wc-mw.mine .wc-msg-row{flex-direction:row-reverse;}
+.wc-bubble{padding:9px 13px;border-radius:16px;font-size:.87rem;line-height:1.52;word-break:break-word;position:relative;max-width:100%;cursor:pointer;user-select:none;transition:transform .1s;color:#e0f4ff;}
+.wc-bubble:active{transform:scale(.97);}
+.wc-mw.mine .wc-bubble{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 20px rgba(0,120,182,.3);}
+.wc-mw.other .wc-bubble{background:rgba(0,50,80,0.7);border-bottom-left-radius:4px;border:1px solid rgba(0,200,255,0.12);backdrop-filter:blur(8px);}
+.wc-mw.wc-admin-msg .wc-bubble{background:linear-gradient(135deg,#92400e,#b45309)!important;border:1px solid rgba(245,158,11,.4)!important;}
+.wc-admin-tag{font-size:.58rem;font-weight:800;color:#f59e0b;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
+.wc-del-btn-msg{background:none;border:none;color:rgba(239,68,68,.5);cursor:pointer;font-size:.72rem;padding:4px;border-radius:6px;opacity:0;transition:all .2s;flex-shrink:0;}
+.wc-msg-row:hover .wc-del-btn-msg{opacity:1;}
+.wc-reactions-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;padding:0 3px;}
+.wc-reaction-pill{display:flex;align-items:center;gap:2px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);border-radius:20px;padding:2px 7px;font-size:.8rem;cursor:pointer;transition:all .15s;}
+.wc-reaction-pill:hover{background:rgba(0,200,255,.2);transform:scale(1.1);}
+.wc-reaction-pill .wc-rc{font-size:.78rem;color:#4a7a96;font-weight:600;}
+.wc-msg-time{font-size:.6rem;color:#4a7a96;margin-top:3px;padding:0 4px;display:flex;align-items:center;gap:4px;}
+.wc-tick{color:#00c8ff;font-size:.65rem;}
+#wc-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;text-align:center;}
+.wc-es-icon{font-size:3rem;animation:wcFloat 3s ease-in-out infinite;}
+@keyframes wcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.wc-es-title{font-size:1.1rem;font-weight:700;color:#e0f4ff;}
+.wc-es-sub{font-size:.78rem;color:#4a7a96;line-height:1.5;}
+/* reply bar */
+#wc-reply-bar{display:none;align-items:center;justify-content:space-between;background:rgba(0,50,80,.6);backdrop-filter:blur(12px);border-top:1px solid rgba(0,200,255,.15);padding:8px 14px;gap:10px;flex-shrink:0;}
+#wc-reply-bar.show{display:flex;}
+.wc-rb-info{flex:1;min-width:0;}
+.wc-rb-name{font-size:.68rem;color:#00c8ff;font-weight:600;margin-bottom:2px;}
+.wc-rb-text{font-size:.75rem;color:#4a7a96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wc-rb-close{background:none;border:none;color:#4a7a96;cursor:pointer;font-size:1.1rem;flex-shrink:0;}
+/* input bar */
+#wc-input-bar{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;background:rgba(4,14,28,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(0,200,255,0.12);flex-shrink:0;}
+#wc-msg-input{flex:1;background:rgba(0,50,80,.5);border:1.5px solid rgba(0,200,255,0.12);border-radius:24px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:10px 16px;outline:none;transition:border-color .2s;resize:none;min-height:42px;max-height:100px;line-height:1.4;}
+#wc-msg-input::placeholder{color:#4a7a96;}
+#wc-msg-input:focus{border-color:#00c8ff;box-shadow:0 0 0 3px rgba(0,200,255,.1);}
+.wc-ibtn{width:42px;height:42px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0;transition:transform .15s;}
+.wc-ibtn:active{transform:scale(.9);}
+#wc-emoji-toggle{background:rgba(0,50,80,.5);border:1.5px solid rgba(0,200,255,0.12);color:#4a7a96;font-size:1.1rem;}
+#wc-send-btn{background:linear-gradient(135deg,#0077b6,#00c8ff);color:#fff;box-shadow:0 4px 14px rgba(0,180,255,.4);}
+/* emoji picker */
+#wc-emoji-picker{display:none;background:rgba(4,14,28,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(0,200,255,0.12);padding:10px 12px;flex-shrink:0;}
+#wc-emoji-picker.show{display:block;}
+.wc-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;}
+.wc-ep-emoji{font-size:1.4rem;text-align:center;padding:6px;border-radius:10px;cursor:pointer;transition:all .15s;background:none;border:none;}
+.wc-ep-emoji:hover{background:rgba(0,180,255,.1);transform:scale(1.25);}
+/* context menu */
+#wc-ctx-menu{display:none;position:fixed;z-index:1100;background:rgba(4,20,40,.97);backdrop-filter:blur(24px);border:1px solid rgba(0,200,255,0.12);border-radius:16px;padding:6px;min-width:200px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:wcCtxIn .18s cubic-bezier(.34,1.56,.64,1);}
+#wc-ctx-menu.show{display:block;}
+@keyframes wcCtxIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+.wc-ctx-reactions{display:flex;gap:4px;padding:8px 10px 4px;border-bottom:1px solid rgba(0,200,255,0.12);margin-bottom:4px;}
+.wc-ctx-react-btn{font-size:1.3rem;padding:5px;border-radius:10px;cursor:pointer;background:none;border:none;transition:all .15s;}
+.wc-ctx-react-btn:hover{background:rgba(0,180,255,.1);transform:scale(1.3);}
+.wc-ctx-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:.83rem;color:#e0f4ff;transition:background .15s;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;}
+.wc-ctx-item:hover{background:rgba(0,180,255,.1);}
+.wc-ctx-item.danger{color:#fca5a5;}
+.wc-ctx-item.danger:hover{background:rgba(239,68,68,.1);}
+.wc-ctx-icon{width:20px;text-align:center;font-size:1rem;}
+/* name modal */
+.wc-overlay{display:none;position:fixed;inset:0;background:rgba(4,14,28,.88);backdrop-filter:blur(14px);z-index:1050;align-items:center;justify-content:center;padding:20px;}
+.wc-overlay.show{display:flex;}
+.wc-modal{background:#071525;border:1px solid rgba(0,200,255,0.12);border-radius:20px;padding:26px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:wcMIn .28s cubic-bezier(.34,1.56,.64,1);}
+@keyframes wcMIn{from{opacity:0;transform:scale(.88) translateY(20px)}to{opacity:1;transform:none}}
+.wc-modal h2{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;color:#e0f4ff;}
+.wc-modal p{font-size:.78rem;color:#4a7a96;margin-bottom:18px;line-height:1.5;}
+.wc-mfield{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.wc-mfield label{font-size:.68rem;font-weight:600;color:#4a7a96;text-transform:uppercase;letter-spacing:.07em;}
+.wc-mfield input{background:rgba(0,50,80,.4);border:1.5px solid rgba(0,200,255,0.12);border-radius:10px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:10px 13px;outline:none;transition:border-color .2s;width:100%;}
+.wc-mfield input:focus{border-color:#00c8ff;}
+.wc-merr{font-size:.72rem;color:#fca5a5;min-height:18px;display:block;margin-bottom:10px;}
+.wc-mactions{display:flex;gap:9px;}
+.wc-btn-p{flex:1;background:linear-gradient(135deg,#0077b6,#00c8ff);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.84rem;cursor:pointer;}
+.wc-btn-s{background:rgba(0,180,255,.1);color:#4a7a96;border:1px solid rgba(0,200,255,.12);border-radius:10px;padding:11px 16px;font-family:'Nunito',sans-serif;font-size:.84rem;cursor:pointer;}
+.wc-btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444)!important;}
+#wc-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(7,21,37,.97);border:1px solid rgba(0,200,255,0.12);color:#e0f4ff;font-size:.78rem;padding:8px 18px;border-radius:20px;backdrop-filter:blur(12px);opacity:0;transition:all .28s;pointer-events:none;z-index:1200;white-space:nowrap;}
+#wc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* canvas bg in wechat */
+#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;}
+.wc-content{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+</style>
+
+<!-- ═══════════ WECHAT PANEL HTML ═══════════ -->
+<div id="wechat-panel">
+  <canvas id="wc-bg-canvas"></canvas>
+  <div class="wc-content">
+    <!-- Header -->
+    <div class="wc-header">
+      <div class="wc-header-left">
+        <button class="wc-back" onclick="closeWeChat()">←</button>
+        <div class="wc-live-dot"></div>
+        <span class="wc-logo">WeChat</span>
+        <span class="wc-admin-badge" id="wc-admin-badge">ADMIN</span>
+      </div>
+      <div class="wc-header-right">
+        <span id="wc-msg-count">0 msgs</span>
+        <button class="wc-hbtn" id="wc-admin-btn" title="Admin">⚙</button>
+      </div>
+    </div>
+    <!-- Admin bar -->
+    <div id="wc-admin-bar">
+      <span class="wc-admin-label">👑 Admin Mode</span>
+      <div class="wc-admin-actions">
+        <button class="wc-aabtn" id="wc-clear-btn">🗑 Clear All</button>
+        <button class="wc-aabtn" id="wc-logout-btn">Logout</button>
+      </div>
+    </div>
+    <!-- Messages -->
+    <div id="wc-messages">
+      <div id="wc-empty">
+        <div class="wc-es-icon">💬</div>
+        <div class="wc-es-title">Welcome to WeChat!</div>
+        <div class="wc-es-sub">Ask your doubts live.<br>Admin will reply soon!</div>
+      </div>
+    </div>
+    <!-- Reply bar -->
+    <div id="wc-reply-bar">
+      <div class="wc-rb-info">
+        <div class="wc-rb-name" id="wc-rb-name"></div>
+        <div class="wc-rb-text" id="wc-rb-text"></div>
+      </div>
+      <button class="wc-rb-close" id="wc-rb-close">✕</button>
+    </div>
+    <!-- Input bar -->
+    <div id="wc-input-bar">
+      <button class="wc-ibtn" id="wc-emoji-toggle">😊</button>
+      <textarea id="wc-msg-input" placeholder="Ask a doubt…" rows="1"></textarea>
+      <button class="wc-ibtn" id="wc-send-btn">➤</button>
+    </div>
+    <!-- Emoji picker -->
+    <div id="wc-emoji-picker">
+      <div class="wc-emoji-grid" id="wc-emoji-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WeChat context menu -->
+<div id="wc-ctx-menu">
+  <div class="wc-ctx-reactions" id="wc-ctx-reactions"></div>
+  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon">↩️</span> Reply</button>
+  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon">📋</span> Copy Text</button>
+  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon">🗑</span> Delete Message</button>
+</div>
+
+<!-- WeChat Name Modal -->
+<div class="wc-overlay" id="wc-name-modal">
+  <div class="wc-modal">
+    <h2>👋 Welcome to WeChat</h2>
+    <p>Enter your name to join the doubt session.</p>
+    <div class="wc-mfield"><label>Your Name</label><input type="text" id="wc-name-input" placeholder="e.g. Ujjawal, Priya…" maxlength="24"/></div>
+    <span class="wc-merr" id="wc-name-err"></span>
+    <div class="wc-mactions"><button class="wc-btn-p" id="wc-name-submit">Join →</button></div>
+  </div>
+</div>
+
+<!-- WeChat Admin Login Modal -->
+<div class="wc-overlay" id="wc-admin-modal">
+  <div class="wc-modal">
+    <h2>🔐 Admin Login</h2>
+    <p>Enter credentials to unlock moderation tools.</p>
+    <div class="wc-mfield"><label>Admin ID</label><input type="text" id="wc-admin-id" placeholder="Admin ID"/></div>
+    <div class="wc-mfield"><label>Password</label><input type="password" id="wc-admin-pass" placeholder="Password"/></div>
+    <span class="wc-merr" id="wc-admin-err"></span>
+    <div class="wc-mactions">
+      <button class="wc-btn-s" id="wc-admin-cancel">Cancel</button>
+      <button class="wc-btn-p" id="wc-admin-submit">Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- WeChat Confirm Clear Modal -->
+<div class="wc-overlay" id="wc-confirm-modal">
+  <div class="wc-modal">
+    <h2>⚠️ Clear All Messages?</h2>
+    <p>This will permanently delete every message. Cannot be undone.</p>
+    <div class="wc-mactions">
+      <button class="wc-btn-s" id="wc-confirm-no">Cancel</button>
+      <button class="wc-btn-p wc-btn-danger" id="wc-confirm-yes">Yes, Clear</button>
+    </div>
+  </div>
+</div>
+<div id="wc-toast"></div>
+
+<!-- ═══════════ WECHAT JS ═══════════ -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,collection,addDoc,deleteDoc,doc,updateDoc,onSnapshot,query,orderBy,getDocs}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const wcConfig={apiKey:"AIzaSyD8_zOJgINAZMWzqn0ozDSE98ouTAPotBU",authDomain:"chatting2027-97f1b.firebaseapp.com",projectId:"chatting2027-97f1b",storageBucket:"chatting2027-97f1b.appspot.com",messagingSenderId:"884874751382",appId:"1:884874751382:web:f5314041e959778c3401b7"};
+const wcApp=initializeApp(wcConfig,'wechat');
+const wcDb=getFirestore(wcApp);
+
+/* ── open/close ── */
+window.openWeChat=function(){window.open('https://wechat-u17.pages.dev/','_blank');}
+window.closeWeChat=function(){document.getElementById('wechat-panel').classList.remove('open');}
+
+/* ── canvas bg ── */
+let wcCanvasInited=false;
+function wcInitCanvas(){
+  if(wcCanvasInited)return;wcCanvasInited=true;
+  const c=document.getElementById('wc-bg-canvas'),cx=c.getContext('2d');
+  let ps=[];
+  function rsz(){c.width=window.innerWidth;c.height=window.innerHeight;}rsz();window.addEventListener('resize',rsz);
+  for(let i=0;i<60;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random()*.4+.1});
+  function draw(){
+    cx.clearRect(0,0,c.width,c.height);
+    cx.strokeStyle='rgba(0,180,255,0.022)';cx.lineWidth=1;
+    for(let x=0;x<c.width;x+=50){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,c.height);cx.stroke();}
+    for(let y=0;y<c.height;y+=50){cx.beginPath();cx.moveTo(0,y);cx.lineTo(c.width,y);cx.stroke();}
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=c.width;if(p.x>c.width)p.x=0;if(p.y<0)p.y=c.height;if(p.y>c.height)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,200,255,${p.a})`;cx.fill();});
+    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<80){cx.beginPath();cx.moveTo(ps[i].x,ps[i].y);cx.lineTo(ps[j].x,ps[j].y);cx.strokeStyle=`rgba(0,200,255,${.055*(1-d/80)})`;cx.stroke();}}
+    requestAnimationFrame(draw);
+  }draw();
+}
+
+/* ── state ── */
+let wcUsername=localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
+let wcIsAdmin=false;
+const WC_AID='power123',WC_APW='ujjawal2809';
+let wcReplyTo=null,wcCtxTarget=null,wcMessagesData=[];
+const WC_REACT=['❤️','😂','👍','😮','😢','🔥'];
+const WC_EMOJIS=['😀','😂','🥰','😍','🤩','😎','🤔','😮','😢','😡','👍','👎','❤️','🔥','🎉','💯','✅','⭐','💬','🚀','💎','🤝','👏','🙏','💪','🎶','🤯','😴','🥳','🫡'];
+
+/* emoji grid */
+const wg=document.getElementById('wc-emoji-grid');
+WC_EMOJIS.forEach(e=>{const b=document.createElement('button');b.className='wc-ep-emoji';b.textContent=e;b.onclick=()=>{document.getElementById('wc-msg-input').value+=e;document.getElementById('wc-msg-input').focus();};wg.appendChild(b);});
+
+/* helpers */
+function wcToast(msg,dur=2200){const t=document.getElementById('wc-toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
+function wcFmtTime(ts){const d=new Date(ts);let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m.toString().padStart(2,'0')} ${ap}`;}
+function wcFmtDay(ts){const d=new Date(ts),t=new Date(),y=new Date();y.setDate(y.getDate()-1);if(d.toDateString()===t.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function wcScrollBot(s=true){const m=document.getElementById('wc-messages');m.scrollTo({top:m.scrollHeight,behavior:s?'smooth':'instant'});}
+
+/* name */
+const wcNm=document.getElementById('wc-name-modal'),wcNi=document.getElementById('wc-name-input'),wcNe=document.getElementById('wc-name-err'),wcNs=document.getElementById('wc-name-submit');
+function wcSubmitName(){const v=wcNi.value.trim();if(!v){wcNe.textContent='Please enter a name.';return;}wcUsername=v;localStorage.setItem('wc_user',v);wcNm.classList.remove('show');document.getElementById('wc-msg-input').focus();}
+wcNs.addEventListener('click',wcSubmitName);
+wcNi.addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
+
+/* admin */
+const wcAm=document.getElementById('wc-admin-modal'),wcAi=document.getElementById('wc-admin-id'),wcAp=document.getElementById('wc-admin-pass'),wcAe=document.getElementById('wc-admin-err');
+document.getElementById('wc-admin-btn').addEventListener('click',()=>{
+  if(wcIsAdmin){document.getElementById('wc-admin-bar').classList.toggle('show');return;}
+  wcAi.value='';wcAp.value='';wcAe.textContent='';wcAm.classList.add('show');setTimeout(()=>wcAi.focus(),100);
+});
+document.getElementById('wc-admin-cancel').addEventListener('click',()=>wcAm.classList.remove('show'));
+document.getElementById('wc-admin-submit').addEventListener('click',()=>{
+  if(wcAi.value===WC_AID&&wcAp.value===WC_APW){
+    wcIsAdmin=true;wcAm.classList.remove('show');
+    document.getElementById('wc-admin-bar').classList.add('show');
+    document.getElementById('wc-admin-badge').classList.add('show');
+    wcToast('👑 Admin mode on');wcRenderMessages();
+  }else{wcAe.textContent='Wrong credentials.';wcAp.value='';}
+});
+wcAp.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('wc-admin-submit').click();});
+document.getElementById('wc-logout-btn').addEventListener('click',()=>{wcIsAdmin=false;document.getElementById('wc-admin-bar').classList.remove('show');document.getElementById('wc-admin-badge').classList.remove('show');wcToast('Logged out');wcRenderMessages();});
+document.getElementById('wc-clear-btn').addEventListener('click',()=>document.getElementById('wc-confirm-modal').classList.add('show'));
+document.getElementById('wc-confirm-no').addEventListener('click',()=>document.getElementById('wc-confirm-modal').classList.remove('show'));
+document.getElementById('wc-confirm-yes').addEventListener('click',async()=>{
+  document.getElementById('wc-confirm-modal').classList.remove('show');
+  const sn=await getDocs(collection(wcDb,'messages'));
+  await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'messages',d.id))));
+  wcToast('🗑 Chat cleared');
+});
+
+/* emoji toggle */
+document.getElementById('wc-emoji-toggle').addEventListener('click',()=>{const ep=document.getElementById('wc-emoji-picker');ep.classList.toggle('show');if(ep.classList.contains('show'))document.getElementById('wc-msg-input').blur();else document.getElementById('wc-msg-input').focus();});
+document.getElementById('wc-msg-input').addEventListener('focus',()=>document.getElementById('wc-emoji-picker').classList.remove('show'));
+
+/* reply */
+const wcRb=document.getElementById('wc-reply-bar');
+document.getElementById('wc-rb-close').addEventListener('click',()=>{wcReplyTo=null;wcRb.classList.remove('show');});
+function wcSetReply(msg){wcReplyTo={id:msg.id,name:msg.name,text:msg.text};document.getElementById('wc-rb-name').textContent='↩ '+msg.name;document.getElementById('wc-rb-text').textContent=msg.text;wcRb.classList.add('show');document.getElementById('wc-msg-input').focus();}
+
+/* send */
+const wcMi=document.getElementById('wc-msg-input'),wcSb=document.getElementById('wc-send-btn');
+async function wcSend(){
+  const text=wcMi.value.trim();if(!text)return;
+  if(!wcUsername){document.getElementById('wc-name-modal').classList.add('show');return;}
+  const pl={name:wcUsername,text,time:Date.now(),role:wcIsAdmin?'admin':'user',reactions:{}};
+  if(wcReplyTo)pl.replyTo={id:wcReplyTo.id,name:wcReplyTo.name,text:wcReplyTo.text};
+  wcMi.value='';wcMi.style.height='';wcReplyTo=null;wcRb.classList.remove('show');
+  try{await addDoc(collection(wcDb,'messages'),pl);}catch(e){wcToast('Send failed');}
+}
+wcSb.addEventListener('click',wcSend);
+wcMi.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();wcSend();}});
+wcMi.addEventListener('input',()=>{wcMi.style.height='auto';wcMi.style.height=Math.min(wcMi.scrollHeight,100)+'px';});
+
+/* context menu */
+const wcCtx=document.getElementById('wc-ctx-menu');
+let wcCtxTarget=null;
+function wcShowCtx(x,y,msg){
+  wcCtxTarget=msg;
+  const vw=window.innerWidth,vh=window.innerHeight;
+  wcCtx.style.display='block';
+  let l=x,t=y;
+  const mw=wcCtx.offsetWidth||210,mh=wcCtx.offsetHeight||180;
+  if(l+mw>vw-8)l=vw-mw-8;if(t+mh>vh-8)t=y-mh-8;if(t<8)t=8;
+  wcCtx.style.left=l+'px';wcCtx.style.top=t+'px';
+  wcCtx.classList.add('show');
+  const cr=document.getElementById('wc-ctx-reactions');cr.innerHTML='';
+  WC_REACT.forEach(e=>{const b=document.createElement('button');b.className='wc-ctx-react-btn';b.textContent=e;b.onclick=()=>wcReactTo(msg.id,e);cr.appendChild(b);});
+  document.getElementById('wc-ctx-delete').style.display=(wcIsAdmin||(msg.name===wcUsername))?'flex':'none';
+}
+function wcHideCtx(){wcCtx.classList.remove('show');wcCtx.style.display='none';wcCtxTarget=null;}
+document.addEventListener('click',e=>{if(!wcCtx.contains(e.target))wcHideCtx();});
+document.getElementById('wc-ctx-reply').addEventListener('click',()=>{if(wcCtxTarget)wcSetReply(wcCtxTarget);wcHideCtx();});
+document.getElementById('wc-ctx-copy').addEventListener('click',()=>{if(wcCtxTarget){navigator.clipboard.writeText(wcCtxTarget.text).then(()=>wcToast('📋 Copied!')).catch(()=>{const ta=document.createElement('textarea');ta.value=wcCtxTarget.text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('📋 Copied!');});}wcHideCtx();});
+document.getElementById('wc-ctx-delete').addEventListener('click',async()=>{if(wcCtxTarget){try{await deleteDoc(doc(wcDb,'messages',wcCtxTarget.id));wcToast('Deleted');}catch(e){wcToast('Error');}}wcHideCtx();});
+
+/* reactions */
+async function wcReactTo(msgId,emoji){
+  wcHideCtx();
+  const m=wcMessagesData.find(x=>x.id===msgId);if(!m)return;
+  const r=m.reactions||{};
+  if(!r[emoji])r[emoji]=[];
+  const idx=r[emoji].indexOf(wcUsername);
+  if(idx>-1)r[emoji].splice(idx,1);else r[emoji].push(wcUsername);
+  if(r[emoji].length===0)delete r[emoji];
+  try{await updateDoc(doc(wcDb,'messages',msgId),{reactions:r});}catch(e){wcToast('Reaction failed');}
+}
+
+/* render */
+function wcRenderMessages(){
+  const el=document.getElementById('wc-messages'),empty=document.getElementById('wc-empty');
+  el.innerHTML='';
+  if(!wcMessagesData.length){el.appendChild(empty);return;}
+  let lastDay=null;
+  document.getElementById('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
+  wcMessagesData.forEach(msg=>{
+    const ds=wcFmtDay(msg.time);
+    if(ds!==lastDay){const d=document.createElement('div');d.className='wc-day-div';d.textContent=ds;el.appendChild(d);lastDay=ds;}
+    const isMine=msg.name===wcUsername,isAdm=msg.role==='admin';
+    const w=document.createElement('div');w.className=`wc-mw ${isMine?'mine':'other'} ${isAdm?'wc-admin-msg':''}`;
+    if(!isMine){const ne=document.createElement('div');ne.className='wc-msg-name'+(isAdm?' an':'');ne.textContent=msg.name;w.appendChild(ne);}
+    if(isAdm){const at=document.createElement('span');at.className='wc-admin-tag';at.textContent='ADMIN';w.appendChild(at);}
+    const row=document.createElement('div');row.className='wc-msg-row';
+    const bubble=document.createElement('div');bubble.className='wc-bubble';
+    if(msg.replyTo){const rp=document.createElement('div');rp.className='wc-reply-preview';rp.innerHTML=`<div class="wc-rp-name">${msg.replyTo.name}</div><div class="wc-rp-text">${msg.replyTo.text}</div>`;bubble.appendChild(rp);}
+    bubble.appendChild(document.createTextNode(msg.text));
+    let pt=null;
+    const onLP=(x,y)=>{navigator.vibrate&&navigator.vibrate(30);wcShowCtx(x,y,msg);};
+    bubble.addEventListener('mousedown',e=>{if(e.button===2)return;pt=setTimeout(()=>onLP(e.clientX,e.clientY),500);});
+    bubble.addEventListener('mousemove',()=>clearTimeout(pt));
+    bubble.addEventListener('mouseup',()=>clearTimeout(pt));
+    bubble.addEventListener('contextmenu',e=>{e.preventDefault();onLP(e.clientX,e.clientY);});
+    bubble.addEventListener('touchstart',e=>{const t=e.touches[0];pt=setTimeout(()=>onLP(t.clientX,t.clientY),500);},{passive:true});
+    bubble.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
+    bubble.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
+    row.appendChild(bubble);
+    if(wcIsAdmin){const db2=document.createElement('button');db2.className='wc-del-btn-msg';db2.textContent='✕';db2.addEventListener('click',async e=>{e.stopPropagation();try{await deleteDoc(doc(wcDb,'messages',msg.id));}catch(e2){wcToast('Error');}});row.appendChild(db2);}
+    w.appendChild(row);
+    const rk=Object.keys(msg.reactions||{}).filter(k=>msg.reactions[k]&&msg.reactions[k].length>0);
+    if(rk.length){const strip=document.createElement('div');strip.className='wc-reactions-strip';rk.forEach(emoji=>{const u=msg.reactions[emoji];const pill=document.createElement('div');pill.className='wc-reaction-pill';if(u.includes(wcUsername))pill.style.background='rgba(0,200,255,.2)';pill.innerHTML=`${emoji}<span class="wc-rc">${u.length}</span>`;pill.title=u.join(', ');pill.onclick=()=>wcReactTo(msg.id,emoji);strip.appendChild(pill);});w.appendChild(strip);}
+    const te=document.createElement('div');te.className='wc-msg-time';te.textContent=wcFmtTime(msg.time);if(isMine)te.innerHTML+=` <span class="wc-tick">✓✓</span>`;w.appendChild(te);
+    el.appendChild(w);
+  });
+}
+
+/* realtime */
+const wcQ=query(collection(wcDb,'messages'),orderBy('time','asc'));
+let wcFirst=true;
+onSnapshot(wcQ,snap=>{
+  wcMessagesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
+  wcRenderMessages();
+  wcScrollBot(!wcFirst);
+  if(wcFirst)wcFirst=false;
+});
+
+// Pre-fill name from student name if set
+window.addEventListener('load',()=>{
+  const sn=localStorage.getItem('ab_student_name');
+  if(sn&&!localStorage.getItem('wc_user')){wcUsername=sn;localStorage.setItem('wc_user',sn);}
+});
 </script>
 </body>
 </html>
