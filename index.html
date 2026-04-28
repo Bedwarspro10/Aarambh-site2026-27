@@ -68,8 +68,9 @@ body::before{
   font-size:30px;font-weight:900;color:#fff;
   box-shadow:0 0 0 0 rgba(91,154,255,0.5),0 8px 32px rgba(91,154,255,0.35);
   animation:loaderPulse 1.6s ease-in-out infinite;will-change:transform,box-shadow;
-  letter-spacing:-1px;
+  letter-spacing:-1px;overflow:hidden;padding:0;
 }
+.lorb img{width:100%;height:100%;object-fit:cover;border-radius:26px;display:block;}
 @keyframes loaderPulse{
   0%{transform:scale(1);box-shadow:0 0 0 0 rgba(91,154,255,0.5),0 8px 32px rgba(91,154,255,0.35);}
   50%{transform:scale(1.08);box-shadow:0 0 0 22px rgba(91,154,255,0),0 12px 40px rgba(91,154,255,0.45);}
@@ -165,8 +166,9 @@ body::before{
   display:flex;align-items:center;justify-content:center;
   font-weight:900;font-size:13px;color:#fff;
   box-shadow:0 4px 18px var(--gb);flex-shrink:0;
-  letter-spacing:-0.5px;
+  letter-spacing:-0.5px;overflow:hidden;padding:0;
 }
+.tlogo img{width:100%;height:100%;object-fit:cover;border-radius:13px;display:block;}
 .tname{font-size:14.5px;font-weight:800;line-height:1.2;letter-spacing:-.2px;}
 .tname span{font-size:11px;font-weight:500;color:var(--txt2);display:block;display:flex;align-items:center;gap:4px;}
 .tname span::after{content:'✓';display:inline-block;width:14px;height:14px;background:#4a9eff;border-radius:50%;font-size:8px;color:#fff;display:inline-flex;align-items:center;justify-content:center;}
@@ -186,7 +188,7 @@ body::before{
   background:rgba(91,154,255,0.04);border-bottom:1px solid var(--br);flex-shrink:0;
   transition:background .45s;display:flex;align-items:center;justify-content:center;gap:8px;
 }
-.clkbar::before{content:'📅';font-size:13px;}
+.clkbar-img{width:22px;height:22px;object-fit:contain;border-radius:4px;flex-shrink:0;}
 .clkbar strong{color:var(--blue);}
 
 /* SEARCH */
@@ -853,13 +855,92 @@ body::before{
 }
 .updated-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:greenPulse 1.5s ease-in-out infinite;}
 @keyframes greenPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ═══ TEACHER CAROUSEL ═══ */
+.teacher-carousel-wrap{
+  margin:0 0 18px;
+  background:linear-gradient(145deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));
+  border:1px solid var(--br2);border-radius:24px;
+  padding:18px 14px 14px;
+  overflow:hidden;position:relative;
+}
+.tc-heading{
+  font-size:12px;font-weight:900;color:var(--txt2);
+  letter-spacing:.6px;text-transform:uppercase;
+  text-align:center;margin-bottom:16px;
+}
+.tc-track{
+  position:relative;min-height:300px;
+}
+.tc-slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  opacity:0;transform:translateX(40px) scale(0.95);
+  transition:opacity .5s cubic-bezier(0.4,0,0.2,1),transform .5s cubic-bezier(0.4,0,0.2,1);
+  pointer-events:none;
+}
+.tc-slide.active{
+  opacity:1;transform:translateX(0) scale(1);pointer-events:all;
+}
+.tc-slide.exit-left{
+  opacity:0;transform:translateX(-40px) scale(0.95);
+}
+.tc-img-wrap{
+  position:relative;
+  width:180px;height:220px;
+  border-radius:20px;overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.1);
+  flex-shrink:0;
+}
+.tc-img-wrap img{
+  width:100%;height:100%;object-fit:cover;object-position:top;
+  display:block;
+}
+.tc-glow{
+  position:absolute;inset:0;border-radius:20px;
+  opacity:0.15;
+}
+.tc-glow-green{background:radial-gradient(circle at 50% 80%,#2fe8a0,transparent 70%);}
+.tc-glow-purple{background:radial-gradient(circle at 50% 80%,#9b6dff,transparent 70%);}
+.tc-glow-blue{background:radial-gradient(circle at 50% 80%,#5b9aff,transparent 70%);}
+.tc-name{
+  font-size:17px;font-weight:900;letter-spacing:-.3px;
+  margin-top:13px;text-align:center;color:var(--txt);
+}
+.tc-aka{
+  font-size:11.5px;font-weight:600;color:var(--txt2);
+  margin-top:2px;text-align:center;
+}
+.tc-title{
+  margin-top:7px;
+  font-size:12.5px;font-weight:900;
+  padding:5px 16px;border-radius:99px;
+  letter-spacing:.2px;
+}
+.tc-science{background:rgba(47,232,160,0.12);color:var(--green);border:1px solid rgba(47,232,160,0.25);}
+.tc-sst{background:rgba(155,109,255,0.12);color:var(--purple);border:1px solid rgba(155,109,255,0.25);}
+.tc-maths{background:rgba(91,154,255,0.12);color:var(--blue);border:1px solid rgba(91,154,255,0.25);}
+.tc-dots{
+  display:flex;justify-content:center;gap:7px;
+  margin-top:14px;
+}
+.tc-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,0.2);cursor:pointer;
+  transition:background .3s,transform .3s;
+}
+.tc-dot.active{
+  background:var(--blue);transform:scale(1.3);
+}
+
 </style>
 </head>
 <body>
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb">AB</div>
+  <div class="lorb"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2HHOvkjOy76FsghTVyB5Yl9RARb7fkdpj7g&s" alt="AB" onerror="this.parentElement.textContent='AB'"></div>
   <div class="llbl">Aarambh Batch</div>
   <div class="lsub">2026–27 · NextToppers Fanpage</div>
   <div class="ltrack"><div class="lfill"></div></div>
@@ -897,7 +978,7 @@ body::before{
 <div id="app">
   <div class="topbar">
     <div class="tbl">
-      <div class="tlogo">AB</div>
+      <div class="tlogo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2HHOvkjOy76FsghTVyB5Yl9RARb7fkdpj7g&s" alt="AB" onerror="this.parentElement.textContent='AB'"></div>
       <div class="tname">Aarambh Batch <span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
@@ -915,7 +996,7 @@ body::before{
       <button class="ib" onclick="openAL()">⚙️</button>
     </div>
   </div>
-  <div class="clkbar"><strong id="clock">—</strong></div>
+  <div class="clkbar"><img id="clk-cal-img" class="clkbar-img" src="" alt=""><strong id="clock">—</strong></div>
 
   <!-- PAGE HOME -->
   <div id="pg-home" class="pg on">
@@ -958,6 +1039,46 @@ body::before{
         <div class="scell"><div class="snum" style="color:var(--purple)">3</div><div class="slbl">Subjects</div></div>
         <div class="scell"><div class="snum" style="color:var(--green)">10</div><div class="slbl">Class</div></div>
       </div>
+
+      <!-- TEACHER CAROUSEL -->
+      <div class="teacher-carousel-wrap">
+        <div class="tc-heading">👑 The Gods of NextToppers</div>
+        <div class="tc-track" id="tc-track">
+          <div class="tc-slide active" data-idx="0">
+            <div class="tc-img-wrap">
+              <img src="https://educrypt.ai/assets/images/case-study/next-topper/nexttopper_prashant.png" alt="Prashant Bhaiya" onerror="this.src='https://via.placeholder.com/220x260?text=PK'">
+              <div class="tc-glow tc-glow-green"></div>
+            </div>
+            <div class="tc-name">Prashant Khirad</div>
+            <div class="tc-aka">Aka Prashant Bhaiya</div>
+            <div class="tc-title tc-science">⚗️ God in Science</div>
+          </div>
+          <div class="tc-slide" data-idx="1">
+            <div class="tc-img-wrap">
+              <img src="https://educrypt.ai/assets/images/case-study/next-topper/nexttopper_digraj.png" alt="Digraj Sir" onerror="this.src='https://via.placeholder.com/220x260?text=DS'">
+              <div class="tc-glow tc-glow-purple"></div>
+            </div>
+            <div class="tc-name">Digraj Singh Rajput</div>
+            <div class="tc-aka">&nbsp;</div>
+            <div class="tc-title tc-sst">🌏 God in SST</div>
+          </div>
+          <div class="tc-slide" data-idx="2">
+            <div class="tc-img-wrap">
+              <img src="https://educrypt.ai/assets/images/case-study/next-topper/nexttopper_shobhit.png" alt="Shobhit Sir" onerror="this.src='https://via.placeholder.com/220x260?text=SN'">
+              <div class="tc-glow tc-glow-blue"></div>
+            </div>
+            <div class="tc-name">Shobhit Nirwan</div>
+            <div class="tc-aka">&nbsp;</div>
+            <div class="tc-title tc-maths">📐 God of Maths</div>
+          </div>
+        </div>
+        <div class="tc-dots" id="tc-dots">
+          <div class="tc-dot active" onclick="tcGoTo(0)"></div>
+          <div class="tc-dot" onclick="tcGoTo(1)"></div>
+          <div class="tc-dot" onclick="tcGoTo(2)"></div>
+        </div>
+      </div>
+
       <div class="notice">
         <div class="ntitle">⚠️ Important Notice</div>
         <div class="nbody">We do not promote any pirated or copied content of NextToppers. This is only a fan page. For lectures, please purchase <b>Aarambh Batch Class 10 (2026–27)</b> from the official NextToppers website/app <b>(₹3,499)</b>. Always verify from official sources.</div>
@@ -1549,7 +1670,7 @@ function checkPin(){
       // Check if user already agreed to T&C
       if(localStorage.getItem('ab_tnc')==='agreed'){
         document.getElementById('app').classList.add('vis');
-        updateCounts();startClock();animPbars();
+        updateCounts();startClock();animPbars();tcStart();
       } else {
         showTNC();
       }
@@ -1570,10 +1691,54 @@ function animPbars(){
 }
 
 /* CLOCK */
+const CAL_IMGS=[
+  '', // index 0 unused
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJX5l8rh0c_wEHQAzO0eet0oSNmuNvsAv2kg&s',
+  'https://www.shutterstock.com/image-vector/day-2-red-calendar-icon-260nw-2052884177.jpg',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-3-icon.png',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-9rgvDd3qLF0InimPws0yTCC1d6IXhFXKM7PMxdqCMQ&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRopxEqjemjZGHCCBQrwXsg5j37ipBdfTCJCHG8yN4K9A&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsS53n6kv5E-aQtYN6DIM40dRcbeqKYt9SC6WBF9c9gROYiHDFPHL5Z8Y&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpqGgg1dx-yTVFDu6T3tyj8DEB0vdiB4z3iD4i_8wsqQ&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2Cs3F-DFBaX3DY28WeFJraKUxBgiKrs-QhWcmNT_46A&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuELPC2uuPA8h1CXuB7ywIF-Y90KZPMR5ovTebK8_VUQ&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTj25q6ZHF4RPmBVl7tzI2CVX1FUxgtv25hk30eSxtTiPBb42exfS2e_ro&s=10',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-11-icon.png',
+  'https://w7.pngwing.com/pngs/250/659/png-transparent-computer-icons-calendar-day-calendar-icon-miscellaneous-calendar-text.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-13-icon.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-14-icon.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-15-icon.png',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3-n5nFHlUZHE7nsMDkLF8Jsc8sVq1-JQMKB03VdKirdwR6M_WYaVHMkE&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW884Sdr1VdIUYUuoVNqrliWj9OEpDSkxb3nxv2DnPLA&s',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR18OG38EI7lVzpm1dq4wj-CJCUsFSeYelFz9V_Uo7TBQ&s=10',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-19-icon.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-20-icon.png',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGwFxbrt2XPkR3eSSPHUbemlw3KM1RlfenAvF5pvWNg&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl1y4mjiOwfnsuQZFVhuwU_Zj-ln3opW9TK6HBdPGfE3SNjoIGpNq7_bUg&s=10',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-23-icon.png',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStctz0cQe6aICnTUcEG8AzeBDDhEZGVz_NEXjbTcNHynTgeydsdRAyeDw&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQ-kXojaAphWPYfnLeUvETnFqf4rs6wJ0F0t8iVJmI5Q&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2Xo9Blh-ow7esqnin4eBE4UuX_FbhoR7RvJJ8tmw0UQ&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOugoZGdhORuBDv7Sj_88ub4FbiU7wEmZYqPAXTdj0rQ&s=10',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-28-icon.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-29-icon.png',
+  'https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/calendar-date-30-icon.png',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRidsNmfWYQfcUsMgRL79Z46XpBgjk7vtKXU1fBS-9Amv9xcIDqe0Wj5T70&s=10'
+];
 function startClock(){
+  let lastDay=-1;
   const u=()=>{
     const n=new Date();
     const ist=new Date(n.toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+    const day=ist.getDate();
+    // Update calendar image only when day changes
+    if(day!==lastDay){
+      lastDay=day;
+      const img=document.getElementById('clk-cal-img');
+      // Clamp to 31 max; months with 28/29/30 days will never reach 29-31
+      const src=CAL_IMGS[Math.min(day,31)]||CAL_IMGS[30];
+      img.src=src;
+    }
     const d=ist.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
     const t=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
     document.getElementById('clock').textContent=`${d} · ${t} IST`;
@@ -1672,7 +1837,7 @@ function closeSubj(){
   },380);
 }
 
-/* RENDER FILES — folder-aware */
+/* RENDER FILES — folder-first, then ungrouped by category */
 function renderFiles(key){
   const s=SUBJ[key];
   const files=getF().filter(f=>f.subject===key);
@@ -1680,53 +1845,79 @@ function renderFiles(key){
   const sc=document.getElementById('dpscroll');
   sc.innerHTML='';
 
+  let cardIdx=0; // global delay counter
+
+  // ── 1. RENDER FOLDERS (each folder appears ONCE, categories inside it) ──
+  folders.forEach(fo=>{
+    const folderFiles=files.filter(f=>f.folder===fo.id);
+    if(!folderFiles.length) return; // skip empty folders
+
+    const folderBlk=document.createElement('div');
+    folderBlk.className='folder-blk';
+    folderBlk.style.animationDelay=(cardIdx*0.06)+'s';
+    cardIdx++;
+
+    const totalCount=folderFiles.length;
+    folderBlk.innerHTML=`<div class="folder-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <span class="folder-ico">📁</span>
+      <span class="folder-name">${esc(fo.name)}</span>
+      <span class="folder-cnt">${totalCount} file${totalCount!==1?'s':''}</span>
+      <span class="folder-arrow">›</span>
+    </div><div class="folder-body"></div>`;
+
+    const body=folderBlk.querySelector('.folder-body');
+
+    // Group files inside folder by category
+    s.cats.forEach(cat=>{
+      const catFiles=folderFiles.filter(f=>f.category===cat);
+      if(!catFiles.length) return;
+      // Category sub-label inside folder
+      const catLbl=document.createElement('div');
+      catLbl.className='catlbl';
+      catLbl.style.cssText='font-size:10px;padding:6px 12px 4px;opacity:0.7;margin-top:4px;';
+      catLbl.textContent=cat;
+      body.appendChild(catLbl);
+      catFiles.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
+    });
+
+    sc.appendChild(folderBlk);
+  });
+
+  // ── 2. RENDER UNGROUPED FILES (no folder) grouped by category ──
   s.cats.forEach((cat,ci)=>{
-    const catFs=files.filter(f=>f.category===cat);
+    const catFsNoFolder=files.filter(f=>f.category===cat && !f.folder);
+    if(!catFsNoFolder.length) return; // skip empty categories
+
     const blk=document.createElement('div');
     blk.className='catblk';
-    blk.style.animationDelay=(ci*0.07)+'s';
+    blk.style.animationDelay=(cardIdx*0.07)+'s';
+    cardIdx++;
+
     const lbl=document.createElement('div');
     lbl.className='catlbl';lbl.textContent=cat;
     blk.appendChild(lbl);
 
-    // Show folders for this category (no folder filter for now — folders are per subject)
-    // Group: uncategorized files first, then folders
-    const catFolders = folders; // all folders shown under each cat if they have files
-    const catFsNoFolder = catFs.filter(f=>!f.folder);
-    const catFsInFolders = catFs.filter(f=>!!f.folder);
-
-    // Render ungrouped files
     const list=document.createElement('div');
     list.className='flist';
-    if(!catFsNoFolder.length && !catFolders.some(fo=>catFsInFolders.some(f=>f.folder===fo.id))){
-      const e=document.createElement('div');
-      e.className='ecatxt';
-      e.innerHTML=`<span class="ei">📂</span>No files yet${isAdmin?' — add via admin panel':''}`;
-      list.appendChild(e);
-    } else {
-      catFsNoFolder.forEach((f,fi)=>list.appendChild(mkFCard(f,fi)));
-    }
+    catFsNoFolder.forEach((f,fi)=>list.appendChild(mkFCard(f,fi)));
     blk.appendChild(list);
-
-    // Render folders that have files in this category
-    catFolders.forEach(fo=>{
-      const folderFiles=catFsInFolders.filter(f=>f.folder===fo.id);
-      if(!folderFiles.length) return; // skip empty folders in user view
-      const folderBlk=document.createElement('div');
-      folderBlk.className='folder-blk';
-      folderBlk.innerHTML=`<div class="folder-hdr" onclick="this.parentElement.classList.toggle('open')">
-        <span class="folder-ico">📁</span>
-        <span class="folder-name">${esc(fo.name)}</span>
-        <span class="folder-cnt">${folderFiles.length} file${folderFiles.length!==1?'s':''}</span>
-        <span class="folder-arrow">›</span>
-      </div><div class="folder-body"></div>`;
-      const body=folderBlk.querySelector('.folder-body');
-      folderFiles.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
-      blk.appendChild(folderBlk);
-    });
 
     sc.appendChild(blk);
   });
+
+  // ── 3. EMPTY STATE (nothing at all) ──
+  if(!sc.children.length){
+    const blk=document.createElement('div');
+    blk.className='catblk';
+    const list=document.createElement('div');
+    list.className='flist';
+    const e=document.createElement('div');
+    e.className='ecatxt';
+    e.innerHTML=`<span class="ei">📂</span>No files yet${isAdmin?' — add via admin panel':''}`;
+    list.appendChild(e);
+    blk.appendChild(list);
+    sc.appendChild(blk);
+  }
 }
 
 function mkFCard(f,delay){
@@ -2155,7 +2346,7 @@ function tncAgree(){
   localStorage.setItem('ab_tnc','agreed');
   document.getElementById('tncoverlay').classList.remove('open');
   document.getElementById('app').classList.add('vis');
-  updateCounts();startClock();animPbars();renderYTHome();
+  updateCounts();startClock();animPbars();renderYTHome();tcStart();
 }
 function tncExit(){
   document.getElementById('tncoverlay').classList.remove('open');
@@ -2515,6 +2706,30 @@ function foModalClose(){
 }
 window.foModalClose=foModalClose;
 window.foModalSave=foModalSave;
+
+/* ═══ TEACHER CAROUSEL ═══ */
+let tcCurrent=0;
+const TC_COUNT=3;
+let tcTimer=null;
+
+function tcGoTo(idx){
+  const slides=document.querySelectorAll('.tc-slide');
+  const dots=document.querySelectorAll('.tc-dot');
+  // exit current
+  slides[tcCurrent].classList.remove('active');
+  slides[tcCurrent].classList.add('exit-left');
+  setTimeout(()=>slides[tcCurrent].classList.remove('exit-left'),500);
+  // enter new
+  tcCurrent=((idx%TC_COUNT)+TC_COUNT)%TC_COUNT;
+  slides[tcCurrent].classList.add('active');
+  dots.forEach((d,i)=>d.classList.toggle('active',i===tcCurrent));
+}
+function tcNext(){tcGoTo(tcCurrent+1);}
+function tcStart(){
+  if(tcTimer)clearInterval(tcTimer);
+  tcTimer=setInterval(tcNext,2000);
+}
+window.tcGoTo=tcGoTo;
 
 /* INIT */
 loadCategories();
