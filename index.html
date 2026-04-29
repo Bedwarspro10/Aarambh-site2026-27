@@ -44,13 +44,12 @@ body{
   transition:background .45s var(--smooth),color .45s var(--smooth);
 }
 
-/* ── STAR FIELD BG ── */
+/* ── CLEAN BG ── */
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 90% 60% at 50% -10%,rgba(91,154,255,0.09) 0%,transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 30%,rgba(155,109,255,0.06) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 50% at 20% 80%,rgba(91,154,255,0.05) 0%,transparent 60%);
+    radial-gradient(ellipse 70% 45% at 50% -5%,rgba(91,154,255,0.05) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 35% at 85% 25%,rgba(155,109,255,0.04) 0%,transparent 55%);
 }
 .lm body::before{display:none;}
 
@@ -942,6 +941,167 @@ body::before{
   background:var(--blue);transform:scale(1.3);
 }
 
+/* ══════════════════════════════════════════
+   ⚡ SMOOTH ANIMATIONS — transform + opacity only
+══════════════════════════════════════════ */
+
+/* Message appear: slide up + fade in */
+@keyframes msgAppear{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.msg-item{
+  animation:msgAppear 0.25s cubic-bezier(0.22,1,0.36,1) both;
+  will-change:transform,opacity;
+}
+
+/* Staggered message delays (first 8 messages) */
+.msg-item:nth-child(1){animation-delay:0s;}
+.msg-item:nth-child(2){animation-delay:.04s;}
+.msg-item:nth-child(3){animation-delay:.08s;}
+.msg-item:nth-child(4){animation-delay:.12s;}
+.msg-item:nth-child(5){animation-delay:.16s;}
+.msg-item:nth-child(6){animation-delay:.20s;}
+.msg-item:nth-child(7){animation-delay:.24s;}
+.msg-item:nth-child(8){animation-delay:.28s;}
+
+/* Button press: scale(0.95 → 1) via active state */
+button:active,
+.kb:active,
+.bkbtn:active,
+.ib:active,
+.btnm:active,
+.btnagree:active,
+.btnexit:active,
+.btnlo:active,
+.fopen:active,
+.fdel:active,
+.afdel:active,
+.ntab:active,
+.ncenter:active,
+.scard:active,
+.bigcc:active,
+.fcard:active,
+.ytcard:active,
+.scell:active,
+.fo-modal-save:active,
+.fo-modal-cancel:active{
+  transform:scale(0.95)!important;
+  transition:transform 0.15s cubic-bezier(0.22,1,0.36,1)!important;
+}
+/* Restore after release */
+button,
+.kb,
+.bkbtn,
+.ib,
+.btnm,
+.btnagree,
+.btnexit,
+.btnlo,
+.fopen,
+.fdel,
+.afdel,
+.ntab,
+.ncenter,
+.scard,
+.bigcc,
+.fcard,
+.ytcard,
+.scell,
+.fo-modal-save,
+.fo-modal-cancel{
+  transition-property:transform,opacity,background,box-shadow,border-color,color,filter;
+  transition-duration:0.3s;
+  transition-timing-function:cubic-bezier(0.22,1,0.36,1);
+}
+/* Don't override specific transforms like scard hover — fix specificity */
+.scard.press{transform:scale(0.93)!important;}
+.scard:hover:not(.press){transform:translateY(-4px) scale(1.02)!important;}
+.bigcc:hover:not(:active){transform:translateY(-4px)!important;}
+
+/* Emoji / reaction panel: slide up animation */
+@keyframes emojiPanelIn{
+  from{opacity:0;transform:translateY(12px) scale(0.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.emoji-panel,
+.reaction-panel,
+.emoji-picker,
+[class*="emoji-tray"],
+[class*="reaction-bar"],
+[class*="emoji-row"]{
+  animation:emojiPanelIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+  transform-origin:bottom center;
+  will-change:transform,opacity;
+}
+
+/* ══════════════════════════════════════════
+   💬 CHAT UI IMPROVEMENTS
+══════════════════════════════════════════ */
+
+/* Better spacing between messages */
+.msg-item + .msg-item{margin-top:10px;}
+.msg-item{margin-bottom:2px;}
+
+/* Reply preview box — softer color, rounder corners */
+.reply-preview,
+[class*="reply-box"],
+[class*="reply-preview"],
+[class*="quoted-msg"]{
+  background:rgba(91,154,255,0.07)!important;
+  border-left:3px solid rgba(91,154,255,0.45)!important;
+  border-radius:10px!important;
+  padding:8px 12px!important;
+  margin-bottom:6px;
+  color:var(--txt2)!important;
+  font-size:12px!important;
+  backdrop-filter:blur(8px);
+}
+.reply-preview strong,
+[class*="reply-box"] strong,
+[class*="reply-preview"] strong,
+[class*="quoted-msg"] strong{
+  color:var(--blue)!important;
+  font-weight:700!important;
+}
+
+/* Deleted messages — lighter, italic */
+.msg-deleted,
+[class*="deleted-msg"],
+[class*="msg-del"]{
+  opacity:0.45!important;
+  font-style:italic!important;
+  color:var(--txt3)!important;
+  background:rgba(255,255,255,0.03)!important;
+  border-color:rgba(255,255,255,0.06)!important;
+  pointer-events:none;
+  user-select:none;
+}
+.msg-deleted *,
+[class*="deleted-msg"] *{
+  color:inherit!important;
+}
+
+/* Smooth page transitions for all .pg switches */
+.pg.on{
+  animation:pgIn 0.32s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes pgIn{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* File card appear stagger inside detail panel */
+.fcard{animation:msgAppear 0.3s cubic-bezier(0.22,1,0.36,1) both;}
+.fcard:nth-child(1){animation-delay:.03s;}
+.fcard:nth-child(2){animation-delay:.07s;}
+.fcard:nth-child(3){animation-delay:.11s;}
+.fcard:nth-child(4){animation-delay:.15s;}
+.fcard:nth-child(5){animation-delay:.19s;}
+.fcard:nth-child(6){animation-delay:.23s;}
+.fcard:nth-child(7){animation-delay:.27s;}
+.fcard:nth-child(8){animation-delay:.31s;}
+
 </style>
 </head>
 <body>
@@ -1126,7 +1286,7 @@ body::before{
           <div style="font-size:9px;color:var(--txt2);font-weight:700;letter-spacing:.5px;">DPP SHEETS</div>
         </div>
         <div style="text-align:center;border-right:1px solid var(--br);">
-          <div style="font-size:20px;margin-bottom:4px;">📋</div>
+          <div style="font-size:20px;margin-bottom:4px;"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"></div>
           <div style="font-size:15px;font-weight:900;color:var(--purple);">85+</div>
           <div style="font-size:9px;color:var(--txt2);font-weight:700;letter-spacing:.5px;">MODULES</div>
         </div>
@@ -1166,7 +1326,7 @@ body::before{
           <div class="pst"><div class="pstn" style="color:var(--green)">10</div><div class="pstl">Class</div></div>
         </div>
       </div>
-      <div class="ihead">📋 Details</div>
+      <div class="ihead"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Details</div>
       <div class="irow"><span class="il">🎓 Batch</span><span class="iv">Aarambh 2026–27</span></div>
       <div class="irow"><span class="il">📱 Platform</span><span class="iv">NextToppers</span></div>
       <div class="irow"><span class="il">🏫 Class</span><span class="iv">Class 10</span></div>
@@ -1318,7 +1478,7 @@ body::before{
       </div>
 
       <div class="ap-card">
-        <div class="ap-card-hdr">📋 Manage Files <span class="ap-hint">Drag ⠿ to reorder</span></div>
+        <div class="ap-card-hdr"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Manage Files <span class="ap-hint">Drag ⠿ to reorder</span></div>
         <div id="apfiles"></div>
       </div>
 
@@ -1371,7 +1531,7 @@ body::before{
         <button class="btnm" onclick="addCategory()">🏷 Add Category</button>
       </div>
       <div class="ap-card">
-        <div class="ap-card-hdr">📋 Current Categories</div>
+        <div class="ap-card-hdr"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Current Categories</div>
         <div id="ap-cats-list"></div>
       </div>
     </div>
@@ -1956,7 +2116,7 @@ function mkFCard(f,delay){
       <div class="fmeta">${f.category} · ${f.subject.toUpperCase()}</div>
     </div>
     <button class="fopen" onclick="event.stopPropagation();openFile('${f.id}')">▶</button>
-    ${isAdmin?`<button class="fdel" onclick="event.stopPropagation();delFile('${f.id}')">🗑</button>`:''}
+    ${isAdmin?`<button class="fdel" onclick="event.stopPropagation();delFile('${f.id}')"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></button>`:''}
   `;
   div.addEventListener('click',()=>openFile(f.id));
   return div;
@@ -2097,7 +2257,7 @@ function renderAF(){
         <div class="af-drag-handle">⠿</div>
         <div class="afth">${ti}</div>
         <div class="afnm">${esc(f.name)}<span>${f.category}${folderName?' · 📁'+esc(folderName):''}</span></div>
-        <button class="afdel" data-id="${f.id}">🗑</button>`;
+        <button class="afdel" data-id="${f.id}"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></button>`;
       row.querySelector('.afdel').addEventListener('click', ()=>delFile(f.id, true));
       // Drag events
       row.addEventListener('dragstart', apDragStart);
@@ -2186,7 +2346,7 @@ async function delFolder(id){
     renderAF();
     renderAPFolders();
     if(curSubj)renderFiles(curSubj);
-    toast('🗑 Folder deleted');
+    toast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Folder deleted');
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -2203,7 +2363,7 @@ function renderAPFolders(){
     row.dataset.folderSubj=fo.subject;
     row.innerHTML=`<div class="afth" style="background:rgba(255,202,44,0.15);font-size:22px;">📁</div>
       <div class="afnm">${esc(fo.name)}<span class="folder-drop-hint">${SUBJ[fo.subject]?.name||fo.subject} · Drop files here</span></div>
-      <button class="afdel" data-id="${fo.id}">🗑</button>`;
+      <button class="afdel" data-id="${fo.id}"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></button>`;
     row.querySelector('.afdel').addEventListener('click',()=>delFolder(fo.id));
     // Make folder rows drop targets for files
     row.addEventListener('dragover',(e)=>{
@@ -2346,7 +2506,7 @@ async function delFile(id, fromAP){
     updateCounts();
     if(fromAP)renderAF();
     if(curSubj)renderFiles(curSubj);
-    toast('🗑 Deleted from Firebase');
+    toast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Deleted from Firebase');
   } catch(e) {
     console.error(e);
     toast('❌ Delete failed: '+e.message);
@@ -2402,7 +2562,7 @@ async function delYT(id){
     await fbLoadYT();
     renderYTHome();
     renderAPYT();
-    toast('🗑 Channel deleted');
+    toast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Channel deleted');
   } catch(e) {
     console.error(e);
     toast('❌ Delete failed: '+e.message);
@@ -2416,7 +2576,7 @@ function renderAPYT(){
   if(!YT_DB.length){list.innerHTML='<div class="ecatxt">No channels yet.</div>';return;}
   YT_DB.forEach(c=>{
     const row=document.createElement('div');row.className='ytrow';
-    row.innerHTML=`<div class="ytico">▶️</div><div class="ytnm">${esc(c.name)}<span>${esc(c.url)}</span></div><button class="ytdel" data-id="${c.id}">🗑</button>`;
+    row.innerHTML=`<div class="ytico">▶️</div><div class="ytnm">${esc(c.name)}<span>${esc(c.url)}</span></div><button class="ytdel" data-id="${c.id}"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></button>`;
     row.querySelector('.ytdel').addEventListener('click', ()=>delYT(c.id));
     list.appendChild(row);
   });
@@ -2522,7 +2682,7 @@ function deleteCategory(subj, cat){
   saveCategories();
   renderAPCats();
   updateCatDropdown();
-  toast('🗑 Category removed');
+  toast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Category removed');
 }
 
 function renderAPCats(){
@@ -2768,11 +2928,13 @@ loadStudentName();
 #wechat-panel{
   position:fixed;inset:0;z-index:900;
   display:flex;flex-direction:column;
-  background:#040e1c;
+  background:linear-gradient(160deg,#040e1c 0%,#061524 50%,#040e1c 100%);
   transform:translateX(100%);
   transition:transform .42s cubic-bezier(0.22,1,0.36,1);
   will-change:transform;
   pointer-events:none;
+  height:100dvh;
+  overflow:hidden;
 }
 #wechat-panel.open{transform:translateX(0);pointer-events:all;}
 
@@ -2788,8 +2950,8 @@ loadStudentName();
 .wc-header-left{display:flex;align-items:center;gap:10px;}
 .wc-live-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;animation:blink2 2s infinite;}
 @keyframes blink2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
-.wc-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:#00c8ff;text-shadow:0 0 20px rgba(0,200,255,.5);}
-.wc-admin-badge{display:none;font-size:.62rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);padding:2px 8px;border-radius:20px;}
+.wc-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:#00c8ff;}
+.wc-admin-badge{display:none;font-size:.62rem;font-weight:700;color:#7dd3fc;background:rgba(245,158,11,.12);border:1px solid rgba(125,211,252,.22);padding:2px 8px;border-radius:20px;}
 .wc-admin-badge.show{display:inline-block;}
 .wc-header-right{display:flex;align-items:center;gap:7px;}
 .wc-hbtn{background:none;border:1px solid rgba(0,200,255,0.12);color:#4a7a96;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
@@ -2801,7 +2963,7 @@ loadStudentName();
 /* admin bar */
 #wc-admin-bar{display:none;background:rgba(4,14,28,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,158,11,.2);padding:8px 16px;gap:10px;align-items:center;justify-content:space-between;flex-shrink:0;}
 #wc-admin-bar.show{display:flex;}
-.wc-admin-label{font-size:.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.1em;}
+.wc-admin-label{font-size:.7rem;font-weight:700;color:#7dd3fc;text-transform:uppercase;letter-spacing:.1em;}
 .wc-admin-actions{display:flex;gap:8px;}
 .wc-aabtn{font-size:.73rem;font-weight:500;padding:5px 13px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;}
 .wc-aabtn:active{transform:scale(.95);}
@@ -2809,29 +2971,29 @@ loadStudentName();
 #wc-logout-btn{background:rgba(0,180,255,.1);border:1px solid rgba(0,200,255,.15);color:#4a7a96;}
 
 /* messages */
-#wc-messages{flex:1;overflow-y:auto;padding:14px 12px 6px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth;background:transparent;}
-#wc-messages::-webkit-scrollbar{width:3px;}
-#wc-messages::-webkit-scrollbar-thumb{background:rgba(0,200,255,.15);border-radius:3px;}
+#wc-messages{flex:1;overflow-y:auto;padding:14px 12px 96px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth;background:transparent;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(125,211,252,.35) transparent;contain:paint;scroll-snap-type:none;touch-action:pan-y;}
+#wc-messages::-webkit-scrollbar{width:2px;}
+#wc-messages::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(125,211,252,.55),rgba(37,99,235,.55));border-radius:999px;}
 .wc-day-div{text-align:center;font-size:.65rem;color:#4a7a96;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 4px;position:relative;}
 .wc-day-div::before,.wc-day-div::after{content:'';position:absolute;top:50%;width:28%;height:1px;background:rgba(0,200,255,0.12);}
 .wc-day-div::before{left:0}.wc-day-div::after{right:0}
-.wc-mw{display:flex;flex-direction:column;max-width:78%;animation:wcMsgIn .28s cubic-bezier(.34,1.56,.64,1) both;}
-@keyframes wcMsgIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+.wc-mw{display:flex;flex-direction:column;max-width:78%;animation:wcMsgIn .25s cubic-bezier(0.4,0,0.2,1) both;will-change:transform,opacity;transform:translateZ(0);backface-visibility:hidden;}
+@keyframes wcMsgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .wc-mw.mine{align-self:flex-end;align-items:flex-end;}
 .wc-mw.other{align-self:flex-start;align-items:flex-start;}
 .wc-msg-name{font-size:.67rem;font-weight:500;color:#4a7a96;margin-bottom:3px;padding:0 4px;}
-.wc-msg-name.an{color:#f59e0b;font-weight:700;}
-.wc-reply-preview{background:rgba(0,200,255,.1);border-left:3px solid #00c8ff;border-radius:8px;padding:5px 9px;margin-bottom:6px;font-size:.72rem;color:#4a7a96;line-height:1.4;}
-.wc-reply-preview .wc-rp-name{color:#00c8ff;font-weight:600;font-size:.68rem;margin-bottom:2px;}
+.wc-msg-name.an{color:#7dd3fc;font-weight:700;}
+.wc-reply-preview{background:linear-gradient(180deg,rgba(13,18,38,.88),rgba(10,15,30,.82));border-left:3px solid #60a5fa;border-radius:8px;padding:5px 9px;margin-bottom:6px;font-size:.72rem;color:#4a7a96;line-height:1.4;}
+.wc-reply-preview .wc-rp-name{color:#7dd3fc;font-weight:700;font-size:.68rem;margin-bottom:2px;}
 .wc-reply-preview .wc-rp-text{color:#e0f4ff;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
 .wc-msg-row{display:flex;align-items:flex-end;gap:5px;}
 .wc-mw.mine .wc-msg-row{flex-direction:row-reverse;}
-.wc-bubble{padding:9px 13px;border-radius:16px;font-size:.87rem;line-height:1.52;word-break:break-word;position:relative;max-width:100%;cursor:pointer;user-select:none;transition:transform .1s;color:#e0f4ff;}
-.wc-bubble:active{transform:scale(.97);}
-.wc-mw.mine .wc-bubble{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 20px rgba(0,120,182,.3);}
-.wc-mw.other .wc-bubble{background:rgba(0,50,80,0.7);border-bottom-left-radius:4px;border:1px solid rgba(0,200,255,0.12);backdrop-filter:blur(8px);}
-.wc-mw.wc-admin-msg .wc-bubble{background:linear-gradient(135deg,#92400e,#b45309)!important;border:1px solid rgba(245,158,11,.4)!important;}
-.wc-admin-tag{font-size:.58rem;font-weight:800;color:#f59e0b;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
+.wc-bubble{padding:10px 14px;border-radius:18px;margin:0 0 12px;font-size:.87rem;line-height:1.52;word-break:break-word;position:relative;max-width:100%;cursor:pointer;user-select:none;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);color:#e0f4ff;will-change:transform;}
+.wc-bubble:active{transform:scale(.985);}
+.wc-mw.mine .wc-bubble{background:linear-gradient(135deg,#60a5fa,#2563eb,#1d4ed8);color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 8px rgba(37,99,235,.18);}
+.wc-mw.other .wc-bubble{background:linear-gradient(180deg,rgba(10,16,34,.82),rgba(8,12,25,.72));border-bottom-left-radius:4px;border:1px solid rgba(125,211,252,.12);backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 20px rgba(0,0,0,.18);}
+.wc-mw.wc-admin-msg .wc-bubble{background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb)!important;border:1px solid rgba(125,211,252,.28)!important;}
+.wc-admin-tag{font-size:.58rem;font-weight:800;color:#7dd3fc;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.22);padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
 .wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;border:1px dashed rgba(255,255,255,0.15)!important;color:rgba(255,255,255,0.4)!important;font-style:italic;font-size:.8rem;cursor:default!important;box-shadow:none!important;}
 .wc-mw.mine .wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;}
 .wc-reactions-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;padding:0 3px;}
@@ -2848,34 +3010,63 @@ loadStudentName();
 /* reply bar */
 #wc-reply-bar{display:none;align-items:center;justify-content:space-between;background:rgba(0,50,80,.6);backdrop-filter:blur(12px);border-top:1px solid rgba(0,200,255,.15);padding:8px 14px;gap:10px;flex-shrink:0;}
 #wc-reply-bar.show{display:flex;}
+/* ═══ REPLY ALERT BANNER ═══ */
+#wc-reply-alert{
+  position:absolute;top:54px;left:50%;transform:translateX(-50%) translateY(-8px);
+  background:linear-gradient(135deg,rgba(0,200,255,0.18),rgba(0,140,200,0.22));
+  border:1px solid rgba(0,200,255,0.35);
+  backdrop-filter:blur(16px);
+  color:#e0f4ff;font-size:.78rem;font-weight:700;
+  padding:7px 18px 7px 12px;
+  border-radius:99px;
+  white-space:nowrap;
+  z-index:999;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .25s ease,transform .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 4px 20px rgba(0,200,255,0.18);
+}
+#wc-reply-alert.show{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
+/* Glow on replied-to message bubble */
+@keyframes wcReplyGlow{
+  0%  {box-shadow:0 0 0 0 rgba(0,200,255,0);}
+  30% {box-shadow:0 0 0 6px rgba(0,200,255,0.35),0 0 18px rgba(0,200,255,0.2);}
+  70% {box-shadow:0 0 0 4px rgba(0,200,255,0.22),0 0 12px rgba(0,200,255,0.15);}
+  100%{box-shadow:0 0 0 0 rgba(0,200,255,0);}
+}
+.wc-bubble.reply-glow{
+  animation:wcReplyGlow 1.5s ease forwards;
+}
 .wc-rb-info{flex:1;min-width:0;}
-.wc-rb-name{font-size:.68rem;color:#00c8ff;font-weight:600;margin-bottom:2px;}
+.wc-rb-name{font-size:.68rem;color:#7dd3fc;font-weight:700;margin-bottom:2px;}
 .wc-rb-text{font-size:.75rem;color:#4a7a96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .wc-rb-close{background:none;border:none;color:#4a7a96;cursor:pointer;font-size:1.1rem;flex-shrink:0;}
 /* input bar */
-#wc-input-bar{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;background:rgba(4,14,28,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(0,200,255,0.12);flex-shrink:0;}
-#wc-msg-input{flex:1;background:rgba(0,50,80,.5);border:1.5px solid rgba(0,200,255,0.12);border-radius:24px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:10px 16px;outline:none;transition:border-color .2s;resize:none;min-height:42px;max-height:100px;line-height:1.4;}
+#wc-input-bar{display:flex;align-items:flex-end;gap:8px;padding:8px 12px;background:rgba(4,14,28,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,200,255,0.08);flex-shrink:0;}
+#wc-msg-input{flex:1;background:rgba(0,40,65,.45);border:1px solid rgba(0,200,255,0.1);border-radius:20px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:8px 14px;outline:none;transition:border-color .2s;resize:none;min-height:36px;max-height:100px;line-height:1.4;}
 #wc-msg-input::placeholder{color:#4a7a96;}
-#wc-msg-input:focus{border-color:#00c8ff;box-shadow:0 0 0 3px rgba(0,200,255,.1);}
-.wc-ibtn{width:42px;height:42px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0;transition:transform .15s;}
+#wc-msg-input:focus{border-color:rgba(0,200,255,0.3);box-shadow:none;}
+.wc-ibtn{width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0;transition:transform .15s;}
 .wc-ibtn:active{transform:scale(.9);}
-#wc-emoji-toggle{background:rgba(0,50,80,.5);border:1.5px solid rgba(0,200,255,0.12);color:#4a7a96;font-size:1.1rem;}
-#wc-send-btn{background:linear-gradient(135deg,#0077b6,#00c8ff);color:#fff;box-shadow:0 4px 14px rgba(0,180,255,.4);}
+#wc-emoji-toggle{background:rgba(15,23,42,.45);border:1px solid rgba(125,211,252,0.1);color:#cfe8ff;font-size:1.05rem;}
+#wc-send-btn{background:linear-gradient(135deg,#60a5fa,#2563eb,#1d4ed8);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.26);}
 /* emoji picker */
-#wc-emoji-picker{display:none;background:rgba(4,14,28,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(0,200,255,0.12);padding:10px 12px;flex-shrink:0;}
+#wc-emoji-picker{display:none;position:fixed;left:0;right:0;bottom:58px;z-index:995;background:rgba(4,14,28,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(125,211,252,0.12);padding:10px 12px;flex-shrink:0;max-height:42dvh;overflow-y:auto;}
 #wc-emoji-picker.show{display:block;}
 .wc-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;}
 .wc-ep-emoji{font-size:1.4rem;text-align:center;padding:6px;border-radius:10px;cursor:pointer;transition:all .15s;background:none;border:none;}
 .wc-ep-emoji:hover{background:rgba(0,180,255,.1);transform:scale(1.25);}
 /* context menu */
-#wc-ctx-menu{display:none;position:fixed;z-index:1100;background:rgba(4,20,40,.97);backdrop-filter:blur(24px);border:1px solid rgba(0,200,255,0.12);border-radius:16px;padding:6px;min-width:200px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:wcCtxIn .18s cubic-bezier(.34,1.56,.64,1);}
+#wc-ctx-menu{display:none;position:fixed;z-index:1100;background:rgba(9,14,28,.72);backdrop-filter:blur(20px);border:1px solid rgba(120,145,255,.18);border-radius:16px;padding:8px;min-width:198px;box-shadow:0 16px 40px rgba(0,0,0,.32),0 0 22px rgba(76,201,255,.08);animation:wcCtxIn .22s cubic-bezier(0.4,0,0.2,1);transform-origin:top left;}
 #wc-ctx-menu.show{display:block;}
-@keyframes wcCtxIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+@keyframes wcCtxIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 .wc-ctx-reactions{display:flex;gap:4px;padding:8px 10px 4px;border-bottom:1px solid rgba(0,200,255,0.12);margin-bottom:4px;}
 .wc-ctx-react-btn{font-size:1.3rem;padding:5px;border-radius:10px;cursor:pointer;background:none;border:none;transition:all .15s;}
 .wc-ctx-react-btn:hover{background:rgba(0,180,255,.1);transform:scale(1.3);}
-.wc-ctx-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:.83rem;color:#e0f4ff;transition:background .15s;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;}
-.wc-ctx-item:hover{background:rgba(0,180,255,.1);}
+.wc-ctx-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;font-size:.84rem;color:#e0f4ff;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;}
+.wc-ctx-item:hover{background:rgba(255,255,255,.05);transform:scale(1.02);}
 .wc-ctx-item.danger{color:#fca5a5;}
 .wc-ctx-item.danger:hover{background:rgba(239,68,68,.1);}
 .wc-ctx-icon{width:20px;text-align:center;font-size:1rem;}
@@ -2896,7 +3087,7 @@ loadStudentName();
 .wc-btn-s{background:rgba(0,180,255,.1);color:#4a7a96;border:1px solid rgba(0,200,255,.12);border-radius:10px;padding:11px 16px;font-family:'Nunito',sans-serif;font-size:.84rem;cursor:pointer;}
 .wc-btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444)!important;}
 #wc-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(7,21,37,.97);border:1px solid rgba(0,200,255,0.12);color:#e0f4ff;font-size:.78rem;padding:8px 18px;border-radius:20px;backdrop-filter:blur(12px);opacity:0;transition:all .28s;pointer-events:none;z-index:1200;white-space:nowrap;}
-#wc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#wc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);} #wc-scroll-down-btn.show{opacity:1;pointer-events:auto !important;transform:scale(1);}
 /* canvas bg in wechat */
 #wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;}
 .wc-content{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
@@ -2919,11 +3110,13 @@ loadStudentName();
         <button class="wc-hbtn" id="wc-admin-btn" title="Admin">⚙</button>
       </div>
     </div>
+    <!-- Reply Alert Banner -->
+    <div id="wc-reply-alert">🔔 You got a reply</div>
     <!-- Admin bar -->
     <div id="wc-admin-bar">
       <span class="wc-admin-label">👑 Admin Mode</span>
       <div class="wc-admin-actions">
-        <button class="wc-aabtn" id="wc-clear-btn">🗑 Clear All</button>
+        <button class="wc-aabtn" id="wc-clear-btn"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Clear All</button>
         <button class="wc-aabtn" id="wc-logout-btn">Logout</button>
       </div>
     </div>
@@ -2959,9 +3152,9 @@ loadStudentName();
 <!-- WeChat context menu -->
 <div id="wc-ctx-menu">
   <div class="wc-ctx-reactions" id="wc-ctx-reactions"></div>
-  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon">↩️</span> Reply</button>
-  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon">📋</span> Copy Text</button>
-  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon">🗑</span> Delete Message</button>
+  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/893/893265.png" alt="Reply" style="width:18px;height:18px;object-fit:contain;"></span> Reply</button>
+  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"></span> Copy Text</button>
+  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></span> Delete Message</button>
 </div>
 
 <!-- WeChat Name Modal -->
@@ -3001,7 +3194,7 @@ loadStudentName();
     </div>
   </div>
 </div>
-<div id="wc-toast"></div>
+<div id="wc-toast"></div><button id="wc-scroll-down-btn" aria-label="Scroll to latest" title="Scroll to latest" style="position:fixed;right:14px;bottom:86px;z-index:9999;opacity:0;pointer-events:none;width:58px;height:58px;border-radius:50%;border:1px solid rgba(125,211,252,.26);background:linear-gradient(135deg,rgba(56,189,248,1),rgba(37,99,235,1));backdrop-filter:blur(16px);box-shadow:0 14px 30px rgba(37,99,235,.34),0 0 22px rgba(56,189,248,.22);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;line-height:1;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);">↓</button>
 
 <!-- ═══════════ WECHAT OPEN/CLOSE — plain script so onclick works ═══════════ -->
 <script>
@@ -3078,14 +3271,10 @@ function wcInitCanvas(){
   const cx=c.getContext('2d');let ps=[];
   function rsz(){c.width=window.innerWidth;c.height=window.innerHeight;}rsz();
   window.addEventListener('resize',rsz);
-  for(let i=0;i<55;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.3,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,a:Math.random()*.35+.1});
+  for(let i=0;i<28;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+.2,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,a:Math.random()*.12+.04});
   (function draw(){
     cx.clearRect(0,0,c.width,c.height);
-    cx.strokeStyle='rgba(0,180,255,0.018)';cx.lineWidth=1;
-    for(let x=0;x<c.width;x+=50){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,c.height);cx.stroke();}
-    for(let y=0;y<c.height;y+=50){cx.beginPath();cx.moveTo(0,y);cx.lineTo(c.width,y);cx.stroke();}
     ps.forEach(p=>{p.x=(p.x+p.vx+c.width)%c.width;p.y=(p.y+p.vy+c.height)%c.height;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,200,255,${p.a})`;cx.fill();});
-    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<90){cx.beginPath();cx.moveTo(ps[i].x,ps[i].y);cx.lineTo(ps[j].x,ps[j].y);cx.strokeStyle=`rgba(0,200,255,${.05*(1-d/90)})`;cx.stroke();}}
     requestAnimationFrame(draw);
   })();
 }
@@ -3137,7 +3326,7 @@ $('wc-confirm-yes').addEventListener('click',async()=>{
   try{
     const sn=await getDocs(collection(wcDb,'messages'));
     await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'messages',d.id))));
-    wcToast('🗑 Chat cleared');
+    wcToast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Chat cleared');
   }catch(e){wcToast('Error clearing chat');}
 });
 
@@ -3181,7 +3370,7 @@ async function wcDeleteMsg(msg){
   const delBy=wcIsAdmin?`Admin (${wcUsername})`:wcUsername;
   try{
     await updateDoc(doc(wcDb,'messages',msg.id),{deletedBy:delBy,text:'',reactions:{}});
-    wcToast(`🗑 Deleted`);
+    wcToast(`<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Deleted`);
   }catch(e){wcToast('Error deleting');}
 }
 
@@ -3223,9 +3412,9 @@ $('wc-ctx-reply').addEventListener('click',()=>{if(wcCtxMsg)wcSetReply(wcCtxMsg)
 $('wc-ctx-copy').addEventListener('click',()=>{
   if(!wcCtxMsg)return;
   const text=wcCtxMsg.text;
-  navigator.clipboard.writeText(text).then(()=>wcToast('📋 Copied!')).catch(()=>{
+  navigator.clipboard.writeText(text).then(()=>wcToast('<img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Copied!')).catch(()=>{
     const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('📋 Copied!');
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('<img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Copied!');
   });
   wcHideCtx();
 });
@@ -3263,6 +3452,7 @@ function wcRenderMessages(){
     // wrapper
     const w=document.createElement('div');
     w.className=`wc-mw ${isMine?'mine':'other'}${isAdm?' wc-admin-msg':''}`;
+    w.dataset.msgId=msg.id;
     // sender name (others only)
     if(!isMine){
       const ne=document.createElement('div');ne.className='wc-msg-name'+(isAdm?' an':'');ne.textContent=msg.name;w.appendChild(ne);
@@ -3325,8 +3515,59 @@ function wcRenderMessages(){
 
 /* ═══ REALTIME ═══ */
 const wcQ=query(collection(wcDb,'messages'),orderBy('time','asc'));
+
+/* Track previously seen message IDs to detect truly new ones */
+let wcSeenIds=new Set();
+let wcAlertTimer=null;
+
+function wcShowReplyAlert(repliedMsgId){
+  /* Banner */
+  const banner=document.getElementById('wc-reply-alert');
+  if(!banner)return;
+  if(wcAlertTimer)clearTimeout(wcAlertTimer);
+  banner.classList.add('show');
+  wcAlertTimer=setTimeout(()=>banner.classList.remove('show'),3000);
+
+  /* Glow the original message bubble */
+  if(repliedMsgId){
+    const wrapper=document.querySelector(`.wc-mw[data-msg-id="${repliedMsgId}"]`);
+    if(wrapper){
+      const bubble=wrapper.querySelector('.wc-bubble');
+      if(bubble){
+        bubble.classList.remove('reply-glow');
+        // Force reflow so re-adding the class restarts animation
+        void bubble.offsetWidth;
+        bubble.classList.add('reply-glow');
+        setTimeout(()=>bubble.classList.remove('reply-glow'),1600);
+        wrapper.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    }
+  }
+}
+
 onSnapshot(wcQ,snap=>{
-  wcMessagesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const newData=snap.docs.map(d=>({id:d.id,...d.data()}));
+
+  /* Detect new messages that reply to the current user */
+  if(wcUsername && wcSeenIds.size>0){
+    newData.forEach(msg=>{
+      if(!wcSeenIds.has(msg.id)){
+        // This is a brand-new message
+        if(
+          msg.replyTo &&
+          msg.replyTo.name === wcUsername &&
+          msg.name !== wcUsername // someone else replied to us
+        ){
+          wcShowReplyAlert(msg.replyTo.id);
+        }
+      }
+    });
+  }
+
+  /* Update seen set */
+  newData.forEach(m=>wcSeenIds.add(m.id));
+
+  wcMessagesData=newData;
   wcRenderMessages();
   wcScrollBot(!wcFirst);
   wcUpdateBadge();
@@ -3339,5 +3580,42 @@ window.addEventListener('load',()=>{
   if(sn&&!localStorage.getItem('wc_user')){wcUsername=sn;localStorage.setItem('wc_user',sn);}
 });
 </script>
+
+<script>
+(function(){
+  const fit=()=>document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px');
+  fit();
+  window.addEventListener('resize',fit,{passive:true});
+  window.visualViewport&&window.visualViewport.addEventListener('resize',fit,{passive:true});
+})();
+</script>
+
+<script>
+(function(){
+  const el = document.getElementById('wc-messages');
+  const btn = document.getElementById('wc-scroll-down-btn');
+  if(!el || !btn) return;
+  const atBottom = () => el.scrollHeight - el.scrollTop - el.clientHeight < 96;
+  const refresh = () => {
+    const show = !atBottom();
+    btn.classList.toggle('show', show);
+    btn.style.opacity = show ? '1' : '0';
+    btn.style.pointerEvents = show ? 'auto' : 'none';
+  };
+  let ticking = false;
+  el.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { refresh(); ticking = false; });
+  }, {passive:true});
+  btn.addEventListener('click', () => {
+    el.scrollTo({top: el.scrollHeight, behavior: 'smooth'});
+    setTimeout(refresh, 120);
+  });
+  new MutationObserver(() => { requestAnimationFrame(() => { if (atBottom()) el.scrollTop = el.scrollHeight; refresh(); }); }).observe(el, {childList:true, subtree:true});
+  refresh();
+})();
+</script>
+
 </body>
 </html>
