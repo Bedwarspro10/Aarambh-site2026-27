@@ -416,6 +416,9 @@ body::before{
 .lm .bnav{background:rgba(238,242,252,0.9);}
 .ntab{flex:1;background:none;border:none;color:var(--txt2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;font-family:'Nunito',sans-serif;transition:color .3s;}
 .ni{font-size:22px;transition:transform .38s var(--bounce),filter .3s;display:block;will-change:transform;}
+.ni-img{width:26px;height:26px;object-fit:cover;border-radius:7px;display:block;transition:transform .38s var(--bounce),filter .3s;will-change:transform;}
+.ntab.on .ni-img{transform:scale(1.2) translateY(-2px);filter:drop-shadow(0 3px 8px rgba(91,154,255,0.55));}
+.ntab#nt-yt.on .ni-img{filter:drop-shadow(0 3px 8px rgba(255,69,69,0.5));}
 .nl{font-size:10px;font-weight:700;transition:color .3s;letter-spacing:.3px;}
 .ntab.on{color:var(--blue);}
 .ntab.on .ni{transform:scale(1.2) translateY(-2px);filter:drop-shadow(0 3px 8px rgba(91,154,255,0.55));}
@@ -1186,11 +1189,11 @@ body::before{
 
   <!-- BOTTOM NAV -->
   <div class="bnav">
-    <button class="ntab on" id="nt-home" onclick="switchTab('home')"><span class="ni">🏠</span><span class="nl">Home</span></button>
-    <button class="ntab" id="nt-courses" onclick="switchTab('courses')"><span class="ni">📚</span><span class="nl">Courses</span></button>
+    <button class="ntab on" id="nt-home" onclick="switchTab('home')"><img class="ni-img" src="https://images.rawpixel.com/image_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTExL3YxMTgxLXR1LWVsZW1lbnQtMjUwLmpwZw.jpg" alt="Home"><span class="nl">Home</span></button>
+    <button class="ntab" id="nt-courses" onclick="switchTab('courses')"><img class="ni-img" src="https://thumbs.dreamstime.com/b/education-vector-logo-open-book-dictionary-textbook-notebook-graduation-hat-icon-modern-emblem-idea-concept-design-156632927.jpg" alt="Courses"><span class="nl">Courses</span></button>
     <button class="ncenter" onclick="openSubj('maths',null)">AB</button>
-    <button class="ntab" id="nt-profile" onclick="switchTab('profile')"><span class="ni">👤</span><span class="nl">Profile</span></button>
-    <button class="ntab" id="nt-yt" onclick="switchTab('yt')"><span class="ni" style="font-size:20px;background:#ff0000;border-radius:8px;padding:3px 5px;display:inline-flex;align-items:center;justify-content:center;">▶️</span><span class="nl">YouTube</span></button>
+    <button class="ntab" id="nt-profile" onclick="switchTab('profile')"><img class="ni-img" src="https://img.magnific.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Profile"><span class="nl">Profile</span></button>
+    <button class="ntab" id="nt-yt" onclick="switchTab('yt')"><img class="ni-img" src="https://img.magnific.com/premium-vector/youtube-app-round-icon-social-media-logo-vector-illustration_277909-797.jpg?semt=ais_hybrid&w=740&q=80" alt="YouTube"><span class="nl">YouTube</span></button>
   </div>
 </div>
 
