@@ -417,8 +417,13 @@ body::before{
 .ntab{flex:1;background:none;border:none;color:var(--txt2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;font-family:'Nunito',sans-serif;transition:color .3s;}
 .ni{font-size:22px;transition:transform .38s var(--bounce),filter .3s;display:block;will-change:transform;}
 .ni-img{width:26px;height:26px;object-fit:cover;border-radius:7px;display:block;transition:transform .38s var(--bounce),filter .3s;will-change:transform;}
+.ni-gif{border-radius:50%;}
 .ntab.on .ni-img{transform:scale(1.2) translateY(-2px);filter:drop-shadow(0 3px 8px rgba(91,154,255,0.55));}
 .ntab#nt-yt.on .ni-img{filter:drop-shadow(0 3px 8px rgba(255,69,69,0.5));}
+.ntab#nt-chat.on{color:#9b6dff;}
+.ntab#nt-chat.on .ni-img{filter:drop-shadow(0 3px 12px rgba(155,109,255,0.7));}
+#chat-badge{display:none;position:absolute;top:-2px;right:-4px;background:#ff4545;color:#fff;border-radius:99px;font-size:8px;font-weight:900;min-width:14px;height:14px;line-height:14px;text-align:center;padding:0 3px;pointer-events:none;}
+#nt-chat{position:relative;}
 .nl{font-size:10px;font-weight:700;transition:color .3s;letter-spacing:.3px;}
 .ntab.on{color:var(--blue);}
 .ntab.on .ni{transform:scale(1.2) translateY(-2px);filter:drop-shadow(0 3px 8px rgba(91,154,255,0.55));}
@@ -985,12 +990,7 @@ body::before{
       <div class="tname">Aarambh Batch <span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
-      <!-- WeChat button - animated -->
-      <a class="wechat-fab-top" id="wechat-top-btn" href="https://wechat-u17.pages.dev/" target="_blank" rel="noopener">
-        <span class="wc-ico">💬</span>
-        <span class="wc-lbl">WeChat</span>
-        <span class="wc-pulse"></span>
-      </a>
+
       <div id="admin-badge" style="display:none;align-items:center;gap:6px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="document.getElementById('apanel').classList.add('open');renderAF&&renderAF();">
         <span style="font-size:11px;font-weight:900;color:#ff6b6b;">⚡ ADMIN</span>
         <button style="background:none;border:none;color:#ff6b6b;font-size:11px;font-weight:800;cursor:pointer;padding:0 2px;" onclick="event.stopPropagation();adminOut()">✕ Logout</button>
@@ -1194,6 +1194,7 @@ body::before{
     <button class="ncenter" onclick="openSubj('maths',null)">AB</button>
     <button class="ntab" id="nt-profile" onclick="switchTab('profile')"><img class="ni-img" src="https://img.magnific.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Profile"><span class="nl">Profile</span></button>
     <button class="ntab" id="nt-yt" onclick="switchTab('yt')"><img class="ni-img" src="https://img.magnific.com/premium-vector/youtube-app-round-icon-social-media-logo-vector-illustration_277909-797.jpg?semt=ais_hybrid&w=740&q=80" alt="YouTube"><span class="nl">YouTube</span></button>
+    <button class="ntab" id="nt-chat" onclick="openWeChat()"><img class="ni-img ni-gif" src="https://cdn-icons-gif.flaticon.com/16275/16275695.gif" alt="Chat"><span class="nl">Chat</span><span id="chat-badge"></span></button>
   </div>
 </div>
 
@@ -1257,6 +1258,7 @@ body::before{
     <button class="ap-tab" id="apt-folders" onclick="apSwitchTab('folders')">🗂 Folders</button>
     <button class="ap-tab" id="apt-cats" onclick="apSwitchTab('cats')">🏷 Categories</button>
     <button class="ap-tab" id="apt-yt" onclick="apSwitchTab('yt')">▶️ YouTube</button>
+    <button class="ap-tab" id="apt-chat" onclick="apSwitchTab('chat')">💬 Chat</button>
   </div>
 
   <div class="apscroll">
@@ -1385,6 +1387,24 @@ body::before{
       <div class="ap-card">
         <div class="ap-card-hdr">📺 Manage Channels</div>
         <div id="ap-yt-list"></div>
+      </div>
+    </div>
+
+    <!-- ─── CHAT TAB (Admin sees all messages & can reply) ─── -->
+    <div class="ap-tabpane" id="aptp-chat">
+      <div class="ap-card" style="padding:0;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--br);">
+          <span style="font-weight:800;font-size:13px;">💬 Live Chat — Admin View</span>
+          <button onclick="openWeChat();" style="background:var(--grd-blue);color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">Open Chat ↗</button>
+        </div>
+        <div style="padding:10px 12px;font-size:11px;color:var(--txt2);background:rgba(155,109,255,0.06);border-bottom:1px solid var(--br);">
+          Click <strong>Open Chat</strong> above — it opens the full chat where you can see all messages, reply in real time, and moderate as Admin (login with admin credentials inside the chat).
+        </div>
+        <div style="padding:14px;font-size:12px;color:var(--txt2);line-height:1.7;">
+          <div>🔐 Admin ID: <strong style="color:var(--blue);">power123</strong></div>
+          <div>🔑 Password: <strong style="color:var(--blue);">ujjawal2809</strong></div>
+          <div style="margin-top:8px;font-size:11px;opacity:0.6;">All student messages are stored in Firebase Firestore in real-time.</div>
+        </div>
       </div>
     </div>
 
@@ -1988,7 +2008,7 @@ function closeSearch(){
 
 /* ADMIN PANEL TAB SWITCHER */
 function apSwitchTab(t){
-  ['files','folders','cats','yt'].forEach(k=>{
+  ['files','folders','cats','yt','chat'].forEach(k=>{
     document.getElementById('apt-'+k)?.classList.toggle('on',k===t);
     document.getElementById('aptp-'+k)?.classList.toggle('on',k===t);
   });
@@ -2742,36 +2762,7 @@ loadStudentName();
 </script>
 <!-- ═══════════ WECHAT CSS ═══════════ -->
 <style>
-/* WeChat animated button in topbar */
-.wechat-fab-top{
-  position:relative;display:flex;align-items:center;gap:5px;
-  background:linear-gradient(135deg,#0077b6,#00c8ff);
-  border:none;color:#fff;border-radius:99px;padding:6px 13px;
-  font-family:'Nunito',sans-serif;font-size:11px;font-weight:900;
-  cursor:pointer;letter-spacing:.3px;
-  box-shadow:0 0 0 0 rgba(0,200,255,0.5);
-  animation:wcTopPulse 2.2s ease-in-out infinite;
-  transition:transform .2s var(--bounce);
-  overflow:visible;
-}
-.wechat-fab-top:active{transform:scale(0.9);}
-.wc-ico{font-size:14px;}
-.wc-lbl{white-space:nowrap;}
-.wc-pulse{
-  position:absolute;inset:-3px;border-radius:99px;
-  border:2px solid rgba(0,200,255,0.6);
-  animation:wcRing 2.2s ease-out infinite;
-  pointer-events:none;
-}
-@keyframes wcTopPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(0,200,255,0.5),0 4px 14px rgba(0,150,255,0.4);}
-  50%{box-shadow:0 0 0 8px rgba(0,200,255,0),0 6px 20px rgba(0,200,255,0.5);}
-}
-@keyframes wcRing{
-  0%{transform:scale(1);opacity:.8;}
-  70%{transform:scale(1.35);opacity:0;}
-  100%{transform:scale(1.35);opacity:0;}
-}
+/* Chat panel open button (removed - now in nav) */
 
 /* WeChat panel — full screen slide in */
 #wechat-panel{
@@ -2781,8 +2772,9 @@ loadStudentName();
   transform:translateX(100%);
   transition:transform .42s cubic-bezier(0.22,1,0.36,1);
   will-change:transform;
+  pointer-events:none;
 }
-#wechat-panel.open{transform:translateX(0);}
+#wechat-panel.open{transform:translateX(0);pointer-events:all;}
 
 /* WeChat header */
 .wc-header{
@@ -2840,8 +2832,8 @@ loadStudentName();
 .wc-mw.other .wc-bubble{background:rgba(0,50,80,0.7);border-bottom-left-radius:4px;border:1px solid rgba(0,200,255,0.12);backdrop-filter:blur(8px);}
 .wc-mw.wc-admin-msg .wc-bubble{background:linear-gradient(135deg,#92400e,#b45309)!important;border:1px solid rgba(245,158,11,.4)!important;}
 .wc-admin-tag{font-size:.58rem;font-weight:800;color:#f59e0b;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
-.wc-del-btn-msg{background:none;border:none;color:rgba(239,68,68,.5);cursor:pointer;font-size:.72rem;padding:4px;border-radius:6px;opacity:0;transition:all .2s;flex-shrink:0;}
-.wc-msg-row:hover .wc-del-btn-msg{opacity:1;}
+.wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;border:1px dashed rgba(255,255,255,0.15)!important;color:rgba(255,255,255,0.4)!important;font-style:italic;font-size:.8rem;cursor:default!important;box-shadow:none!important;}
+.wc-mw.mine .wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;}
 .wc-reactions-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;padding:0 3px;}
 .wc-reaction-pill{display:flex;align-items:center;gap:2px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);border-radius:20px;padding:2px 7px;font-size:.8rem;cursor:pointer;transition:all .15s;}
 .wc-reaction-pill:hover{background:rgba(0,200,255,.2);transform:scale(1.1);}
@@ -2919,7 +2911,7 @@ loadStudentName();
       <div class="wc-header-left">
         <button class="wc-back" onclick="closeWeChat()">←</button>
         <div class="wc-live-dot"></div>
-        <span class="wc-logo">WeChat</span>
+        <span class="wc-logo">Aarambh Chat</span>
         <span class="wc-admin-badge" id="wc-admin-badge">ADMIN</span>
       </div>
       <div class="wc-header-right">
@@ -2939,7 +2931,7 @@ loadStudentName();
     <div id="wc-messages">
       <div id="wc-empty">
         <div class="wc-es-icon">💬</div>
-        <div class="wc-es-title">Welcome to WeChat!</div>
+        <div class="wc-es-title">Welcome to Aarambh Chat!</div>
         <div class="wc-es-sub">Ask your doubts live.<br>Admin will reply soon!</div>
       </div>
     </div>
@@ -2975,7 +2967,7 @@ loadStudentName();
 <!-- WeChat Name Modal -->
 <div class="wc-overlay" id="wc-name-modal">
   <div class="wc-modal">
-    <h2>👋 Welcome to WeChat</h2>
+    <h2>👋 Welcome to Aarambh Chat</h2>
     <p>Enter your name to join the doubt session.</p>
     <div class="wc-mfield"><label>Your Name</label><input type="text" id="wc-name-input" placeholder="e.g. Ujjawal, Priya…" maxlength="24"/></div>
     <span class="wc-merr" id="wc-name-err"></span>
@@ -3011,6 +3003,33 @@ loadStudentName();
 </div>
 <div id="wc-toast"></div>
 
+<!-- ═══════════ WECHAT OPEN/CLOSE — plain script so onclick works ═══════════ -->
+<script>
+function openWeChat(){
+  const panel=document.getElementById('wechat-panel');
+  if(!panel)return;
+  panel.classList.add('open');
+  const nb=document.getElementById('nt-chat');
+  if(nb)nb.classList.add('on');
+  // clear unread badge
+  const badge=document.getElementById('chat-badge');
+  if(badge)badge.style.display='none';
+  // show name modal if no username saved
+  const saved=localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
+  if(!saved){
+    setTimeout(()=>{const m=document.getElementById('wc-name-modal');if(m)m.classList.add('show');},300);
+  }
+  // init canvas if available
+  if(typeof wcInitCanvasGlobal==='function')wcInitCanvasGlobal();
+}
+function closeWeChat(){
+  const panel=document.getElementById('wechat-panel');
+  if(panel)panel.classList.remove('open');
+  const nb=document.getElementById('nt-chat');
+  if(nb)nb.classList.remove('on');
+}
+</script>
+
 <!-- ═══════════ WECHAT JS ═══════════ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -3020,129 +3039,204 @@ const wcConfig={apiKey:"AIzaSyD8_zOJgINAZMWzqn0ozDSE98ouTAPotBU",authDomain:"cha
 const wcApp=initializeApp(wcConfig,'wechat');
 const wcDb=getFirestore(wcApp);
 
-/* ── open/close ── */
-window.openWeChat=function(){window.open('https://wechat-u17.pages.dev/','_blank');}
-window.closeWeChat=function(){document.getElementById('wechat-panel').classList.remove('open');}
-
-/* ── canvas bg ── */
-let wcCanvasInited=false;
-function wcInitCanvas(){
-  if(wcCanvasInited)return;wcCanvasInited=true;
-  const c=document.getElementById('wc-bg-canvas'),cx=c.getContext('2d');
-  let ps=[];
-  function rsz(){c.width=window.innerWidth;c.height=window.innerHeight;}rsz();window.addEventListener('resize',rsz);
-  for(let i=0;i<60;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random()*.4+.1});
-  function draw(){
-    cx.clearRect(0,0,c.width,c.height);
-    cx.strokeStyle='rgba(0,180,255,0.022)';cx.lineWidth=1;
-    for(let x=0;x<c.width;x+=50){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,c.height);cx.stroke();}
-    for(let y=0;y<c.height;y+=50){cx.beginPath();cx.moveTo(0,y);cx.lineTo(c.width,y);cx.stroke();}
-    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=c.width;if(p.x>c.width)p.x=0;if(p.y<0)p.y=c.height;if(p.y>c.height)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,200,255,${p.a})`;cx.fill();});
-    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<80){cx.beginPath();cx.moveTo(ps[i].x,ps[i].y);cx.lineTo(ps[j].x,ps[j].y);cx.strokeStyle=`rgba(0,200,255,${.055*(1-d/80)})`;cx.stroke();}}
-    requestAnimationFrame(draw);
-  }draw();
-}
-
-/* ── state ── */
+/* ═══ STATE ═══ */
 let wcUsername=localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
 let wcIsAdmin=false;
+let wcReplyTo=null;
+let wcCtxMsg=null;
+let wcMessagesData=[];
+let wcLastSeenCount=0;
+let wcFirst=true;
 const WC_AID='power123',WC_APW='ujjawal2809';
-let wcReplyTo=null,wcCtxTarget=null,wcMessagesData=[];
 const WC_REACT=['❤️','😂','👍','😮','😢','🔥'];
 const WC_EMOJIS=['😀','😂','🥰','😍','🤩','😎','🤔','😮','😢','😡','👍','👎','❤️','🔥','🎉','💯','✅','⭐','💬','🚀','💎','🤝','👏','🙏','💪','🎶','🤯','😴','🥳','🫡'];
 
-/* emoji grid */
-const wg=document.getElementById('wc-emoji-grid');
-WC_EMOJIS.forEach(e=>{const b=document.createElement('button');b.className='wc-ep-emoji';b.textContent=e;b.onclick=()=>{document.getElementById('wc-msg-input').value+=e;document.getElementById('wc-msg-input').focus();};wg.appendChild(b);});
-
-/* helpers */
-function wcToast(msg,dur=2200){const t=document.getElementById('wc-toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
+/* ═══ HELPERS ═══ */
+const $=id=>document.getElementById(id);
+function wcToast(msg,dur=2200){const t=$('wc-toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
 function wcFmtTime(ts){const d=new Date(ts);let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m.toString().padStart(2,'0')} ${ap}`;}
-function wcFmtDay(ts){const d=new Date(ts),t=new Date(),y=new Date();y.setDate(y.getDate()-1);if(d.toDateString()===t.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
-function wcScrollBot(s=true){const m=document.getElementById('wc-messages');m.scrollTo({top:m.scrollHeight,behavior:s?'smooth':'instant'});}
+function wcFmtDay(ts){const d=new Date(ts),n=new Date(),y=new Date();y.setDate(y.getDate()-1);if(d.toDateString()===n.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function wcScrollBot(smooth=true){const m=$('wc-messages');m.scrollTo({top:m.scrollHeight,behavior:smooth?'smooth':'instant'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* name */
-const wcNm=document.getElementById('wc-name-modal'),wcNi=document.getElementById('wc-name-input'),wcNe=document.getElementById('wc-name-err'),wcNs=document.getElementById('wc-name-submit');
-function wcSubmitName(){const v=wcNi.value.trim();if(!v){wcNe.textContent='Please enter a name.';return;}wcUsername=v;localStorage.setItem('wc_user',v);wcNm.classList.remove('show');document.getElementById('wc-msg-input').focus();}
-wcNs.addEventListener('click',wcSubmitName);
-wcNi.addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
+/* ═══ UNREAD BADGE ═══ */
+function wcUpdateBadge(){
+  const panel=$('wechat-panel');
+  if(panel&&panel.classList.contains('open')){wcLastSeenCount=wcMessagesData.length;return;}
+  const unread=Math.max(0,wcMessagesData.length-wcLastSeenCount);
+  const badge=$('chat-badge');
+  if(!badge)return;
+  if(unread>0){badge.textContent=unread>99?'99+':String(unread);badge.style.display='block';}
+  else badge.style.display='none';
+}
 
-/* admin */
-const wcAm=document.getElementById('wc-admin-modal'),wcAi=document.getElementById('wc-admin-id'),wcAp=document.getElementById('wc-admin-pass'),wcAe=document.getElementById('wc-admin-err');
-document.getElementById('wc-admin-btn').addEventListener('click',()=>{
-  if(wcIsAdmin){document.getElementById('wc-admin-bar').classList.toggle('show');return;}
-  wcAi.value='';wcAp.value='';wcAe.textContent='';wcAm.classList.add('show');setTimeout(()=>wcAi.focus(),100);
+/* ═══ CANVAS BG ═══ */
+let wcCanvasInited=false;
+function wcInitCanvas(){
+  if(wcCanvasInited)return;wcCanvasInited=true;
+  const c=$('wc-bg-canvas');if(!c)return;
+  const cx=c.getContext('2d');let ps=[];
+  function rsz(){c.width=window.innerWidth;c.height=window.innerHeight;}rsz();
+  window.addEventListener('resize',rsz);
+  for(let i=0;i<55;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.3,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,a:Math.random()*.35+.1});
+  (function draw(){
+    cx.clearRect(0,0,c.width,c.height);
+    cx.strokeStyle='rgba(0,180,255,0.018)';cx.lineWidth=1;
+    for(let x=0;x<c.width;x+=50){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,c.height);cx.stroke();}
+    for(let y=0;y<c.height;y+=50){cx.beginPath();cx.moveTo(0,y);cx.lineTo(c.width,y);cx.stroke();}
+    ps.forEach(p=>{p.x=(p.x+p.vx+c.width)%c.width;p.y=(p.y+p.vy+c.height)%c.height;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,200,255,${p.a})`;cx.fill();});
+    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<90){cx.beginPath();cx.moveTo(ps[i].x,ps[i].y);cx.lineTo(ps[j].x,ps[j].y);cx.strokeStyle=`rgba(0,200,255,${.05*(1-d/90)})`;cx.stroke();}}
+    requestAnimationFrame(draw);
+  })();
+}
+window.wcInitCanvasGlobal=()=>wcInitCanvas();
+
+/* ═══ EMOJI GRID ═══ */
+const wg=$('wc-emoji-grid');
+WC_EMOJIS.forEach(e=>{
+  const b=document.createElement('button');b.className='wc-ep-emoji';b.textContent=e;
+  b.addEventListener('click',()=>{const mi=$('wc-msg-input');mi.value+=e;mi.focus();$('wc-emoji-picker').classList.remove('show');});
+  wg.appendChild(b);
 });
-document.getElementById('wc-admin-cancel').addEventListener('click',()=>wcAm.classList.remove('show'));
-document.getElementById('wc-admin-submit').addEventListener('click',()=>{
-  if(wcAi.value===WC_AID&&wcAp.value===WC_APW){
-    wcIsAdmin=true;wcAm.classList.remove('show');
-    document.getElementById('wc-admin-bar').classList.add('show');
-    document.getElementById('wc-admin-badge').classList.add('show');
+
+/* ═══ NAME MODAL ═══ */
+function wcSubmitName(){
+  const v=$('wc-name-input').value.trim();
+  if(!v){$('wc-name-err').textContent='Please enter your name.';return;}
+  wcUsername=v;localStorage.setItem('wc_user',v);
+  $('wc-name-modal').classList.remove('show');
+  $('wc-msg-input').focus();
+}
+$('wc-name-submit').addEventListener('click',wcSubmitName);
+$('wc-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
+
+/* ═══ ADMIN ═══ */
+$('wc-admin-btn').addEventListener('click',()=>{
+  if(wcIsAdmin){$('wc-admin-bar').classList.toggle('show');return;}
+  $('wc-admin-id').value='';$('wc-admin-pass').value='';$('wc-admin-err').textContent='';
+  $('wc-admin-modal').classList.add('show');
+  setTimeout(()=>$('wc-admin-id').focus(),120);
+});
+$('wc-admin-cancel').addEventListener('click',()=>$('wc-admin-modal').classList.remove('show'));
+$('wc-admin-submit').addEventListener('click',()=>{
+  if($('wc-admin-id').value===WC_AID&&$('wc-admin-pass').value===WC_APW){
+    wcIsAdmin=true;$('wc-admin-modal').classList.remove('show');
+    $('wc-admin-bar').classList.add('show');$('wc-admin-badge').classList.add('show');
     wcToast('👑 Admin mode on');wcRenderMessages();
-  }else{wcAe.textContent='Wrong credentials.';wcAp.value='';}
+  }else{$('wc-admin-err').textContent='Wrong credentials.';$('wc-admin-pass').value='';}
 });
-wcAp.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('wc-admin-submit').click();});
-document.getElementById('wc-logout-btn').addEventListener('click',()=>{wcIsAdmin=false;document.getElementById('wc-admin-bar').classList.remove('show');document.getElementById('wc-admin-badge').classList.remove('show');wcToast('Logged out');wcRenderMessages();});
-document.getElementById('wc-clear-btn').addEventListener('click',()=>document.getElementById('wc-confirm-modal').classList.add('show'));
-document.getElementById('wc-confirm-no').addEventListener('click',()=>document.getElementById('wc-confirm-modal').classList.remove('show'));
-document.getElementById('wc-confirm-yes').addEventListener('click',async()=>{
-  document.getElementById('wc-confirm-modal').classList.remove('show');
-  const sn=await getDocs(collection(wcDb,'messages'));
-  await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'messages',d.id))));
-  wcToast('🗑 Chat cleared');
+$('wc-admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('wc-admin-submit').click();});
+$('wc-logout-btn').addEventListener('click',()=>{
+  wcIsAdmin=false;$('wc-admin-bar').classList.remove('show');$('wc-admin-badge').classList.remove('show');
+  wcToast('Logged out');wcRenderMessages();
+});
+$('wc-clear-btn').addEventListener('click',()=>$('wc-confirm-modal').classList.add('show'));
+$('wc-confirm-no').addEventListener('click',()=>$('wc-confirm-modal').classList.remove('show'));
+$('wc-confirm-yes').addEventListener('click',async()=>{
+  $('wc-confirm-modal').classList.remove('show');
+  try{
+    const sn=await getDocs(collection(wcDb,'messages'));
+    await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'messages',d.id))));
+    wcToast('🗑 Chat cleared');
+  }catch(e){wcToast('Error clearing chat');}
 });
 
-/* emoji toggle */
-document.getElementById('wc-emoji-toggle').addEventListener('click',()=>{const ep=document.getElementById('wc-emoji-picker');ep.classList.toggle('show');if(ep.classList.contains('show'))document.getElementById('wc-msg-input').blur();else document.getElementById('wc-msg-input').focus();});
-document.getElementById('wc-msg-input').addEventListener('focus',()=>document.getElementById('wc-emoji-picker').classList.remove('show'));
+/* ═══ EMOJI PICKER TOGGLE ═══ */
+$('wc-emoji-toggle').addEventListener('click',()=>{
+  const ep=$('wc-emoji-picker');
+  ep.classList.toggle('show');
+  if(!ep.classList.contains('show'))$('wc-msg-input').focus();
+});
+$('wc-msg-input').addEventListener('focus',()=>$('wc-emoji-picker').classList.remove('show'));
 
-/* reply */
-const wcRb=document.getElementById('wc-reply-bar');
-document.getElementById('wc-rb-close').addEventListener('click',()=>{wcReplyTo=null;wcRb.classList.remove('show');});
-function wcSetReply(msg){wcReplyTo={id:msg.id,name:msg.name,text:msg.text};document.getElementById('wc-rb-name').textContent='↩ '+msg.name;document.getElementById('wc-rb-text').textContent=msg.text;wcRb.classList.add('show');document.getElementById('wc-msg-input').focus();}
+/* ═══ REPLY BAR ═══ */
+$('wc-rb-close').addEventListener('click',()=>{wcReplyTo=null;$('wc-reply-bar').classList.remove('show');});
+function wcSetReply(msg){
+  wcReplyTo={id:msg.id,name:msg.name,text:msg.deletedBy?'[deleted]':msg.text};
+  $('wc-rb-name').textContent='↩ '+msg.name;
+  $('wc-rb-text').textContent=wcReplyTo.text;
+  $('wc-reply-bar').classList.add('show');
+  $('wc-msg-input').focus();
+}
 
-/* send */
-const wcMi=document.getElementById('wc-msg-input'),wcSb=document.getElementById('wc-send-btn');
+/* ═══ SEND ═══ */
 async function wcSend(){
-  const text=wcMi.value.trim();if(!text)return;
-  if(!wcUsername){document.getElementById('wc-name-modal').classList.add('show');return;}
-  const pl={name:wcUsername,text,time:Date.now(),role:wcIsAdmin?'admin':'user',reactions:{}};
+  const mi=$('wc-msg-input');
+  const text=mi.value.trim();if(!text)return;
+  if(!wcUsername){$('wc-name-modal').classList.add('show');return;}
+  const pl={name:wcUsername,text,time:Date.now(),role:wcIsAdmin?'admin':'user',reactions:{},deletedBy:null};
   if(wcReplyTo)pl.replyTo={id:wcReplyTo.id,name:wcReplyTo.name,text:wcReplyTo.text};
-  wcMi.value='';wcMi.style.height='';wcReplyTo=null;wcRb.classList.remove('show');
-  try{await addDoc(collection(wcDb,'messages'),pl);}catch(e){wcToast('Send failed');}
+  mi.value='';mi.style.height='';
+  wcReplyTo=null;$('wc-reply-bar').classList.remove('show');
+  $('wc-emoji-picker').classList.remove('show');
+  try{await addDoc(collection(wcDb,'messages'),pl);}
+  catch(e){wcToast('❌ Send failed. Check connection.');}
 }
-wcSb.addEventListener('click',wcSend);
-wcMi.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();wcSend();}});
-wcMi.addEventListener('input',()=>{wcMi.style.height='auto';wcMi.style.height=Math.min(wcMi.scrollHeight,100)+'px';});
+$('wc-send-btn').addEventListener('click',wcSend);
+$('wc-msg-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();wcSend();}});
+$('wc-msg-input').addEventListener('input',()=>{const mi=$('wc-msg-input');mi.style.height='auto';mi.style.height=Math.min(mi.scrollHeight,100)+'px';});
 
-/* context menu */
-const wcCtx=document.getElementById('wc-ctx-menu');
-let wcCtxTarget=null;
+/* ═══ DELETE (soft — shows "deleted by X") ═══ */
+async function wcDeleteMsg(msg){
+  const delBy=wcIsAdmin?`Admin (${wcUsername})`:wcUsername;
+  try{
+    await updateDoc(doc(wcDb,'messages',msg.id),{deletedBy:delBy,text:'',reactions:{}});
+    wcToast(`🗑 Deleted`);
+  }catch(e){wcToast('Error deleting');}
+}
+
+/* ═══ CONTEXT MENU ═══ */
+const wcCtxEl=$('wc-ctx-menu');
 function wcShowCtx(x,y,msg){
-  wcCtxTarget=msg;
-  const vw=window.innerWidth,vh=window.innerHeight;
-  wcCtx.style.display='block';
-  let l=x,t=y;
-  const mw=wcCtx.offsetWidth||210,mh=wcCtx.offsetHeight||180;
-  if(l+mw>vw-8)l=vw-mw-8;if(t+mh>vh-8)t=y-mh-8;if(t<8)t=8;
-  wcCtx.style.left=l+'px';wcCtx.style.top=t+'px';
-  wcCtx.classList.add('show');
-  const cr=document.getElementById('wc-ctx-reactions');cr.innerHTML='';
-  WC_REACT.forEach(e=>{const b=document.createElement('button');b.className='wc-ctx-react-btn';b.textContent=e;b.onclick=()=>wcReactTo(msg.id,e);cr.appendChild(b);});
-  document.getElementById('wc-ctx-delete').style.display=(wcIsAdmin||(msg.name===wcUsername))?'flex':'none';
+  wcCtxMsg=msg;
+  const isDeleted=!!msg.deletedBy;
+  const canDelete=!isDeleted&&(wcIsAdmin||(msg.name===wcUsername));
+  // rebuild reaction row
+  const cr=$('wc-ctx-reactions');cr.innerHTML='';
+  if(!isDeleted){
+    WC_REACT.forEach(e=>{
+      const b=document.createElement('button');b.className='wc-ctx-react-btn';b.textContent=e;
+      b.addEventListener('click',()=>wcReactTo(msg.id,e));
+      cr.appendChild(b);
+    });
+  }
+  // show/hide items
+  $('wc-ctx-reply').style.display=isDeleted?'none':'flex';
+  $('wc-ctx-copy').style.display=isDeleted?'none':'flex';
+  $('wc-ctx-delete').style.display=canDelete?'flex':'none';
+  // position
+  wcCtxEl.style.display='block';
+  wcCtxEl.classList.add('show');
+  requestAnimationFrame(()=>{
+    const vw=window.innerWidth,vh=window.innerHeight;
+    const mw=wcCtxEl.offsetWidth,mh=wcCtxEl.offsetHeight;
+    let l=x,t=y;
+    if(l+mw>vw-8)l=vw-mw-8;
+    if(t+mh>vh-8)t=y-mh-12;
+    if(t<8)t=8;if(l<8)l=8;
+    wcCtxEl.style.left=l+'px';wcCtxEl.style.top=t+'px';
+  });
 }
-function wcHideCtx(){wcCtx.classList.remove('show');wcCtx.style.display='none';wcCtxTarget=null;}
-document.addEventListener('click',e=>{if(!wcCtx.contains(e.target))wcHideCtx();});
-document.getElementById('wc-ctx-reply').addEventListener('click',()=>{if(wcCtxTarget)wcSetReply(wcCtxTarget);wcHideCtx();});
-document.getElementById('wc-ctx-copy').addEventListener('click',()=>{if(wcCtxTarget){navigator.clipboard.writeText(wcCtxTarget.text).then(()=>wcToast('📋 Copied!')).catch(()=>{const ta=document.createElement('textarea');ta.value=wcCtxTarget.text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('📋 Copied!');});}wcHideCtx();});
-document.getElementById('wc-ctx-delete').addEventListener('click',async()=>{if(wcCtxTarget){try{await deleteDoc(doc(wcDb,'messages',wcCtxTarget.id));wcToast('Deleted');}catch(e){wcToast('Error');}}wcHideCtx();});
+function wcHideCtx(){wcCtxEl.classList.remove('show');setTimeout(()=>{if(!wcCtxEl.classList.contains('show'))wcCtxEl.style.display='none';},200);wcCtxMsg=null;}
+document.addEventListener('click',e=>{if(wcCtxEl.style.display==='block'&&!wcCtxEl.contains(e.target))wcHideCtx();},{capture:false});
+$('wc-ctx-reply').addEventListener('click',()=>{if(wcCtxMsg)wcSetReply(wcCtxMsg);wcHideCtx();});
+$('wc-ctx-copy').addEventListener('click',()=>{
+  if(!wcCtxMsg)return;
+  const text=wcCtxMsg.text;
+  navigator.clipboard.writeText(text).then(()=>wcToast('📋 Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('📋 Copied!');
+  });
+  wcHideCtx();
+});
+$('wc-ctx-delete').addEventListener('click',()=>{if(wcCtxMsg)wcDeleteMsg(wcCtxMsg);wcHideCtx();});
 
-/* reactions */
+/* ═══ REACTIONS ═══ */
 async function wcReactTo(msgId,emoji){
   wcHideCtx();
-  const m=wcMessagesData.find(x=>x.id===msgId);if(!m)return;
-  const r=m.reactions||{};
+  if(!wcUsername){wcToast('Enter your name first');return;}
+  const m=wcMessagesData.find(x=>x.id===msgId);if(!m||m.deletedBy)return;
+  const r=JSON.parse(JSON.stringify(m.reactions||{}));
   if(!r[emoji])r[emoji]=[];
   const idx=r[emoji].indexOf(wcUsername);
   if(idx>-1)r[emoji].splice(idx,1);else r[emoji].push(wcUsername);
@@ -3150,55 +3244,96 @@ async function wcReactTo(msgId,emoji){
   try{await updateDoc(doc(wcDb,'messages',msgId),{reactions:r});}catch(e){wcToast('Reaction failed');}
 }
 
-/* render */
+/* ═══ RENDER MESSAGES ═══ */
 function wcRenderMessages(){
-  const el=document.getElementById('wc-messages'),empty=document.getElementById('wc-empty');
+  const el=$('wc-messages'),empty=$('wc-empty');
   el.innerHTML='';
-  if(!wcMessagesData.length){el.appendChild(empty);return;}
+  if(!wcMessagesData.length){el.appendChild(empty);$('wc-msg-count').textContent='0 msgs';return;}
+  $('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
   let lastDay=null;
-  document.getElementById('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
   wcMessagesData.forEach(msg=>{
     const ds=wcFmtDay(msg.time);
-    if(ds!==lastDay){const d=document.createElement('div');d.className='wc-day-div';d.textContent=ds;el.appendChild(d);lastDay=ds;}
-    const isMine=msg.name===wcUsername,isAdm=msg.role==='admin';
-    const w=document.createElement('div');w.className=`wc-mw ${isMine?'mine':'other'} ${isAdm?'wc-admin-msg':''}`;
-    if(!isMine){const ne=document.createElement('div');ne.className='wc-msg-name'+(isAdm?' an':'');ne.textContent=msg.name;w.appendChild(ne);}
-    if(isAdm){const at=document.createElement('span');at.className='wc-admin-tag';at.textContent='ADMIN';w.appendChild(at);}
+    if(ds!==lastDay){
+      const d=document.createElement('div');d.className='wc-day-div';d.textContent=ds;
+      el.appendChild(d);lastDay=ds;
+    }
+    const isDeleted=!!msg.deletedBy;
+    const isMine=msg.name===wcUsername;
+    const isAdm=msg.role==='admin';
+    // wrapper
+    const w=document.createElement('div');
+    w.className=`wc-mw ${isMine?'mine':'other'}${isAdm?' wc-admin-msg':''}`;
+    // sender name (others only)
+    if(!isMine){
+      const ne=document.createElement('div');ne.className='wc-msg-name'+(isAdm?' an':'');ne.textContent=msg.name;w.appendChild(ne);
+    }
+    // admin badge
+    if(isAdm&&!isDeleted){const at=document.createElement('span');at.className='wc-admin-tag';at.textContent='ADMIN';w.appendChild(at);}
+    // row
     const row=document.createElement('div');row.className='wc-msg-row';
-    const bubble=document.createElement('div');bubble.className='wc-bubble';
-    if(msg.replyTo){const rp=document.createElement('div');rp.className='wc-reply-preview';rp.innerHTML=`<div class="wc-rp-name">${msg.replyTo.name}</div><div class="wc-rp-text">${msg.replyTo.text}</div>`;bubble.appendChild(rp);}
-    bubble.appendChild(document.createTextNode(msg.text));
-    let pt=null;
-    const onLP=(x,y)=>{navigator.vibrate&&navigator.vibrate(30);wcShowCtx(x,y,msg);};
-    bubble.addEventListener('mousedown',e=>{if(e.button===2)return;pt=setTimeout(()=>onLP(e.clientX,e.clientY),500);});
-    bubble.addEventListener('mousemove',()=>clearTimeout(pt));
-    bubble.addEventListener('mouseup',()=>clearTimeout(pt));
-    bubble.addEventListener('contextmenu',e=>{e.preventDefault();onLP(e.clientX,e.clientY);});
-    bubble.addEventListener('touchstart',e=>{const t=e.touches[0];pt=setTimeout(()=>onLP(t.clientX,t.clientY),500);},{passive:true});
-    bubble.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
-    bubble.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
+    const bubble=document.createElement('div');
+    if(isDeleted){
+      bubble.className='wc-bubble wc-bubble-deleted';
+      bubble.textContent=`🚫 Message deleted by ${msg.deletedBy}`;
+    }else{
+      bubble.className='wc-bubble';
+      // reply preview
+      if(msg.replyTo){
+        const rp=document.createElement('div');rp.className='wc-reply-preview';
+        rp.innerHTML=`<div class="wc-rp-name">${esc(msg.replyTo.name)}</div><div class="wc-rp-text">${esc(msg.replyTo.text)}</div>`;
+        bubble.appendChild(rp);
+      }
+      bubble.appendChild(document.createTextNode(msg.text));
+      // long press / right click → context menu
+      let pt=null;
+      const onLP=(x,y)=>{navigator.vibrate&&navigator.vibrate(28);wcShowCtx(x,y,msg);};
+      bubble.addEventListener('mousedown',e=>{if(e.button!==0)return;pt=setTimeout(()=>onLP(e.clientX,e.clientY),520);});
+      bubble.addEventListener('mousemove',()=>clearTimeout(pt));
+      bubble.addEventListener('mouseup',()=>clearTimeout(pt));
+      bubble.addEventListener('contextmenu',e=>{e.preventDefault();onLP(e.clientX,e.clientY);});
+      bubble.addEventListener('touchstart',e=>{const t=e.touches[0];pt=setTimeout(()=>onLP(t.clientX,t.clientY),520);},{passive:true});
+      bubble.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
+      bubble.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
+    }
     row.appendChild(bubble);
-    if(wcIsAdmin){const db2=document.createElement('button');db2.className='wc-del-btn-msg';db2.textContent='✕';db2.addEventListener('click',async e=>{e.stopPropagation();try{await deleteDoc(doc(wcDb,'messages',msg.id));}catch(e2){wcToast('Error');}});row.appendChild(db2);}
     w.appendChild(row);
-    const rk=Object.keys(msg.reactions||{}).filter(k=>msg.reactions[k]&&msg.reactions[k].length>0);
-    if(rk.length){const strip=document.createElement('div');strip.className='wc-reactions-strip';rk.forEach(emoji=>{const u=msg.reactions[emoji];const pill=document.createElement('div');pill.className='wc-reaction-pill';if(u.includes(wcUsername))pill.style.background='rgba(0,200,255,.2)';pill.innerHTML=`${emoji}<span class="wc-rc">${u.length}</span>`;pill.title=u.join(', ');pill.onclick=()=>wcReactTo(msg.id,emoji);strip.appendChild(pill);});w.appendChild(strip);}
-    const te=document.createElement('div');te.className='wc-msg-time';te.textContent=wcFmtTime(msg.time);if(isMine)te.innerHTML+=` <span class="wc-tick">✓✓</span>`;w.appendChild(te);
+    // reactions
+    if(!isDeleted){
+      const rk=Object.keys(msg.reactions||{}).filter(k=>(msg.reactions[k]||[]).length>0);
+      if(rk.length){
+        const strip=document.createElement('div');strip.className='wc-reactions-strip';
+        rk.forEach(emoji=>{
+          const u=msg.reactions[emoji]||[];
+          const pill=document.createElement('div');pill.className='wc-reaction-pill';
+          if(u.includes(wcUsername))pill.style.background='rgba(0,200,255,.22)';
+          pill.innerHTML=`${emoji}<span class="wc-rc">${u.length}</span>`;
+          pill.title=u.join(', ');
+          pill.addEventListener('click',()=>wcReactTo(msg.id,emoji));
+          strip.appendChild(pill);
+        });
+        w.appendChild(strip);
+      }
+    }
+    // timestamp
+    const te=document.createElement('div');te.className='wc-msg-time';
+    te.textContent=wcFmtTime(msg.time);
+    if(isMine&&!isDeleted)te.innerHTML+=` <span class="wc-tick">✓✓</span>`;
+    w.appendChild(te);
     el.appendChild(w);
   });
 }
 
-/* realtime */
+/* ═══ REALTIME ═══ */
 const wcQ=query(collection(wcDb,'messages'),orderBy('time','asc'));
-let wcFirst=true;
 onSnapshot(wcQ,snap=>{
   wcMessagesData=snap.docs.map(d=>({id:d.id,...d.data()}));
-  document.getElementById('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
   wcRenderMessages();
   wcScrollBot(!wcFirst);
+  wcUpdateBadge();
   if(wcFirst)wcFirst=false;
-});
+},{error:e=>console.error('Firestore error:',e)});
 
-// Pre-fill name from student name if set
+/* ═══ PRE-FILL NAME ═══ */
 window.addEventListener('load',()=>{
   const sn=localStorage.getItem('ab_student_name');
   if(sn&&!localStorage.getItem('wc_user')){wcUsername=sn;localStorage.setItem('wc_user',sn);}
