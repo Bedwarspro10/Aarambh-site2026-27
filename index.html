@@ -2969,6 +2969,25 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
 #wc-msg-count{font-size:.68rem;color:#4a7a96;background:rgba(91,154,255,0.08);
   border:1px solid rgba(91,154,255,0.14);padding:3px 9px;border-radius:20px;font-weight:600;}
 
+/* ── CHAT MODE LOADING OVERLAY ── */
+#wc-chat-loading{
+  position:absolute;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;
+  background:linear-gradient(160deg,#030811 0%,#060d1f 60%,#04091a 100%);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+#wc-chat-loading.show{opacity:1;pointer-events:all;}
+.wc-spinner{
+  width:52px;height:52px;border-radius:50%;
+  border:3px solid rgba(91,154,255,0.15);
+  border-top-color:#5b9aff;
+  animation:wcSpin 0.85s linear infinite;
+}
+@keyframes wcSpin{to{transform:rotate(360deg);}}
+.wc-loading-label{font-size:.8rem;font-weight:700;color:#3a5070;letter-spacing:.05em;}
+
 /* ── CHAT MODE SELECTOR ── */
 #wc-mode-selector{
   position:absolute;inset:0;z-index:10;
@@ -3395,6 +3414,77 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
 @keyframes newPulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .new-msg-dot{width:5px;height:5px;border-radius:50%;background:#9b6dff;}
 
+/* ── CLOSE CHAT BUTTON ── */
+.wc-close-chat-btn{
+  background:linear-gradient(135deg,#ef4444,#b91c1c)!important;
+  color:#fff!important;border-color:rgba(239,68,68,.4)!important;
+}
+.wc-close-chat-btn:hover{opacity:.88;}
+
+/* ── CHAT CLOSURE COUNTDOWN OVERLAY ── */
+#wc-closure-overlay{
+  position:absolute;inset:0;z-index:900;
+  background:rgba(3,6,15,.96);backdrop-filter:blur(24px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;
+}
+#wc-closure-overlay.active{display:flex;}
+#wc-closure-box{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:rgba(15,20,40,.9);border:1px solid rgba(239,68,68,.35);
+  border-radius:28px;padding:32px 28px;width:100%;max-width:320px;
+  box-shadow:0 0 60px rgba(239,68,68,.15),0 20px 60px rgba(0,0,0,.6);
+  animation:closureIn .45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes closureIn{from{opacity:0;transform:scale(.8) translateY(30px);}to{opacity:1;transform:scale(1) translateY(0);}}
+#wc-closure-icon{font-size:3rem;animation:iconPulse 1s ease-in-out infinite;}
+@keyframes iconPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+#wc-closure-title{
+  font-size:1rem;font-weight:900;color:#fca5a5;letter-spacing:.5px;text-transform:uppercase;
+  text-align:center;
+}
+#wc-closure-timer{
+  font-size:3.5rem;font-weight:900;letter-spacing:-2px;
+  background:linear-gradient(135deg,#ef4444,#fca5a5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-variant-numeric:tabular-nums;line-height:1;
+  animation:timerPulse 1s ease-in-out infinite;
+}
+@keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+#wc-closure-sub{
+  font-size:.76rem;color:#6b85b0;text-align:center;line-height:1.6;max-width:240px;
+}
+#wc-cancel-closure-btn{
+  margin-top:8px;padding:11px 24px;border-radius:14px;border:1px solid rgba(239,68,68,.35);
+  background:rgba(239,68,68,.1);color:#fca5a5;
+  font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;
+  transition:background .2s,transform .2s;
+}
+#wc-cancel-closure-btn:active{transform:scale(.95);}
+#wc-cancel-closure-btn:hover{background:rgba(239,68,68,.2);}
+
+/* ── FRESH CHAT SCREEN ── */
+#wc-fresh-screen{
+  position:absolute;inset:0;z-index:800;
+  background:linear-gradient(160deg,#030811,#060d1f);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:32px;
+}
+#wc-fresh-screen.active{display:flex;}
+#wc-fresh-icon{font-size:3.5rem;animation:freshBounce 2s ease-in-out infinite;}
+@keyframes freshBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+#wc-fresh-title{font-size:1.3rem;font-weight:900;color:#e8eeff;letter-spacing:-.3px;text-align:center;}
+#wc-fresh-sub{font-size:.82rem;color:#3a5070;text-align:center;line-height:1.7;max-width:260px;}
+#wc-fresh-start-btn{
+  margin-top:4px;padding:13px 32px;border-radius:16px;border:none;
+  background:linear-gradient(135deg,#5b9aff,#9b6dff);
+  color:#fff;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;
+  box-shadow:0 6px 24px rgba(91,154,255,.35);
+  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
+}
+#wc-fresh-start-btn:active{transform:scale(.94);}
+#wc-fresh-start-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(91,154,255,.4);}
+
 /* Staggered message animations */
 .wc-mw:nth-child(1){animation-delay:.02s;}
 .wc-mw:nth-child(2){animation-delay:.04s;}
@@ -3410,6 +3500,20 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
 <div id="wechat-panel">
   <canvas id="wc-bg-canvas"></canvas>
   <div class="wc-content">
+
+    <!-- ── FRESH CHAT SCREEN (shown after chat is deleted) ── -->
+    <div id="wc-fresh-screen">
+      <div id="wc-fresh-icon">✨</div>
+      <div id="wc-fresh-title">Fresh Start!</div>
+      <div id="wc-fresh-sub">The previous chat session has ended. Start a new conversation below.</div>
+      <button id="wc-fresh-start-btn" onclick="wcStartFresh()">💬 Start New Chat</button>
+    </div>
+
+    <!-- ── CHAT LOADING OVERLAY ── -->
+    <div id="wc-chat-loading">
+      <div class="wc-spinner"></div>
+      <div class="wc-loading-label" id="wc-loading-label">Loading chat…</div>
+    </div>
 
     <!-- ── MODE SELECTOR SCREEN ── -->
     <div id="wc-mode-selector">
@@ -3461,7 +3565,32 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
       <div class="wc-admin-actions">
         <button class="wc-aabtn" id="wc-back-to-inbox">← Inbox</button>
         <button class="wc-aabtn" id="wc-clear-btn">🗑 Clear All</button>
+        <button class="wc-aabtn wc-close-chat-btn" id="wc-close-chat-btn">🔴 Close Chat</button>
         <button class="wc-aabtn" id="wc-logout-btn">Logout</button>
+      </div>
+    </div>
+
+    <!-- ── CLOSE CHAT CONFIRMATION MODAL ── -->
+    <div class="wc-overlay" id="wc-close-confirm-modal">
+      <div class="wc-modal" style="max-width:320px;">
+        <div style="font-size:2.5rem;text-align:center;margin-bottom:8px;">⚠️</div>
+        <h2 style="text-align:center;font-size:1.1rem;margin-bottom:8px;">Close This Chat?</h2>
+        <p style="text-align:center;font-size:.82rem;color:#6b85b0;line-height:1.6;">A 2-minute countdown will begin. After that, all messages will be permanently deleted and users will see a fresh empty chat.</p>
+        <div class="wc-mactions" style="margin-top:18px;">
+          <button class="wc-btn-s" id="wc-close-confirm-no">Cancel</button>
+          <button class="wc-btn-p wc-btn-danger" id="wc-close-confirm-yes">Yes, Close Chat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CHAT CLOSURE COUNTDOWN OVERLAY ── -->
+    <div id="wc-closure-overlay">
+      <div id="wc-closure-box">
+        <div id="wc-closure-icon">🔴</div>
+        <div id="wc-closure-title">Chat Closing In</div>
+        <div id="wc-closure-timer">2:00</div>
+        <div id="wc-closure-sub">This chat will be permanently deleted. You cannot send messages during this time.</div>
+        <button id="wc-cancel-closure-btn" style="display:none;">⛔ Cancel Closure</button>
       </div>
     </div>
 
@@ -3530,9 +3659,9 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
 <!-- Context menu -->
 <div id="wc-ctx-menu">
   <div class="wc-ctx-reactions" id="wc-ctx-reactions"></div>
-  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon">↩</span> Reply</button>
-  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon">📋</span> Copy Text</button>
-  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon">🗑</span> Delete</button>
+  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/893/893265.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;filter:invert(1);"></span> Reply</button>
+  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;filter:invert(1);"></span> Copy Text</button>
+  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;filter:invert(1);"></span> Delete</button>
 </div>
 
 <!-- Name Modal -->
@@ -3740,7 +3869,22 @@ window.wcSelectMode=function(mode){
   }
   console.log('[Chat] Switching to mode:', mode);
 
-  // Unsubscribe ALL previous listeners before switching — prevents cross-contamination
+  // Show loading spinner for 2 seconds before entering chat
+  const loadingEl=$('wc-chat-loading');
+  const loadingLabel=$('wc-loading-label');
+  if(loadingEl){
+    if(loadingLabel)loadingLabel.textContent=mode==='group'?'Loading Group Chat…':'Loading Private Chat…';
+    modeSelector.classList.add('hidden'); // hide mode cards immediately
+    loadingEl.classList.add('show');
+  }
+
+  setTimeout(()=>{
+    if(loadingEl)loadingEl.classList.remove('show');
+    wcDoSelectMode(mode);
+  }, 2000);
+};
+
+function wcDoSelectMode(mode){
   if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;console.log('[Chat] Unsubscribed group listener');}
   if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;console.log('[Chat] Unsubscribed private listener');}
 
@@ -3970,7 +4114,9 @@ function wcRenderMessages(data,chatType){
       msgEl.appendChild(d);lastDay=ds;
     }
     // Determine ownership
-    const isMine = wcIsAdmin ? (msg.role==='admin') : (msg.userId===initUserId()||msg.name===wcUsername);
+    // Admin: owns messages with role==='admin'
+    // User: owns messages with their exact userId (never rely on name — names can collide)
+    const isMine = wcIsAdmin ? (msg.role==='admin') : (msg.userId===initUserId() && msg.role!=='admin');
     const isAdm=msg.role==='admin';
     const isDeleted=!!msg.deletedBy;
     const w=document.createElement('div');
@@ -4236,6 +4382,7 @@ function wcSubmitName(){
   $('wc-name-modal').classList.remove('change-mode');
   $('wc-msg-input').focus();
   if(wcPendingMode){const m=wcPendingMode;wcPendingMode=null;window.wcSelectMode(m);}
+}
 
 /* ═══ CHANGE NAME (user can rename themselves) ═══ */
 window.wcOpenChangeName=function(){
@@ -4251,7 +4398,6 @@ window.wcOpenChangeName=function(){
   modal.classList.add('show');
   setTimeout(()=>{if(input)input.focus();},120);
 };
-}
 $('wc-name-submit').addEventListener('click',wcSubmitName);
 $('wc-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
 
@@ -4338,6 +4484,116 @@ window.wcShowModeSelector=function(){
   adminBar.classList.remove('show');
   wcCurrentPrivateUserId=null;
   wcCheckPrivateUnread();
+};
+
+/* ═══════════════════════════════════════════
+   CHAT CLOSURE SYSTEM
+═══════════════════════════════════════════ */
+let wcClosureTimer=null;
+let wcClosureSeconds=120;
+
+// Show the confirm dialog when admin clicks Close Chat
+$('wc-close-chat-btn').addEventListener('click',()=>{
+  $('wc-close-confirm-modal').classList.add('show');
+});
+$('wc-close-confirm-no').addEventListener('click',()=>{
+  $('wc-close-confirm-modal').classList.remove('show');
+});
+$('wc-close-confirm-yes').addEventListener('click',()=>{
+  $('wc-close-confirm-modal').classList.remove('show');
+  wcStartClosure();
+});
+
+function wcStartClosure(){
+  wcClosureSeconds=120;
+  // Disable input for everyone
+  const inp=$('wc-msg-input');
+  const sendBtn=$('wc-send-btn');
+  const emojiBtn=$('wc-emoji-toggle');
+  if(inp){inp.disabled=true;inp.placeholder='Chat is closing…';}
+  if(sendBtn)sendBtn.disabled=true;
+  if(emojiBtn)emojiBtn.disabled=true;
+  // Show overlay
+  const overlay=$('wc-closure-overlay');
+  overlay.classList.add('active');
+  // Show cancel button only for admin
+  const cancelBtn=$('wc-cancel-closure-btn');
+  if(wcIsAdmin)cancelBtn.style.display='block';
+  // Update timer display
+  wcUpdateClosureTimer();
+  // Start countdown
+  wcClosureTimer=setInterval(()=>{
+    wcClosureSeconds--;
+    wcUpdateClosureTimer();
+    if(wcClosureSeconds<=0){
+      clearInterval(wcClosureTimer);
+      wcClosureTimer=null;
+      wcExecuteClosure();
+    }
+  },1000);
+}
+
+function wcUpdateClosureTimer(){
+  const m=Math.floor(wcClosureSeconds/60);
+  const s=wcClosureSeconds%60;
+  $('wc-closure-timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+}
+
+async function wcExecuteClosure(){
+  // Delete all messages from both collections
+  try{
+    const cols=['messages','private_messages'];
+    for(const col of cols){
+      const sn=await getDocs(collection(wcDb,col));
+      await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,col,d.id))));
+    }
+  }catch(e){console.error('Closure delete error:',e);}
+  // Hide closure overlay
+  $('wc-closure-overlay').classList.remove('active');
+  // Re-enable inputs
+  const inp=$('wc-msg-input');
+  const sendBtn=$('wc-send-btn');
+  const emojiBtn=$('wc-emoji-toggle');
+  if(inp){inp.disabled=false;inp.placeholder='Type a message…';}
+  if(sendBtn)sendBtn.disabled=false;
+  if(emojiBtn)emojiBtn.disabled=false;
+  // Kill listeners
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;}
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+  if(wcInboxUnsub){wcInboxUnsub();wcInboxUnsub=null;}
+  // Clear rendered messages
+  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+  wcMessagesData=[];
+  // Hide all chat UI
+  mainHeader.style.display='none';
+  adminBar.classList.remove('show');
+  modeSelector.classList.add('hidden');
+  inbox.classList.remove('show');
+  privateChatHeader.classList.remove('show');
+  // Show fresh screen
+  $('wc-fresh-screen').classList.add('active');
+}
+
+// Cancel closure (admin only)
+$('wc-cancel-closure-btn').addEventListener('click',()=>{
+  if(!wcIsAdmin)return;
+  if(wcClosureTimer){clearInterval(wcClosureTimer);wcClosureTimer=null;}
+  // Re-enable inputs
+  const inp=$('wc-msg-input');
+  const sendBtn=$('wc-send-btn');
+  const emojiBtn=$('wc-emoji-toggle');
+  if(inp){inp.disabled=false;inp.placeholder='Type a message…';}
+  if(sendBtn)sendBtn.disabled=false;
+  if(emojiBtn)emojiBtn.disabled=false;
+  $('wc-closure-overlay').classList.remove('active');
+  wcToast('✅ Chat closure cancelled');
+});
+
+// Fresh screen — start new chat
+window.wcStartFresh=function(){
+  $('wc-fresh-screen').classList.remove('active');
+  mainHeader.style.display='';
+  window.wcShowModeSelector();
 };
 </script>
 
