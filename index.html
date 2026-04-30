@@ -2920,207 +2920,579 @@ updateCounts();
 renderYTHome();
 loadStudentName();
 </script>
-<!-- ═══════════ WECHAT CSS ═══════════ -->
+<!-- ═══════════ DUAL CHAT CSS ═══════════ -->
 <style>
-/* Chat panel open button (removed - now in nav) */
-
-/* WeChat panel — full screen slide in */
+/* ── PANEL BASE ── */
 #wechat-panel{
-  position:fixed;inset:0;z-index:900;
-  display:flex;flex-direction:column;
-  background:linear-gradient(160deg,#040e1c 0%,#061524 50%,#040e1c 100%);
+  position:fixed;inset:0;z-index:500;
+  background:linear-gradient(160deg,#030811 0%,#060d1f 50%,#04091a 100%);
   transform:translateX(100%);
-  transition:transform .42s cubic-bezier(0.22,1,0.36,1);
-  will-change:transform;
+  transition:transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  display:flex;flex-direction:column;
+  will-change:transform;overflow:hidden;
   pointer-events:none;
-  height:100dvh;
-  overflow:hidden;
 }
 #wechat-panel.open{transform:translateX(0);pointer-events:all;}
 
-/* WeChat header */
+canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;}
+
+.wc-content{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;overflow:hidden;}
+
+/* ── HEADER ── */
 .wc-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px 10px;
-  background:rgba(4,14,28,0.88);
+  padding:max(14px,env(safe-area-inset-top,14px)) 16px 12px;
+  background:rgba(3,8,20,0.82);
   backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(0,200,255,0.12);
+  border-bottom:1px solid rgba(91,154,255,0.1);
   flex-shrink:0;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 .wc-header-left{display:flex;align-items:center;gap:10px;}
 .wc-live-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;animation:blink2 2s infinite;}
-@keyframes blink2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
-.wc-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:#00c8ff;}
-.wc-admin-badge{display:none;font-size:.62rem;font-weight:700;color:#7dd3fc;background:rgba(245,158,11,.12);border:1px solid rgba(125,211,252,.22);padding:2px 8px;border-radius:20px;}
+@keyframes blink2{0%,100%{opacity:1;}50%{opacity:.3;}}
+.wc-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.1rem;
+  background:linear-gradient(90deg,#5b9aff,#9b6dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.wc-admin-badge{display:none;font-size:.6rem;font-weight:800;color:#fbbf24;
+  background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);
+  padding:2px 8px;border-radius:20px;letter-spacing:.05em;}
 .wc-admin-badge.show{display:inline-block;}
-.wc-header-right{display:flex;align-items:center;gap:7px;}
-.wc-hbtn{background:none;border:1px solid rgba(0,200,255,0.12);color:#4a7a96;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.wc-hbtn:hover{border-color:#00c8ff;color:#00c8ff;}
-.wc-back{background:none;border:none;color:#00c8ff;font-size:22px;cursor:pointer;padding:0;transition:transform .2s;font-weight:900;}
-.wc-back:active{transform:scale(0.85);}
-#wc-msg-count{font-size:.7rem;color:#4a7a96;background:rgba(0,180,255,0.1);border:1px solid rgba(0,200,255,0.12);padding:3px 9px;border-radius:20px;font-weight:600;}
+.wc-header-right{display:flex;align-items:center;gap:8px;}
+.wc-hbtn{background:none;border:1px solid rgba(91,154,255,0.15);color:#4a7a96;
+  width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;}
+.wc-hbtn:hover{border-color:#5b9aff;color:#5b9aff;background:rgba(91,154,255,0.08);}
+.wc-back{background:none;border:none;color:#5b9aff;font-size:22px;cursor:pointer;
+  padding:0;transition:transform .2s;font-weight:900;line-height:1;}
+.wc-back:active{transform:scale(0.82);}
+#wc-msg-count{font-size:.68rem;color:#4a7a96;background:rgba(91,154,255,0.08);
+  border:1px solid rgba(91,154,255,0.14);padding:3px 9px;border-radius:20px;font-weight:600;}
 
-/* admin bar */
-#wc-admin-bar{display:none;background:rgba(4,14,28,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,158,11,.2);padding:8px 16px;gap:10px;align-items:center;justify-content:space-between;flex-shrink:0;}
+/* ── CHAT MODE SELECTOR ── */
+#wc-mode-selector{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;padding:32px 24px;
+  background:linear-gradient(160deg,#030811 0%,#060d1f 60%,#04091a 100%);
+  transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+#wc-mode-selector.hidden{opacity:0;pointer-events:none;transform:scale(0.96);}
+.wc-mode-title{font-size:1.3rem;font-weight:900;color:#e8eeff;text-align:center;margin-bottom:4px;}
+.wc-mode-sub{font-size:.8rem;color:#3a5070;text-align:center;margin-bottom:8px;}
+.wc-mode-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:340px;}
+.wc-mode-card{
+  display:flex;align-items:center;gap:16px;
+  background:rgba(10,18,36,0.9);
+  border:1px solid rgba(91,154,255,0.15);
+  border-radius:20px;padding:18px 20px;cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position:relative;overflow:hidden;
+}
+.wc-mode-card::before{
+  content:'';position:absolute;inset:0;
+  background:var(--card-glow,rgba(91,154,255,0.0));
+  transition:background 0.25s;border-radius:20px;
+}
+.wc-mode-card:hover{border-color:rgba(91,154,255,0.4);transform:translateY(-2px) scale(1.02);
+  box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+.wc-mode-card:hover::before{background:rgba(91,154,255,0.04);}
+.wc-mode-card:active{transform:scale(0.97);}
+.wc-mode-card.private-card:hover{border-color:rgba(155,109,255,0.4);}
+.wc-mode-icon{
+  width:52px;height:52px;border-radius:16px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.group-icon{background:linear-gradient(135deg,#1a4fff,#5b9aff);}
+.private-icon{background:linear-gradient(135deg,#5b21b6,#9b6dff);}
+.wc-mode-info{flex:1;}
+.wc-mode-name{font-size:1rem;font-weight:800;color:#e8eeff;margin-bottom:3px;}
+.wc-mode-desc{font-size:.75rem;color:#3a5070;line-height:1.4;}
+.wc-mode-badge{
+  font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:99px;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.badge-live{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);}
+.badge-priv{background:rgba(155,109,255,0.15);color:#9b6dff;border:1px solid rgba(155,109,255,0.3);}
+
+/* ── ADMIN BAR ── */
+#wc-admin-bar{display:none;background:rgba(4,10,24,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(251,191,36,.2);padding:8px 16px;gap:10px;
+  align-items:center;justify-content:space-between;flex-shrink:0;}
 #wc-admin-bar.show{display:flex;}
-.wc-admin-label{font-size:.7rem;font-weight:700;color:#7dd3fc;text-transform:uppercase;letter-spacing:.1em;}
+.wc-admin-label{font-size:.7rem;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.1em;}
 .wc-admin-actions{display:flex;gap:8px;}
-.wc-aabtn{font-size:.73rem;font-weight:500;padding:5px 13px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;}
+.wc-aabtn{font-size:.72rem;font-weight:600;padding:5px 13px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;}
 .wc-aabtn:active{transform:scale(.95);}
-#wc-clear-btn{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
-#wc-logout-btn{background:rgba(0,180,255,.1);border:1px solid rgba(0,200,255,.15);color:#4a7a96;}
+#wc-clear-btn{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:#fca5a5;}
+#wc-logout-btn{background:rgba(91,154,255,.1);border:1px solid rgba(91,154,255,.18);color:#5b9aff;}
+#wc-back-to-inbox{display:none;background:rgba(155,109,255,.1);border:1px solid rgba(155,109,255,.2);color:#9b6dff;}
+#wc-back-to-inbox.show{display:inline-flex;}
 
-/* messages */
-#wc-messages{flex:1;overflow-y:auto;padding:14px 12px 96px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth;background:transparent;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(125,211,252,.35) transparent;contain:paint;scroll-snap-type:none;touch-action:pan-y;}
+/* ── MESSAGES AREA ── */
+#wc-messages{
+  flex:1;overflow-y:auto;padding:14px 12px 96px;
+  display:flex;flex-direction:column;gap:5px;
+  scroll-behavior:smooth;background:transparent;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:rgba(91,154,255,.3) transparent;
+  contain:paint;touch-action:pan-y;
+}
 #wc-messages::-webkit-scrollbar{width:2px;}
-#wc-messages::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(125,211,252,.55),rgba(37,99,235,.55));border-radius:999px;}
-.wc-day-div{text-align:center;font-size:.65rem;color:#4a7a96;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 4px;position:relative;}
-.wc-day-div::before,.wc-day-div::after{content:'';position:absolute;top:50%;width:28%;height:1px;background:rgba(0,200,255,0.12);}
+#wc-messages::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(91,154,255,.5),rgba(155,109,255,.5));border-radius:999px;}
+
+/* ── DAY DIVIDER ── */
+.wc-day-div{text-align:center;font-size:.63rem;color:#3a5070;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;margin:10px 0 4px;position:relative;}
+.wc-day-div::before,.wc-day-div::after{content:'';position:absolute;top:50%;
+  width:30%;height:1px;background:rgba(91,154,255,0.1);}
 .wc-day-div::before{left:0}.wc-day-div::after{right:0}
-.wc-mw{display:flex;flex-direction:column;max-width:78%;animation:wcMsgIn .25s cubic-bezier(0.4,0,0.2,1) both;will-change:transform,opacity;transform:translateZ(0);backface-visibility:hidden;}
-@keyframes wcMsgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MESSAGE WRAPPER ── */
+.wc-mw{
+  display:flex;flex-direction:column;max-width:78%;
+  animation:wcMsgIn 0.25s cubic-bezier(0.4,0,0.2,1) both;
+  will-change:transform,opacity;transform:translateZ(0);
+  backface-visibility:hidden;
+}
+@keyframes wcMsgIn{from{opacity:0;transform:translateY(10px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 .wc-mw.mine{align-self:flex-end;align-items:flex-end;}
 .wc-mw.other{align-self:flex-start;align-items:flex-start;}
-.wc-msg-name{font-size:.67rem;font-weight:500;color:#4a7a96;margin-bottom:3px;padding:0 4px;}
-.wc-msg-name.an{color:#7dd3fc;font-weight:700;}
-.wc-reply-preview{background:linear-gradient(180deg,rgba(13,18,38,.88),rgba(10,15,30,.82));border-left:3px solid #60a5fa;border-radius:8px;padding:5px 9px;margin-bottom:6px;font-size:.72rem;color:#4a7a96;line-height:1.4;}
-.wc-reply-preview .wc-rp-name{color:#7dd3fc;font-weight:700;font-size:.68rem;margin-bottom:2px;}
-.wc-reply-preview .wc-rp-text{color:#e0f4ff;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.wc-msg-name{font-size:.66rem;font-weight:600;color:#3a5070;margin-bottom:3px;padding:0 4px;}
+.wc-msg-name.an{color:#5b9aff;font-weight:800;}
+.wc-admin-tag{font-size:.56rem;font-weight:800;color:#fbbf24;
+  background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);
+  padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
+
+/* ── REPLY PREVIEW ── */
+.wc-reply-preview{
+  background:rgba(10,18,36,0.85);border-left:3px solid #5b9aff;
+  border-radius:8px;padding:5px 9px;margin-bottom:6px;
+  font-size:.71rem;color:#3a5070;line-height:1.4;
+}
+.wc-reply-preview .wc-rp-name{color:#5b9aff;font-weight:700;font-size:.67rem;margin-bottom:2px;}
+.wc-reply-preview .wc-rp-text{color:#e0ecff;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+
+/* ── MESSAGE ROW & BUBBLE ── */
 .wc-msg-row{display:flex;align-items:flex-end;gap:5px;}
 .wc-mw.mine .wc-msg-row{flex-direction:row-reverse;}
-.wc-bubble{padding:10px 14px;border-radius:18px;margin:0 0 12px;font-size:.87rem;line-height:1.52;word-break:break-word;position:relative;max-width:100%;cursor:pointer;user-select:none;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);color:#e0f4ff;will-change:transform;}
-.wc-bubble:active{transform:scale(.985);}
-.wc-mw.mine .wc-bubble{background:linear-gradient(135deg,#60a5fa,#2563eb,#1d4ed8);color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 8px rgba(37,99,235,.18);}
-.wc-mw.other .wc-bubble{background:linear-gradient(180deg,rgba(10,16,34,.82),rgba(8,12,25,.72));border-bottom-left-radius:4px;border:1px solid rgba(125,211,252,.12);backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 20px rgba(0,0,0,.18);}
-.wc-mw.wc-admin-msg .wc-bubble{background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb)!important;border:1px solid rgba(125,211,252,.28)!important;}
-.wc-admin-tag{font-size:.58rem;font-weight:800;color:#7dd3fc;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.22);padding:1px 6px;border-radius:6px;display:inline-block;margin-bottom:4px;}
-.wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;border:1px dashed rgba(255,255,255,0.15)!important;color:rgba(255,255,255,0.4)!important;font-style:italic;font-size:.8rem;cursor:default!important;box-shadow:none!important;}
-.wc-mw.mine .wc-bubble-deleted{background:rgba(80,80,80,0.25)!important;}
+.wc-bubble{
+  padding:10px 14px;border-radius:18px;margin:0 0 12px;
+  font-size:.86rem;line-height:1.54;word-break:break-word;
+  position:relative;max-width:100%;cursor:pointer;user-select:none;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);color:#e0ecff;
+  will-change:transform;
+}
+.wc-bubble:active{transform:scale(.984);}
+.wc-mw.mine .wc-bubble{
+  background:linear-gradient(135deg,#5b9aff,#3d7eff,#2563eb);
+  color:#fff;border-bottom-right-radius:4px;
+  box-shadow:0 3px 12px rgba(37,99,235,.25);
+}
+.wc-mw.other .wc-bubble{
+  background:linear-gradient(180deg,rgba(10,18,36,.88),rgba(8,14,28,.75));
+  border-bottom-left-radius:4px;
+  border:1px solid rgba(91,154,255,.1);
+  backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.2);
+}
+.wc-mw.wc-admin-msg .wc-bubble{
+  background:linear-gradient(135deg,#1a0a3a,#3d1a7a,#7c3aed,#9b6dff)!important;
+  border:1px solid rgba(155,109,255,.4)!important;
+  box-shadow:0 4px 20px rgba(155,109,255,.35)!important;
+  animation:wcMsgIn 0.25s cubic-bezier(0.4,0,0.2,1) both, adminSlide 3s ease-in-out 0.3s infinite!important;
+}
+@keyframes adminSlide{
+  0%{transform:translateX(0) translateY(0) rotate(0deg);box-shadow:0 4px 20px rgba(155,109,255,.35);}
+  15%{transform:translateX(-6px) translateY(3px) rotate(-0.8deg);box-shadow:0 6px 28px rgba(155,109,255,.55);}
+  50%{transform:translateX(-3px) translateY(1px) rotate(-0.4deg);box-shadow:0 5px 24px rgba(155,109,255,.45);}
+  85%{transform:translateX(-6px) translateY(3px) rotate(-0.8deg);box-shadow:0 6px 28px rgba(155,109,255,.55);}
+  100%{transform:translateX(0) translateY(0) rotate(0deg);box-shadow:0 4px 20px rgba(155,109,255,.35);}
+}
+/* Admin name label — gold crown style */
+.wc-msg-name.wc-admin-name{
+  background:linear-gradient(90deg,#ffd700,#ffb700,#ff8c00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  font-weight:900;font-size:.72rem;letter-spacing:.3px;
+}
+/* User name label — white with color per-user */
+.wc-msg-name.wc-user-name{
+  color:#c8d8ff;font-weight:700;font-size:.68rem;
+}
+/* Change name button in header */
+#wc-change-name-btn{
+  font-size:.65rem;font-weight:700;
+  background:rgba(91,154,255,.12);border:1px solid rgba(91,154,255,.25);
+  color:#5b9aff;padding:3px 9px;border-radius:20px;cursor:pointer;
+  transition:all .2s;margin-right:4px;
+}
+#wc-change-name-btn:hover{background:rgba(91,154,255,.22);}
+/* Change name modal title */
+#wc-name-modal.change-mode h2{background:none;font-size:1.1rem;}
+#wc-name-modal.change-mode p::before{content:'✏️ ';}
+.wc-bubble-deleted{
+  background:rgba(60,60,70,.2)!important;
+  border:1px dashed rgba(255,255,255,.12)!important;
+  color:rgba(255,255,255,.35)!important;
+  font-style:italic;font-size:.8rem;cursor:default!important;
+  box-shadow:none!important;
+}
+.wc-mw.mine .wc-bubble-deleted{background:rgba(60,60,70,.2)!important;}
+.reply-glow{animation:replyGlow 1.5s ease forwards!important;}
+@keyframes replyGlow{0%{box-shadow:0 0 0 rgba(91,154,255,0);}30%{box-shadow:0 0 18px rgba(91,154,255,.6);}100%{box-shadow:0 0 0 rgba(91,154,255,0);}}
+
+/* ── REACTIONS ── */
 .wc-reactions-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;padding:0 3px;}
-.wc-reaction-pill{display:flex;align-items:center;gap:2px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);border-radius:20px;padding:2px 7px;font-size:.8rem;cursor:pointer;transition:all .15s;}
-.wc-reaction-pill:hover{background:rgba(0,200,255,.2);transform:scale(1.1);}
-.wc-reaction-pill .wc-rc{font-size:.78rem;color:#4a7a96;font-weight:600;}
-.wc-msg-time{font-size:.6rem;color:#4a7a96;margin-top:3px;padding:0 4px;display:flex;align-items:center;gap:4px;}
-.wc-tick{color:#00c8ff;font-size:.65rem;}
-#wc-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;text-align:center;}
+.wc-reaction-pill{display:flex;align-items:center;gap:2px;
+  background:rgba(91,154,255,.08);border:1px solid rgba(91,154,255,.18);
+  border-radius:20px;padding:2px 7px;font-size:.8rem;cursor:pointer;
+  transition:all .15s;}
+.wc-reaction-pill:hover{background:rgba(91,154,255,.18);transform:scale(1.1);}
+.wc-rc{font-size:.76rem;color:#3a5070;font-weight:700;}
+
+/* ── TIMESTAMP ── */
+.wc-msg-time{font-size:.58rem;color:#3a5070;margin-top:3px;padding:0 4px;
+  display:flex;align-items:center;gap:4px;}
+.wc-tick{color:#5b9aff;font-size:.62rem;}
+
+/* ── EMPTY STATE ── */
+#wc-empty{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;padding:40px;text-align:center;}
 .wc-es-icon{font-size:3rem;animation:wcFloat 3s ease-in-out infinite;}
-@keyframes wcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.wc-es-title{font-size:1.1rem;font-weight:700;color:#e0f4ff;}
-.wc-es-sub{font-size:.78rem;color:#4a7a96;line-height:1.5;}
-/* reply bar */
-#wc-reply-bar{display:none;align-items:center;justify-content:space-between;background:rgba(0,50,80,.6);backdrop-filter:blur(12px);border-top:1px solid rgba(0,200,255,.15);padding:8px 14px;gap:10px;flex-shrink:0;}
+@keyframes wcFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.wc-es-title{font-size:1.05rem;font-weight:800;color:#e8eeff;}
+.wc-es-sub{font-size:.76rem;color:#3a5070;line-height:1.55;}
+
+/* ── REPLY BAR ── */
+#wc-reply-bar{display:none;align-items:center;justify-content:space-between;
+  background:rgba(0,30,60,.7);backdrop-filter:blur(14px);
+  border-top:1px solid rgba(91,154,255,.15);padding:8px 14px;gap:10px;flex-shrink:0;}
 #wc-reply-bar.show{display:flex;}
-/* ═══ REPLY ALERT BANNER ═══ */
-#wc-reply-alert{
-  position:absolute;top:54px;left:50%;transform:translateX(-50%) translateY(-8px);
-  background:linear-gradient(135deg,rgba(0,200,255,0.18),rgba(0,140,200,0.22));
-  border:1px solid rgba(0,200,255,0.35);
-  backdrop-filter:blur(16px);
-  color:#e0f4ff;font-size:.78rem;font-weight:700;
-  padding:7px 18px 7px 12px;
-  border-radius:99px;
-  white-space:nowrap;
-  z-index:999;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .25s ease,transform .25s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 4px 20px rgba(0,200,255,0.18);
-}
-#wc-reply-alert.show{
-  opacity:1;transform:translateX(-50%) translateY(0);
-}
-/* Glow on replied-to message bubble */
-@keyframes wcReplyGlow{
-  0%  {box-shadow:0 0 0 0 rgba(0,200,255,0);}
-  30% {box-shadow:0 0 0 6px rgba(0,200,255,0.35),0 0 18px rgba(0,200,255,0.2);}
-  70% {box-shadow:0 0 0 4px rgba(0,200,255,0.22),0 0 12px rgba(0,200,255,0.15);}
-  100%{box-shadow:0 0 0 0 rgba(0,200,255,0);}
-}
-.wc-bubble.reply-glow{
-  animation:wcReplyGlow 1.5s ease forwards;
-}
 .wc-rb-info{flex:1;min-width:0;}
-.wc-rb-name{font-size:.68rem;color:#7dd3fc;font-weight:700;margin-bottom:2px;}
-.wc-rb-text{font-size:.75rem;color:#4a7a96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.wc-rb-close{background:none;border:none;color:#4a7a96;cursor:pointer;font-size:1.1rem;flex-shrink:0;}
-/* input bar */
-#wc-input-bar{display:flex;align-items:flex-end;gap:8px;padding:8px 12px;background:rgba(4,14,28,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,200,255,0.08);flex-shrink:0;}
-#wc-msg-input{flex:1;background:rgba(0,40,65,.45);border:1px solid rgba(0,200,255,0.1);border-radius:20px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:8px 14px;outline:none;transition:border-color .2s;resize:none;min-height:36px;max-height:100px;line-height:1.4;}
-#wc-msg-input::placeholder{color:#4a7a96;}
-#wc-msg-input:focus{border-color:rgba(0,200,255,0.3);box-shadow:none;}
-.wc-ibtn{width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0;transition:transform .15s;}
-.wc-ibtn:active{transform:scale(.9);}
-#wc-emoji-toggle{background:rgba(15,23,42,.45);border:1px solid rgba(125,211,252,0.1);color:#cfe8ff;font-size:1.05rem;}
-#wc-send-btn{background:linear-gradient(135deg,#60a5fa,#2563eb,#1d4ed8);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.26);}
-/* emoji picker */
-#wc-emoji-picker{display:none;position:fixed;left:0;right:0;bottom:58px;z-index:995;background:rgba(4,14,28,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(125,211,252,0.12);padding:10px 12px;flex-shrink:0;max-height:42dvh;overflow-y:auto;}
+.wc-rb-name{font-size:.68rem;font-weight:800;color:#5b9aff;margin-bottom:2px;}
+.wc-rb-text{font-size:.74rem;color:#3a5070;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wc-rb-close{background:none;border:none;color:#3a5070;font-size:18px;cursor:pointer;
+  padding:4px;transition:color .15s;flex-shrink:0;}
+.wc-rb-close:hover{color:#e8eeff;}
+
+/* ── INPUT BAR ── */
+#wc-input-bar{
+  display:flex;align-items:flex-end;gap:8px;
+  padding:10px 12px max(10px,env(safe-area-inset-bottom,10px));
+  background:rgba(3,8,20,.92);backdrop-filter:blur(24px);
+  border-top:1px solid rgba(91,154,255,.1);flex-shrink:0;
+}
+.wc-ibtn{background:none;border:1px solid rgba(91,154,255,.15);color:#4a7a96;
+  width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;}
+.wc-ibtn:hover{border-color:#5b9aff;color:#5b9aff;}
+#wc-send-btn{background:linear-gradient(135deg,#5b9aff,#9b6dff);border:none;color:#fff;}
+#wc-send-btn:hover{transform:scale(1.08);box-shadow:0 4px 16px rgba(91,154,255,.4);}
+#wc-msg-input{
+  flex:1;background:rgba(10,18,36,.8);border:1px solid rgba(91,154,255,.14);
+  border-radius:20px;padding:10px 14px;color:#e8eeff;font-family:'Nunito',sans-serif;
+  font-size:.88rem;resize:none;outline:none;max-height:100px;overflow-y:auto;
+  line-height:1.4;transition:border-color .2s;
+}
+#wc-msg-input:focus{border-color:rgba(91,154,255,.4);}
+#wc-msg-input::placeholder{color:#2a3a56;}
+
+/* ── EMOJI PICKER ── */
+#wc-emoji-picker{
+  display:none;position:absolute;bottom:68px;left:8px;right:8px;
+  background:rgba(6,12,26,.97);border:1px solid rgba(91,154,255,.15);
+  border-radius:18px;padding:12px;backdrop-filter:blur(24px);
+  box-shadow:0 -10px 40px rgba(0,0,0,.4);z-index:20;
+  max-height:200px;overflow-y:auto;
+}
 #wc-emoji-picker.show{display:block;}
 .wc-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;}
-.wc-ep-emoji{font-size:1.4rem;text-align:center;padding:6px;border-radius:10px;cursor:pointer;transition:all .15s;background:none;border:none;}
-.wc-ep-emoji:hover{background:rgba(0,180,255,.1);transform:scale(1.25);}
-/* context menu */
-#wc-ctx-menu{display:none;position:fixed;z-index:1100;background:rgba(9,14,28,.72);backdrop-filter:blur(20px);border:1px solid rgba(120,145,255,.18);border-radius:16px;padding:8px;min-width:198px;box-shadow:0 16px 40px rgba(0,0,0,.32),0 0 22px rgba(76,201,255,.08);animation:wcCtxIn .22s cubic-bezier(0.4,0,0.2,1);transform-origin:top left;}
-#wc-ctx-menu.show{display:block;}
-@keyframes wcCtxIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-.wc-ctx-reactions{display:flex;gap:4px;padding:8px 10px 4px;border-bottom:1px solid rgba(0,200,255,0.12);margin-bottom:4px;}
-.wc-ctx-react-btn{font-size:1.3rem;padding:5px;border-radius:10px;cursor:pointer;background:none;border:none;transition:all .15s;}
-.wc-ctx-react-btn:hover{background:rgba(0,180,255,.1);transform:scale(1.3);}
-.wc-ctx-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;font-size:.84rem;color:#e0f4ff;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;}
-.wc-ctx-item:hover{background:rgba(255,255,255,.05);transform:scale(1.02);}
-.wc-ctx-item.danger{color:#fca5a5;}
-.wc-ctx-item.danger:hover{background:rgba(239,68,68,.1);}
-.wc-ctx-icon{width:20px;text-align:center;font-size:1rem;}
-/* name modal */
-.wc-overlay{display:none;position:fixed;inset:0;background:rgba(4,14,28,.88);backdrop-filter:blur(14px);z-index:1050;align-items:center;justify-content:center;padding:20px;}
+.wc-ep-emoji{background:none;border:none;font-size:1.3rem;cursor:pointer;
+  padding:5px;border-radius:8px;transition:background .15s;}
+.wc-ep-emoji:hover{background:rgba(91,154,255,.1);}
+
+/* ── REPLY ALERT BANNER ── */
+#wc-reply-alert{
+  display:none;position:absolute;top:72px;left:50%;transform:translateX(-50%);
+  background:rgba(91,154,255,.18);border:1px solid rgba(91,154,255,.35);
+  color:#5b9aff;font-size:.76rem;font-weight:700;
+  padding:6px 18px;border-radius:99px;white-space:nowrap;
+  animation:replyAlertIn .35s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter:blur(12px);z-index:30;
+}
+#wc-reply-alert.show{display:block;}
+@keyframes replyAlertIn{from{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.88);}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}}
+
+/* ── SCROLL DOWN BUTTON ── */
+#wc-scroll-down-btn{
+  position:fixed;right:14px;bottom:86px;z-index:9999;
+  opacity:0;pointer-events:none;
+  width:50px;height:50px;border-radius:50%;
+  border:1px solid rgba(91,154,255,.28);
+  background:linear-gradient(135deg,rgba(91,154,255,1),rgba(155,109,255,1));
+  backdrop-filter:blur(16px);
+  box-shadow:0 8px 24px rgba(91,154,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:20px;cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+#wc-scroll-down-btn.visible{opacity:1;pointer-events:auto;}
+
+/* ── OVERLAYS (modals) ── */
+.wc-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,5,15,.7);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
 .wc-overlay.show{display:flex;}
-.wc-modal{background:#071525;border:1px solid rgba(0,200,255,0.12);border-radius:20px;padding:26px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:wcMIn .28s cubic-bezier(.34,1.56,.64,1);}
-@keyframes wcMIn{from{opacity:0;transform:scale(.88) translateY(20px)}to{opacity:1;transform:none}}
-.wc-modal h2{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;color:#e0f4ff;}
-.wc-modal p{font-size:.78rem;color:#4a7a96;margin-bottom:18px;line-height:1.5;}
-.wc-mfield{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
-.wc-mfield label{font-size:.68rem;font-weight:600;color:#4a7a96;text-transform:uppercase;letter-spacing:.07em;}
-.wc-mfield input{background:rgba(0,50,80,.4);border:1.5px solid rgba(0,200,255,0.12);border-radius:10px;color:#e0f4ff;font-family:'Nunito',sans-serif;font-size:.87rem;padding:10px 13px;outline:none;transition:border-color .2s;width:100%;}
-.wc-mfield input:focus{border-color:#00c8ff;}
-.wc-merr{font-size:.72rem;color:#fca5a5;min-height:18px;display:block;margin-bottom:10px;}
-.wc-mactions{display:flex;gap:9px;}
-.wc-btn-p{flex:1;background:linear-gradient(135deg,#0077b6,#00c8ff);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.84rem;cursor:pointer;}
-.wc-btn-s{background:rgba(0,180,255,.1);color:#4a7a96;border:1px solid rgba(0,200,255,.12);border-radius:10px;padding:11px 16px;font-family:'Nunito',sans-serif;font-size:.84rem;cursor:pointer;}
-.wc-btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444)!important;}
-#wc-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(7,21,37,.97);border:1px solid rgba(0,200,255,0.12);color:#e0f4ff;font-size:.78rem;padding:8px 18px;border-radius:20px;backdrop-filter:blur(12px);opacity:0;transition:all .28s;pointer-events:none;z-index:1200;white-space:nowrap;}
-#wc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);} #wc-scroll-down-btn.show{opacity:1;pointer-events:auto !important;transform:scale(1);}
-/* canvas bg in wechat */
-#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;}
-.wc-content{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+.wc-modal{
+  background:linear-gradient(145deg,#060e20,#0a1428);
+  border:1px solid rgba(91,154,255,.18);border-radius:22px;
+  padding:26px 24px;width:100%;max-width:360px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  animation:modalIn .35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn{from{transform:scale(.88) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.wc-modal h2{font-size:1.1rem;font-weight:900;color:#e8eeff;margin-bottom:8px;}
+.wc-modal p{font-size:.82rem;color:#3a5070;line-height:1.5;margin-bottom:16px;}
+.wc-mfield{margin-bottom:14px;}
+.wc-mfield label{font-size:.72rem;font-weight:700;color:#3a5070;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.wc-mfield input{
+  width:100%;background:rgba(10,18,36,.8);border:1px solid rgba(91,154,255,.15);
+  border-radius:12px;padding:10px 14px;color:#e8eeff;
+  font-family:'Nunito',sans-serif;font-size:.88rem;outline:none;
+  transition:border-color .2s;
+}
+.wc-mfield input:focus{border-color:rgba(91,154,255,.4);}
+.wc-mfield input::placeholder{color:#2a3a56;}
+.wc-merr{font-size:.74rem;color:#ff6b6b;display:block;min-height:18px;margin-bottom:8px;}
+.wc-mactions{display:flex;gap:8px;justify-content:flex-end;}
+.wc-btn-p{background:linear-gradient(135deg,#5b9aff,#9b6dff);color:#fff;border:none;
+  padding:9px 20px;border-radius:12px;font-family:'Nunito',sans-serif;
+  font-size:.84rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.wc-btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,154,255,.35);}
+.wc-btn-s{background:rgba(91,154,255,.08);color:#3a5070;border:1px solid rgba(91,154,255,.15);
+  padding:9px 18px;border-radius:12px;font-family:'Nunito',sans-serif;
+  font-size:.84rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.wc-btn-s:hover{color:#e8eeff;}
+.wc-btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626)!important;}
+
+/* ── CONTEXT MENU ── */
+#wc-ctx-menu{
+  position:fixed;z-index:700;min-width:180px;
+  background:rgba(6,12,26,.98);border:1px solid rgba(91,154,255,.18);
+  border-radius:16px;padding:6px;
+  box-shadow:0 16px 50px rgba(0,0,0,.5);
+  display:none;
+  animation:ctxIn .2s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter:blur(24px);
+}
+#wc-ctx-menu.show{display:block;}
+@keyframes ctxIn{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+.wc-ctx-reactions{display:flex;gap:4px;padding:6px 8px 4px;border-bottom:1px solid rgba(91,154,255,.1);margin-bottom:4px;}
+.wc-ctx-react-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;
+  padding:3px;border-radius:8px;transition:transform .15s;}
+.wc-ctx-react-btn:hover{transform:scale(1.25);}
+.wc-ctx-item{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;
+  color:#b0c4de;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;
+  padding:9px 12px;border-radius:10px;cursor:pointer;transition:all .15s;text-align:left;}
+.wc-ctx-item:hover{background:rgba(91,154,255,.1);color:#e8eeff;}
+.wc-ctx-item.danger{color:#fca5a5;}
+.wc-ctx-item.danger:hover{background:rgba(239,68,68,.12);}
+.wc-ctx-icon{width:20px;display:flex;justify-content:center;}
+
+/* ── TOAST ── */
+#wc-toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:rgba(10,18,36,.96);border:1px solid rgba(91,154,255,.2);
+  color:#e8eeff;font-size:.8rem;font-weight:700;
+  padding:9px 18px;border-radius:99px;
+  pointer-events:none;opacity:0;z-index:800;
+  transition:all .3s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(16px);white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+#wc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ════════════ ADMIN INBOX ════════════ */
+#wc-inbox{
+  position:absolute;inset:0;z-index:5;
+  display:none;flex-direction:column;
+  background:linear-gradient(160deg,#030811,#060d1f);
+  transition:opacity 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+#wc-inbox.show{display:flex;}
+.wc-inbox-header{
+  padding:max(14px,env(safe-area-inset-top,14px)) 16px 12px;
+  background:rgba(3,8,20,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(155,109,255,.15);flex-shrink:0;
+  display:flex;align-items:center;gap:12px;
+}
+.wc-inbox-title{font-size:1rem;font-weight:900;color:#e8eeff;flex:1;}
+.wc-inbox-subtitle{font-size:.7rem;color:#3a5070;margin-top:2px;}
+.wc-inbox-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;
+  scrollbar-width:thin;scrollbar-color:rgba(155,109,255,.3) transparent;}
+.wc-inbox-empty{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;padding:40px;text-align:center;color:#3a5070;font-size:.82rem;}
+.wc-inbox-card{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(10,16,32,.85);border:1px solid rgba(155,109,255,.12);
+  border-radius:16px;padding:14px 16px;cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  animation:wcMsgIn .25s cubic-bezier(0.4,0,0.2,1) both;
+}
+.wc-inbox-card:hover{border-color:rgba(155,109,255,.35);transform:translateX(4px);
+  background:rgba(155,109,255,.06);}
+.wc-inbox-card:active{transform:scale(.98);}
+.wc-inbox-avatar{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,#5b21b6,#9b6dff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;font-weight:900;color:#fff;text-transform:uppercase;
+  position:relative;
+}
+.wc-inbox-info{flex:1;min-width:0;}
+.wc-inbox-name{font-size:.9rem;font-weight:800;color:#e8eeff;margin-bottom:3px;}
+.wc-inbox-preview{font-size:.74rem;color:#3a5070;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wc-inbox-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.wc-inbox-time{font-size:.62rem;color:#2a3a56;}
+.wc-inbox-unread{
+  background:linear-gradient(135deg,#5b9aff,#9b6dff);color:#fff;
+  font-size:.6rem;font-weight:800;min-width:18px;height:18px;
+  border-radius:99px;display:flex;align-items:center;justify-content:center;
+  padding:0 5px;
+}
+
+/* ── PRIVATE CHAT HEADER ── */
+#wc-private-chat-header{
+  display:none;align-items:center;gap:12px;
+  padding:max(14px,env(safe-area-inset-top,14px)) 16px 12px;
+  background:rgba(3,8,20,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(155,109,255,.15);flex-shrink:0;
+}
+#wc-private-chat-header.show{display:flex;}
+.wc-private-avatar{
+  width:36px;height:36px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,#5b21b6,#9b6dff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;font-weight:900;color:#fff;text-transform:uppercase;
+}
+.wc-private-name-info{flex:1;}
+.wc-private-username{font-size:.9rem;font-weight:800;color:#e8eeff;}
+.wc-private-status{font-size:.66rem;color:#3a5070;margin-top:1px;}
+
+/* ── NEW MSG INDICATOR ── */
+.new-msg-indicator{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.6rem;font-weight:800;color:#9b6dff;
+  background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.25);
+  padding:2px 7px;border-radius:99px;margin-left:6px;
+  animation:newPulse 1.5s ease-in-out infinite;
+}
+@keyframes newPulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.new-msg-dot{width:5px;height:5px;border-radius:50%;background:#9b6dff;}
+
+/* Staggered message animations */
+.wc-mw:nth-child(1){animation-delay:.02s;}
+.wc-mw:nth-child(2){animation-delay:.04s;}
+.wc-mw:nth-child(3){animation-delay:.06s;}
+.wc-mw:nth-child(4){animation-delay:.08s;}
+.wc-mw:nth-child(5){animation-delay:.10s;}
+.wc-mw:nth-child(6){animation-delay:.12s;}
+.wc-mw:nth-child(7){animation-delay:.14s;}
+.wc-mw:nth-child(8){animation-delay:.16s;}
 </style>
 
 <!-- ═══════════ WECHAT PANEL HTML ═══════════ -->
 <div id="wechat-panel">
   <canvas id="wc-bg-canvas"></canvas>
   <div class="wc-content">
-    <!-- Header -->
-    <div class="wc-header">
+
+    <!-- ── MODE SELECTOR SCREEN ── -->
+    <div id="wc-mode-selector">
+      <div style="font-size:2.5rem;margin-bottom:4px;">💬</div>
+      <div class="wc-mode-title">Aarambh Chat</div>
+      <div class="wc-mode-sub">Choose how you want to connect</div>
+      <div class="wc-mode-cards">
+        <div class="wc-mode-card" id="wc-mode-group" onclick="wcSelectMode('group')">
+          <div class="wc-mode-icon group-icon">👥</div>
+          <div class="wc-mode-info">
+            <div class="wc-mode-name">Group Chat</div>
+            <div class="wc-mode-desc">Public chat — everyone can see messages. Ask doubts, discuss topics.</div>
+          </div>
+          <span class="wc-mode-badge badge-live">Live</span>
+        </div>
+        <div class="wc-mode-card private-card" id="wc-mode-private" onclick="wcSelectMode('private')">
+          <div class="wc-mode-icon private-icon">🔒</div>
+          <div class="wc-mode-info">
+            <div class="wc-mode-name">Chat with Admin</div>
+            <div class="wc-mode-desc">Private 1-to-1 with admin. Only you and admin can see messages.</div>
+          </div>
+          <span class="wc-mode-badge badge-priv" id="private-unread-badge" style="display:none;">New</span>
+        </div>
+      </div>
+      <button class="wc-back" style="margin-top:8px;font-size:14px;color:#3a5070;font-weight:700;" onclick="closeWeChat()">← Back to app</button>
+    </div>
+
+    <!-- ── MAIN HEADER (shown when in a chat) ── -->
+    <div class="wc-header" id="wc-main-header" style="display:none;">
       <div class="wc-header-left">
-        <button class="wc-back" onclick="closeWeChat()">←</button>
+        <button class="wc-back" id="wc-back-btn" onclick="wcGoBack()">←</button>
         <div class="wc-live-dot"></div>
-        <span class="wc-logo">Aarambh Chat</span>
+        <span class="wc-logo" id="wc-header-title">Aarambh Chat</span>
         <span class="wc-admin-badge" id="wc-admin-badge">ADMIN</span>
       </div>
       <div class="wc-header-right">
         <span id="wc-msg-count">0 msgs</span>
+        <button id="wc-change-name-btn" onclick="wcOpenChangeName()" title="Change your name" style="display:none">✏️ Name</button>
         <button class="wc-hbtn" id="wc-admin-btn" title="Admin">⚙</button>
       </div>
     </div>
-    <!-- Reply Alert Banner -->
-    <div id="wc-reply-alert">🔔 You got a reply</div>
+
+    <!-- Reply alert banner -->
+    <div id="wc-reply-alert">🔔 You got a reply!</div>
+
     <!-- Admin bar -->
     <div id="wc-admin-bar">
       <span class="wc-admin-label">👑 Admin Mode</span>
       <div class="wc-admin-actions">
-        <button class="wc-aabtn" id="wc-clear-btn"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Clear All</button>
+        <button class="wc-aabtn" id="wc-back-to-inbox">← Inbox</button>
+        <button class="wc-aabtn" id="wc-clear-btn">🗑 Clear All</button>
         <button class="wc-aabtn" id="wc-logout-btn">Logout</button>
       </div>
     </div>
-    <!-- Messages -->
+
+    <!-- ── ADMIN INBOX ── -->
+    <div id="wc-inbox">
+      <div class="wc-inbox-header">
+        <button class="wc-back" onclick="wcGoBack()">←</button>
+        <div>
+          <div class="wc-inbox-title">📬 Private Inbox</div>
+          <div class="wc-inbox-subtitle">Users who messaged you</div>
+        </div>
+      </div>
+      <div class="wc-inbox-list" id="wc-inbox-list">
+        <div class="wc-inbox-empty">
+          <div style="font-size:2.5rem;">📭</div>
+          <div>No private messages yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PRIVATE CHAT HEADER (admin viewing a user's chat) ── -->
+    <div id="wc-private-chat-header">
+      <button class="wc-back" onclick="wcAdminBackToInbox()">←</button>
+      <div class="wc-private-avatar" id="wc-private-avatar">?</div>
+      <div class="wc-private-name-info">
+        <div class="wc-private-username" id="wc-private-username">User</div>
+        <div class="wc-private-status">Private conversation</div>
+      </div>
+    </div>
+
+    <!-- Messages area -->
     <div id="wc-messages">
       <div id="wc-empty">
         <div class="wc-es-icon">💬</div>
@@ -3128,6 +3500,7 @@ loadStudentName();
         <div class="wc-es-sub">Ask your doubts live.<br>Admin will reply soon!</div>
       </div>
     </div>
+
     <!-- Reply bar -->
     <div id="wc-reply-bar">
       <div class="wc-rb-info">
@@ -3136,12 +3509,14 @@ loadStudentName();
       </div>
       <button class="wc-rb-close" id="wc-rb-close">✕</button>
     </div>
+
     <!-- Input bar -->
     <div id="wc-input-bar">
       <button class="wc-ibtn" id="wc-emoji-toggle">😊</button>
-      <textarea id="wc-msg-input" placeholder="Ask a doubt…" rows="1"></textarea>
+      <textarea id="wc-msg-input" placeholder="Type a message…" rows="1"></textarea>
       <button class="wc-ibtn" id="wc-send-btn">➤</button>
     </div>
+
     <!-- Emoji picker -->
     <div id="wc-emoji-picker">
       <div class="wc-emoji-grid" id="wc-emoji-grid"></div>
@@ -3149,26 +3524,29 @@ loadStudentName();
   </div>
 </div>
 
-<!-- WeChat context menu -->
+<!-- Scroll down button -->
+<button id="wc-scroll-down-btn" aria-label="Scroll to latest">↓</button>
+
+<!-- Context menu -->
 <div id="wc-ctx-menu">
   <div class="wc-ctx-reactions" id="wc-ctx-reactions"></div>
-  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/893/893265.png" alt="Reply" style="width:18px;height:18px;object-fit:contain;"></span> Reply</button>
-  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"></span> Copy Text</button>
-  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></span> Delete Message</button>
+  <button class="wc-ctx-item" id="wc-ctx-reply"><span class="wc-ctx-icon">↩</span> Reply</button>
+  <button class="wc-ctx-item" id="wc-ctx-copy"><span class="wc-ctx-icon">📋</span> Copy Text</button>
+  <button class="wc-ctx-item danger" id="wc-ctx-delete" style="display:none"><span class="wc-ctx-icon">🗑</span> Delete</button>
 </div>
 
-<!-- WeChat Name Modal -->
+<!-- Name Modal -->
 <div class="wc-overlay" id="wc-name-modal">
   <div class="wc-modal">
     <h2>👋 Welcome to Aarambh Chat</h2>
-    <p>Enter your name to join the doubt session.</p>
+    <p>Enter your name to join the chat session.</p>
     <div class="wc-mfield"><label>Your Name</label><input type="text" id="wc-name-input" placeholder="e.g. Ujjawal, Priya…" maxlength="24"/></div>
     <span class="wc-merr" id="wc-name-err"></span>
     <div class="wc-mactions"><button class="wc-btn-p" id="wc-name-submit">Join →</button></div>
   </div>
 </div>
 
-<!-- WeChat Admin Login Modal -->
+<!-- Admin Login Modal -->
 <div class="wc-overlay" id="wc-admin-modal">
   <div class="wc-modal">
     <h2>🔐 Admin Login</h2>
@@ -3183,20 +3561,21 @@ loadStudentName();
   </div>
 </div>
 
-<!-- WeChat Confirm Clear Modal -->
+<!-- Confirm Clear Modal -->
 <div class="wc-overlay" id="wc-confirm-modal">
   <div class="wc-modal">
     <h2>⚠️ Clear All Messages?</h2>
-    <p>This will permanently delete every message. Cannot be undone.</p>
+    <p>This will permanently delete every message in this chat. Cannot be undone.</p>
     <div class="wc-mactions">
       <button class="wc-btn-s" id="wc-confirm-no">Cancel</button>
       <button class="wc-btn-p wc-btn-danger" id="wc-confirm-yes">Yes, Clear</button>
     </div>
   </div>
 </div>
-<div id="wc-toast"></div><button id="wc-scroll-down-btn" aria-label="Scroll to latest" title="Scroll to latest" style="position:fixed;right:14px;bottom:86px;z-index:9999;opacity:0;pointer-events:none;width:58px;height:58px;border-radius:50%;border:1px solid rgba(125,211,252,.26);background:linear-gradient(135deg,rgba(56,189,248,1),rgba(37,99,235,1));backdrop-filter:blur(16px);box-shadow:0 14px 30px rgba(37,99,235,.34),0 0 22px rgba(56,189,248,.22);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;line-height:1;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);">↓</button>
 
-<!-- ═══════════ WECHAT OPEN/CLOSE — plain script so onclick works ═══════════ -->
+<div id="wc-toast"></div>
+
+<!-- ═══════════ OPEN/CLOSE — global scope ═══════════ -->
 <script>
 function openWeChat(){
   const panel=document.getElementById('wechat-panel');
@@ -3204,16 +3583,11 @@ function openWeChat(){
   panel.classList.add('open');
   const nb=document.getElementById('nt-chat');
   if(nb)nb.classList.add('on');
-  // clear unread badge
   const badge=document.getElementById('chat-badge');
   if(badge)badge.style.display='none';
-  // show name modal if no username saved
-  const saved=localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
-  if(!saved){
-    setTimeout(()=>{const m=document.getElementById('wc-name-modal');if(m)m.classList.add('show');},300);
-  }
-  // init canvas if available
   if(typeof wcInitCanvasGlobal==='function')wcInitCanvasGlobal();
+  // Always go back to mode selector when opening fresh
+  if(typeof wcShowModeSelector==='function')wcShowModeSelector();
 }
 function closeWeChat(){
   const panel=document.getElementById('wechat-panel');
@@ -3221,47 +3595,63 @@ function closeWeChat(){
   const nb=document.getElementById('nt-chat');
   if(nb)nb.classList.remove('on');
 }
+function wcGoBack(){
+  if(typeof wcShowModeSelector==='function')wcShowModeSelector();
+}
 </script>
 
-<!-- ═══════════ WECHAT JS ═══════════ -->
+<!-- ═══════════ DUAL CHAT JS ═══════════ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,collection,addDoc,deleteDoc,doc,updateDoc,onSnapshot,query,orderBy,getDocs}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,addDoc,deleteDoc,doc,updateDoc,onSnapshot,query,orderBy,getDocs,where,serverTimestamp,getDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const wcConfig={apiKey:"AIzaSyD8_zOJgINAZMWzqn0ozDSE98ouTAPotBU",authDomain:"chatting2027-97f1b.firebaseapp.com",projectId:"chatting2027-97f1b",storageBucket:"chatting2027-97f1b.appspot.com",messagingSenderId:"884874751382",appId:"1:884874751382:web:f5314041e959778c3401b7"};
+const wcConfig={
+  apiKey:"AIzaSyD8_zOJgINAZMWzqn0ozDSE98ouTAPotBU",
+  authDomain:"chatting2027-97f1b.firebaseapp.com",
+  projectId:"chatting2027-97f1b",
+  storageBucket:"chatting2027-97f1b.appspot.com",
+  messagingSenderId:"884874751382",
+  appId:"1:884874751382:web:f5314041e959778c3401b7"
+};
 const wcApp=initializeApp(wcConfig,'wechat');
 const wcDb=getFirestore(wcApp);
 
-/* ═══ STATE ═══ */
-let wcUsername=localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
-let wcIsAdmin=false;
-let wcReplyTo=null;
-let wcCtxMsg=null;
-let wcMessagesData=[];
-let wcLastSeenCount=0;
-let wcFirst=true;
-const WC_AID='power123',WC_APW='ujjawal2809';
+/* ═══ CONSTANTS ═══ */
+const WC_AID='power123', WC_APW='ujjawal2809';
 const WC_REACT=['❤️','😂','👍','😮','😢','🔥'];
 const WC_EMOJIS=['😀','😂','🥰','😍','🤩','😎','🤔','😮','😢','😡','👍','👎','❤️','🔥','🎉','💯','✅','⭐','💬','🚀','💎','🤝','👏','🙏','💪','🎶','🤯','😴','🥳','🫡'];
 
-/* ═══ HELPERS ═══ */
-const $=id=>document.getElementById(id);
-function wcToast(msg,dur=2200){const t=$('wc-toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
-function wcFmtTime(ts){const d=new Date(ts);let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m.toString().padStart(2,'0')} ${ap}`;}
-function wcFmtDay(ts){const d=new Date(ts),n=new Date(),y=new Date();y.setDate(y.getDate()-1);if(d.toDateString()===n.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
-function wcScrollBot(smooth=true){const m=$('wc-messages');m.scrollTo({top:m.scrollHeight,behavior:smooth?'smooth':'instant'});}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* ═══ STATE ═══ */
+let wcUsername = localStorage.getItem('wc_user')||localStorage.getItem('ab_student_name')||'';
+let wcUserId = localStorage.getItem('wc_uid')||(()=>{const id='uid_'+Math.random().toString(36).slice(2,11);localStorage.setItem('wc_uid',id);return id;})();
+let wcIsAdmin = false;
+let wcMode = null; // 'group' | 'private'
+let wcReplyTo = null;
+let wcCtxMsg = null;
+let wcMessagesData = [];
+let wcLastSeenCount = 0;
+let wcFirst = true;
+let wcGroupUnsub = null;
+let wcPrivateUnsub = null;
+let wcInboxUnsub = null;
+let wcSeenIds = new Set();
+let wcAlertTimer = null;
+let wcCurrentPrivateUserId = null; // for admin viewing a specific user's chat
+let wcPrivateLastSeen = parseInt(localStorage.getItem('wc_priv_last_seen')||'0');
+let wcPrivateNewCount = 0;
+let wcPendingMode = null; // FIXED: declared here to avoid Temporal Dead Zone error
 
-/* ═══ UNREAD BADGE ═══ */
-function wcUpdateBadge(){
-  const panel=$('wechat-panel');
-  if(panel&&panel.classList.contains('open')){wcLastSeenCount=wcMessagesData.length;return;}
-  const unread=Math.max(0,wcMessagesData.length-wcLastSeenCount);
-  const badge=$('chat-badge');
-  if(!badge)return;
-  if(unread>0){badge.textContent=unread>99?'99+':String(unread);badge.style.display='block';}
-  else badge.style.display='none';
-}
+/* ═══ DOM REFS ═══ */
+const $=id=>document.getElementById(id);
+const msgEl=$('wc-messages');
+const modeSelector=$('wc-mode-selector');
+const mainHeader=$('wc-main-header');
+const adminBar=$('wc-admin-bar');
+const inputBar=$('wc-input-bar');
+const replyBar=$('wc-reply-bar');
+const emojiPicker=$('wc-emoji-picker');
+const inbox=$('wc-inbox');
+const privateChatHeader=$('wc-private-chat-header');
 
 /* ═══ CANVAS BG ═══ */
 let wcCanvasInited=false;
@@ -3271,81 +3661,385 @@ function wcInitCanvas(){
   const cx=c.getContext('2d');let ps=[];
   function rsz(){c.width=window.innerWidth;c.height=window.innerHeight;}rsz();
   window.addEventListener('resize',rsz);
-  for(let i=0;i<28;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+.2,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,a:Math.random()*.12+.04});
+  for(let i=0;i<28;i++)ps.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+.2,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,a:Math.random()*.1+.03});
   (function draw(){
     cx.clearRect(0,0,c.width,c.height);
-    ps.forEach(p=>{p.x=(p.x+p.vx+c.width)%c.width;p.y=(p.y+p.vy+c.height)%c.height;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,200,255,${p.a})`;cx.fill();});
-    requestAnimationFrame(draw);
+    ps.forEach(p=>{p.x=(p.x+p.vx+c.width)%c.width;p.y=(p.y+p.vy+c.height)%c.height;
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=`rgba(91,154,255,${p.a})`;cx.fill();
+    });requestAnimationFrame(draw);
   })();
 }
 window.wcInitCanvasGlobal=()=>wcInitCanvas();
 
-/* ═══ EMOJI GRID ═══ */
-const wg=$('wc-emoji-grid');
-WC_EMOJIS.forEach(e=>{
-  const b=document.createElement('button');b.className='wc-ep-emoji';b.textContent=e;
-  b.addEventListener('click',()=>{const mi=$('wc-msg-input');mi.value+=e;mi.focus();$('wc-emoji-picker').classList.remove('show');});
-  wg.appendChild(b);
-});
+/* ═══ HELPERS ═══ */
+function wcToast(msg,dur=2200){const t=$('wc-toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
+function wcFmtTime(ts){const d=new Date(ts);let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m.toString().padStart(2,'0')} ${ap}`;}
+function wcFmtDay(ts){const d=new Date(ts),n=new Date(),y=new Date();y.setDate(y.getDate()-1);if(d.toDateString()===n.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function wcAtBottom(){return msgEl.scrollHeight-msgEl.scrollTop-msgEl.clientHeight<96;}
+function wcScrollBot(smooth=true){msgEl.scrollTo({top:msgEl.scrollHeight,behavior:smooth?'smooth':'instant'});}
+function initUserId(){if(!wcUserId){wcUserId='uid_'+Math.random().toString(36).slice(2,11);localStorage.setItem('wc_uid',wcUserId);}return wcUserId;}
 
-/* ═══ NAME MODAL ═══ */
-function wcSubmitName(){
-  const v=$('wc-name-input').value.trim();
-  if(!v){$('wc-name-err').textContent='Please enter your name.';return;}
-  wcUsername=v;localStorage.setItem('wc_user',v);
-  $('wc-name-modal').classList.remove('show');
-  $('wc-msg-input').focus();
+/* ═══ UI STATE HELPERS ═══ */
+function showChatUI(){
+  mainHeader.style.display='flex';
+  msgEl.style.display='flex';
+  inputBar.style.display='flex';
 }
-$('wc-name-submit').addEventListener('click',wcSubmitName);
-$('wc-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
+function hideChatUI(){
+  mainHeader.style.display='none';
+  msgEl.style.display='none';
+  inputBar.style.display='none';
+  replyBar.classList.remove('show');
+  emojiPicker.classList.remove('show');
+  adminBar.classList.remove('show');
+  inbox.classList.remove('show');
+  privateChatHeader.classList.remove('show');
+}
 
-/* ═══ ADMIN ═══ */
-$('wc-admin-btn').addEventListener('click',()=>{
-  if(wcIsAdmin){$('wc-admin-bar').classList.toggle('show');return;}
-  $('wc-admin-id').value='';$('wc-admin-pass').value='';$('wc-admin-err').textContent='';
-  $('wc-admin-modal').classList.add('show');
-  setTimeout(()=>$('wc-admin-id').focus(),120);
-});
-$('wc-admin-cancel').addEventListener('click',()=>$('wc-admin-modal').classList.remove('show'));
-$('wc-admin-submit').addEventListener('click',()=>{
-  if($('wc-admin-id').value===WC_AID&&$('wc-admin-pass').value===WC_APW){
-    wcIsAdmin=true;$('wc-admin-modal').classList.remove('show');
-    $('wc-admin-bar').classList.add('show');$('wc-admin-badge').classList.add('show');
-    wcToast('👑 Admin mode on');wcRenderMessages();
-  }else{$('wc-admin-err').textContent='Wrong credentials.';$('wc-admin-pass').value='';}
-});
-$('wc-admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('wc-admin-submit').click();});
-$('wc-logout-btn').addEventListener('click',()=>{
-  wcIsAdmin=false;$('wc-admin-bar').classList.remove('show');$('wc-admin-badge').classList.remove('show');
-  wcToast('Logged out');wcRenderMessages();
-});
-$('wc-clear-btn').addEventListener('click',()=>$('wc-confirm-modal').classList.add('show'));
-$('wc-confirm-no').addEventListener('click',()=>$('wc-confirm-modal').classList.remove('show'));
-$('wc-confirm-yes').addEventListener('click',async()=>{
-  $('wc-confirm-modal').classList.remove('show');
+/* ═══ MODE SELECTOR ═══ */
+window.wcShowModeSelector=function(){
+  wcMode=null;
+  modeSelector.classList.remove('hidden');
+  hideChatUI();
+  // unsubscribe old listeners
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;}
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+  if(wcInboxUnsub&&!wcIsAdmin){wcInboxUnsub();wcInboxUnsub=null;}
+  wcCurrentPrivateUserId=null;
+  // Update private unread badge
+  wcCheckPrivateUnread();
+};
+
+/* ═══ PRIVATE UNREAD CHECK ═══ */
+async function wcCheckPrivateUnread(){
+  if(!wcUsername||wcIsAdmin)return;
   try{
-    const sn=await getDocs(collection(wcDb,'messages'));
-    await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'messages',d.id))));
-    wcToast('<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Chat cleared');
-  }catch(e){wcToast('Error clearing chat');}
-});
+    // Single where() only — no composite index needed
+    const q=query(collection(wcDb,'private_messages'),where('userId','==',initUserId()));
+    const snap=await getDocs(q);
+    // Filter admin replies and unread count client-side
+    const unread=snap.docs.filter(d=>{
+      const dat=d.data();
+      return dat.role==='admin' && (dat.time||0)>wcPrivateLastSeen;
+    }).length;
+    wcPrivateNewCount=unread;
+    const badge=$('private-unread-badge');
+    if(badge){badge.style.display=unread>0?'inline-flex':'none';}
+  }catch(e){console.warn('[Chat] Unread check failed:',e);}
+}
 
-/* ═══ EMOJI PICKER TOGGLE ═══ */
-$('wc-emoji-toggle').addEventListener('click',()=>{
-  const ep=$('wc-emoji-picker');
-  ep.classList.toggle('show');
-  if(!ep.classList.contains('show'))$('wc-msg-input').focus();
-});
-$('wc-msg-input').addEventListener('focus',()=>$('wc-emoji-picker').classList.remove('show'));
+/* ═══ MODE SELECT ═══ */
+window.wcSelectMode=function(mode){
+  // Ask for name if not set
+  if(!wcUsername){
+    $('wc-name-modal').classList.add('show');
+    wcPendingMode=mode;
+    return;
+  }
+  console.log('[Chat] Switching to mode:', mode);
 
-/* ═══ REPLY BAR ═══ */
-$('wc-rb-close').addEventListener('click',()=>{wcReplyTo=null;$('wc-reply-bar').classList.remove('show');});
-function wcSetReply(msg){
-  wcReplyTo={id:msg.id,name:msg.name,text:msg.deletedBy?'[deleted]':msg.text};
-  $('wc-rb-name').textContent='↩ '+msg.name;
-  $('wc-rb-text').textContent=wcReplyTo.text;
-  $('wc-reply-bar').classList.add('show');
-  $('wc-msg-input').focus();
+  // Unsubscribe ALL previous listeners before switching — prevents cross-contamination
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;console.log('[Chat] Unsubscribed group listener');}
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;console.log('[Chat] Unsubscribed private listener');}
+
+  wcMode=mode;
+  modeSelector.classList.add('hidden');
+  // Clear messages from previous session
+  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+  wcMessagesData=[];
+
+  if(mode==='group'){
+    console.log('[Chat] Loading GROUP chat from collection: messages');
+    $('wc-header-title').textContent='Group Chat';
+    $('wc-msg-input').placeholder='Ask a doubt…';
+    showChatUI();
+    if(wcIsAdmin){adminBar.classList.add('show');$('wc-back-to-inbox').classList.remove('show');}
+    wcFirst=true;
+    wcStartGroupChat();
+  } else if(mode==='private'){
+    if(wcIsAdmin){
+      // Admin sees inbox
+      console.log('[Chat] Admin: opening private inbox');
+      showInbox();
+    } else {
+      // User sees their private chat
+      console.log('[Chat] Loading PRIVATE chat from collection: private_messages for userId:', initUserId());
+      $('wc-header-title').textContent='Chat with Admin';
+      $('wc-msg-input').placeholder='Message admin privately…';
+      showChatUI();
+      wcFirst=true;
+      wcStartPrivateChat(initUserId());
+      // mark seen
+      wcPrivateLastSeen=Date.now();
+      localStorage.setItem('wc_priv_last_seen',wcPrivateLastSeen);
+      const badge=$('private-unread-badge');
+      if(badge)badge.style.display='none';
+    }
+  }
+  // Show change-name button for non-admin users once they're in a chat
+  const cnb=$('wc-change-name-btn');
+  if(cnb)cnb.style.display=wcIsAdmin?'none':'inline-block';
+};
+
+/* ═══ INBOX (admin) ═══ */
+function showInbox(){
+  hideChatUI();
+  modeSelector.classList.add('hidden');
+  adminBar.classList.remove('show');
+  inbox.classList.add('show');
+  wcLoadInbox();
+}
+
+function wcAdminOpenUserChat(userId,userName){
+  window.wcAdminBackToInbox=wcAdminBackToInboxFn;
+  wcCurrentPrivateUserId=userId;
+  inbox.classList.remove('show');
+  // Show private header
+  privateChatHeader.classList.add('show');
+  $('wc-private-avatar').textContent=userName.charAt(0).toUpperCase();
+  $('wc-private-username').textContent=userName;
+  // Show chat UI without full header
+  mainHeader.style.display='none';
+  msgEl.style.display='flex';
+  inputBar.style.display='flex';
+  adminBar.classList.add('show');
+  $('wc-back-to-inbox').classList.add('show');
+  $('wc-header-title').textContent='Private: '+userName;
+  wcFirst=true;
+  wcStartPrivateChat(userId);
+}
+
+function wcAdminBackToInboxFn(){
+  privateChatHeader.classList.remove('show');
+  msgEl.style.display='none';
+  inputBar.style.display='none';
+  adminBar.classList.remove('show');
+  $('wc-back-to-inbox').classList.remove('show');
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+  wcCurrentPrivateUserId=null;
+  showInbox();
+}
+window.wcAdminBackToInbox=wcAdminBackToInboxFn;
+
+function wcLoadInbox(){
+  const list=$('wc-inbox-list');
+  if(wcInboxUnsub)wcInboxUnsub();
+  // Listen to all private_messages, group by userId, show last message per user
+  // No orderBy() to avoid composite index requirement — sort client-side
+  const q=query(collection(wcDb,'private_messages'));
+  wcInboxUnsub=onSnapshot(q,snap=>{
+    const msgs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Group by userId
+    const userMap={};
+    msgs.forEach(m=>{
+      if(!userMap[m.userId])userMap[m.userId]={userId:m.userId,name:m.name,messages:[]};
+      userMap[m.userId].messages.push(m);
+    });
+    const users=Object.values(userMap);
+    if(!users.length){
+      list.innerHTML='<div class="wc-inbox-empty"><div style="font-size:2.5rem;">📭</div><div>No private messages yet</div></div>';
+      return;
+    }
+    list.innerHTML='';
+    // Sort by most recent message
+    users.sort((a,b)=>{
+      const la=a.messages[a.messages.length-1].time;
+      const lb=b.messages[b.messages.length-1].time;
+      return lb-la;
+    });
+    users.forEach(user=>{
+      const lastMsg=user.messages[user.messages.length-1];
+      const unread=user.messages.filter(m=>m.role==='user'&&!m.seenByAdmin).length;
+      const card=document.createElement('div');
+      card.className='wc-inbox-card';
+      const initials=user.name.charAt(0).toUpperCase();
+      const preview=lastMsg.deletedBy?'[deleted]':lastMsg.text;
+      const timeStr=wcFmtTime(lastMsg.time);
+      card.innerHTML=`
+        <div class="wc-inbox-avatar">${initials}</div>
+        <div class="wc-inbox-info">
+          <div class="wc-inbox-name">${esc(user.name)}${unread?`<span class="new-msg-indicator"><span class="new-msg-dot"></span> New</span>`:''}</div>
+          <div class="wc-inbox-preview">${esc(preview.slice(0,60))}</div>
+        </div>
+        <div class="wc-inbox-meta">
+          <div class="wc-inbox-time">${timeStr}</div>
+          ${unread?`<div class="wc-inbox-unread">${unread>99?'99+':unread}</div>`:''}
+        </div>
+      `;
+      card.addEventListener('click',()=>{
+        wcAdminOpenUserChat(user.userId,user.name);
+        // mark as seen by admin
+        user.messages.filter(m=>m.role==='user'&&!m.seenByAdmin).forEach(m=>{
+          updateDoc(doc(wcDb,'private_messages',m.id),{seenByAdmin:true}).catch(()=>{});
+        });
+      });
+      list.appendChild(card);
+    });
+  },{error:e=>console.error('Inbox error:',e)});
+}
+
+/* ═══ GROUP CHAT ═══ */
+function wcStartGroupChat(){
+  // Safety: ensure private listener is dead
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;}
+  console.log('[Chat] Starting GROUP listener on collection: "messages"');
+  const q=query(collection(wcDb,'messages'),orderBy('time','asc'));
+  wcGroupUnsub=onSnapshot(q,snap=>{
+    const newData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Detect reply-to-me
+    if(wcUsername&&wcSeenIds.size>0){
+      newData.forEach(msg=>{
+        if(!wcSeenIds.has(msg.id)&&msg.replyTo&&msg.replyTo.name===wcUsername&&msg.name!==wcUsername){
+          wcShowReplyAlert(msg.replyTo.id);
+        }
+      });
+    }
+    newData.forEach(m=>wcSeenIds.add(m.id));
+    wcMessagesData=newData;
+    const wasAtBottom=wcAtBottom();
+    wcRenderMessages(wcMessagesData,'group');
+    if(wcFirst||wasAtBottom)wcScrollBot(!wcFirst);
+    wcUpdateBadge();
+    if(wcFirst)wcFirst=false;
+    $('wc-msg-count').textContent=newData.length+' msgs';
+  },{error:e=>console.error('Group chat error:',e)});
+}
+
+/* ═══ PRIVATE CHAT ═══ */
+function wcStartPrivateChat(userId){
+  // Safety: ensure group listener is dead — prevents group messages leaking into private view
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;}
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+  console.log('[Chat] Starting PRIVATE listener on collection: "private_messages" for userId:', userId);
+  // IMPORTANT: No orderBy() — combining where()+orderBy() needs a composite Firestore index.
+  // If that index doesn't exist, Firestore throws an error and the listener fires nothing.
+  // We sort client-side instead — 100% reliable with no index required.
+  const q=query(collection(wcDb,'private_messages'),where('userId','==',userId));
+  wcPrivateUnsub=onSnapshot(q,snap=>{
+    const newData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Client-side sort by time ascending
+    newData.sort((a,b)=>(a.time||0)-(b.time||0));
+    wcMessagesData=newData;
+    const wasAtBottom=wcAtBottom();
+    wcRenderMessages(newData,'private');
+    if(wcFirst||wasAtBottom)wcScrollBot(!wcFirst);
+    if(wcFirst)wcFirst=false;
+    $('wc-msg-count').textContent=newData.length+' msgs';
+    // Detect admin replies for badge
+    if(!wcIsAdmin){
+      const adminMsgs=newData.filter(m=>m.role==='admin');
+      if(adminMsgs.length>0){const badge=$('private-unread-badge');if(badge)badge.style.display='none';}
+    }
+  },{error:e=>console.error('Private chat error:',e)});
+}
+
+/* ═══ RENDER MESSAGES ═══ */
+function wcRenderMessages(data,chatType){
+  const empty=$('wc-empty');
+  if(!data.length){
+    if(empty){
+      empty.style.display='flex';
+      const title=empty.querySelector('.wc-es-title');
+      const sub=empty.querySelector('.wc-es-sub');
+      if(chatType==='private'&&!wcIsAdmin){
+        if(title)title.textContent='No messages yet';
+        if(sub)sub.innerHTML='Send a message to admin.<br>Reply is usually quick!';
+      } else if(chatType==='private'&&wcIsAdmin){
+        if(title)title.textContent='No messages in this chat';
+        if(sub)sub.innerHTML='';
+      } else {
+        if(title)title.textContent='Welcome to Aarambh Chat!';
+        if(sub)sub.innerHTML='Ask your doubts live.<br>Admin will reply soon!';
+      }
+    }
+    // clear old messages but keep empty div
+    Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+    return;
+  }
+  if(empty)empty.style.display='none';
+  // Efficient patch: rebuild
+  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+  let lastDay='';
+  data.forEach(msg=>{
+    const ds=wcFmtDay(msg.time);
+    if(ds!==lastDay){
+      const d=document.createElement('div');d.className='wc-day-div';d.textContent=ds;
+      msgEl.appendChild(d);lastDay=ds;
+    }
+    // Determine ownership
+    const isMine = wcIsAdmin ? (msg.role==='admin') : (msg.userId===initUserId()||msg.name===wcUsername);
+    const isAdm=msg.role==='admin';
+    const isDeleted=!!msg.deletedBy;
+    const w=document.createElement('div');
+    // mine always right (flex-end), other always left (flex-start)
+    w.className=`wc-mw ${isMine?'mine':'other'}${isAdm?' wc-admin-msg':''}`;
+    w.dataset.msgId=msg.id;
+    // name label — show for ALL other messages (not mine), with emoji + color
+    if(!isMine){
+      const ne=document.createElement('div');
+      if(isAdm){
+        ne.className='wc-msg-name wc-admin-name';
+        ne.textContent='👑 Admin';
+      } else {
+        ne.className='wc-msg-name wc-user-name';
+        ne.textContent='👤 '+(msg.name||'User');
+      }
+      w.appendChild(ne);
+    }
+    // ADMIN tag badge — only for admin messages (distinct from reply preview)
+    if(isAdm&&!isDeleted){
+      const at=document.createElement('span');at.className='wc-admin-tag';
+      at.innerHTML='👑 ADMIN';w.appendChild(at);
+    }
+    const row=document.createElement('div');row.className='wc-msg-row';
+    const bubble=document.createElement('div');
+    if(isDeleted){
+      bubble.className='wc-bubble wc-bubble-deleted';
+      bubble.textContent=`🚫 Deleted by ${msg.deletedBy}`;
+    } else {
+      bubble.className='wc-bubble';
+      if(msg.replyTo){
+        const rp=document.createElement('div');rp.className='wc-reply-preview';
+        rp.innerHTML=`<div class="wc-rp-name">${esc(msg.replyTo.name)}</div><div class="wc-rp-text">${esc(msg.replyTo.text)}</div>`;
+        bubble.appendChild(rp);
+      }
+      bubble.appendChild(document.createTextNode(msg.text));
+      let pt=null;
+      const onLP=(x,y)=>{navigator.vibrate&&navigator.vibrate(28);wcShowCtx(x,y,msg);};
+      bubble.addEventListener('mousedown',e=>{if(e.button!==0)return;pt=setTimeout(()=>onLP(e.clientX,e.clientY),520);});
+      bubble.addEventListener('mousemove',()=>clearTimeout(pt));
+      bubble.addEventListener('mouseup',()=>clearTimeout(pt));
+      bubble.addEventListener('contextmenu',e=>{e.preventDefault();onLP(e.clientX,e.clientY);});
+      bubble.addEventListener('touchstart',e=>{const t=e.touches[0];pt=setTimeout(()=>onLP(t.clientX,t.clientY),520);},{passive:true});
+      bubble.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
+      bubble.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
+    }
+    row.appendChild(bubble);w.appendChild(row);
+    // reactions (group chat only)
+    if(!isDeleted&&chatType==='group'){
+      const rk=Object.keys(msg.reactions||{}).filter(k=>(msg.reactions[k]||[]).length>0);
+      if(rk.length){
+        const strip=document.createElement('div');strip.className='wc-reactions-strip';
+        rk.forEach(emoji=>{
+          const u=msg.reactions[emoji]||[];
+          const pill=document.createElement('div');pill.className='wc-reaction-pill';
+          if(u.includes(wcUsername))pill.style.background='rgba(91,154,255,.22)';
+          pill.innerHTML=`${emoji}<span class="wc-rc">${u.length}</span>`;
+          pill.title=u.join(', ');
+          pill.addEventListener('click',()=>wcReactTo(msg.id,emoji));
+          strip.appendChild(pill);
+        });w.appendChild(strip);
+      }
+    }
+    const te=document.createElement('div');te.className='wc-msg-time';
+    te.textContent=wcFmtTime(msg.time);
+    if(isMine&&!isDeleted)te.innerHTML+=` <span class="wc-tick">✓✓</span>`;
+    w.appendChild(te);
+    msgEl.appendChild(w);
+  });
 }
 
 /* ═══ SEND ═══ */
@@ -3353,25 +4047,104 @@ async function wcSend(){
   const mi=$('wc-msg-input');
   const text=mi.value.trim();if(!text)return;
   if(!wcUsername){$('wc-name-modal').classList.add('show');return;}
-  const pl={name:wcUsername,text,time:Date.now(),role:wcIsAdmin?'admin':'user',reactions:{},deletedBy:null};
-  if(wcReplyTo)pl.replyTo={id:wcReplyTo.id,name:wcReplyTo.name,text:wcReplyTo.text};
+  if(!wcMode){wcToast('❌ No chat mode selected.');return;}
   mi.value='';mi.style.height='';
-  wcReplyTo=null;$('wc-reply-bar').classList.remove('show');
-  $('wc-emoji-picker').classList.remove('show');
-  try{await addDoc(collection(wcDb,'messages'),pl);}
-  catch(e){wcToast('❌ Send failed. Check connection.');}
+  emojiPicker.classList.remove('show');
+  if(wcMode==='group'){
+    const pl={
+      name:wcUsername,
+      userId:initUserId(),
+      text:text,
+      time:Date.now(),
+      role:wcIsAdmin?'admin':'user',
+      reactions:{},
+      deletedBy:null
+    };
+    if(wcReplyTo)pl.replyTo={id:wcReplyTo.id,name:wcReplyTo.name,text:wcReplyTo.text};
+    wcReplyTo=null;replyBar.classList.remove('show');
+    console.log('[Chat] Sending to GROUP collection "messages":', pl);
+    try{
+      await addDoc(collection(wcDb,'messages'),pl);
+      console.log('[Chat] Group message sent successfully');
+    }catch(e){
+      console.error('[Chat] Group send failed — code:',e.code,'msg:',e.message);
+      if(e.code==='permission-denied'){
+        wcToast('❌ Permission denied. Update Firestore rules.');
+      } else {
+        wcToast('❌ Send failed: '+(e.code||e.message));
+      }
+    }
+  } else if(wcMode==='private'){
+    // For admin: must have wcCurrentPrivateUserId set (from inbox)
+    // For user: use their own userId
+    const targetUserId = wcIsAdmin ? wcCurrentPrivateUserId : initUserId();
+    if(!targetUserId){
+      wcToast('❌ No user selected for private chat.');
+      console.error('[Chat] Private send aborted: targetUserId is null/undefined');
+      return;
+    }
+    const pl={
+      userId:targetUserId,
+      name:wcIsAdmin?'Admin':wcUsername,
+      text:text,
+      time:Date.now(),
+      role:wcIsAdmin?'admin':'user',
+      deletedBy:null,
+      seenByAdmin:wcIsAdmin?true:false
+    };
+    console.log('[Chat] Sending to PRIVATE collection "private_messages":', pl);
+    try{
+      await addDoc(collection(wcDb,'private_messages'),pl);
+      console.log('[Chat] Private message sent successfully');
+    }catch(e){
+      console.error('[Chat] Private send failed — code:',e.code,'msg:',e.message);
+      // Show actual error so we can diagnose (permission-denied = Firestore rules issue)
+      if(e.code==='permission-denied'){
+        wcToast('❌ Permission denied — fix Firestore rules (see console)',4000);
+        console.error('%c[FIRESTORE RULES FIX] Go to Firebase Console → Firestore → Rules and paste this:','color:#ff6b6b;font-weight:bold;font-size:14px');
+        console.log(`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /messages/{doc} {
+      allow read, write: if true;
+    }
+    match /private_messages/{doc} {
+      allow read, write: if true;
+    }
+  }
+}`);
+      } else {
+        wcToast('❌ Send failed: '+(e.code||e.message));
+      }
+    }
+  }
 }
-$('wc-send-btn').addEventListener('click',wcSend);
-$('wc-msg-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();wcSend();}});
-$('wc-msg-input').addEventListener('input',()=>{const mi=$('wc-msg-input');mi.style.height='auto';mi.style.height=Math.min(mi.scrollHeight,100)+'px';});
 
-/* ═══ DELETE (soft — shows "deleted by X") ═══ */
+/* ═══ DELETE ═══ */
 async function wcDeleteMsg(msg){
-  const delBy=wcIsAdmin?`Admin (${wcUsername})`:wcUsername;
+  const delBy=wcIsAdmin?'Admin':wcUsername;
+  const col=wcMode==='group'?'messages':'private_messages';
   try{
-    await updateDoc(doc(wcDb,'messages',msg.id),{deletedBy:delBy,text:'',reactions:{}});
-    wcToast(`<img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"> Deleted`);
+    await updateDoc(doc(wcDb,col,msg.id),{deletedBy:delBy,text:'',reactions:{}});
+    wcToast('🗑 Deleted');
   }catch(e){wcToast('Error deleting');}
+}
+
+/* ═══ REACTIONS (group only) ═══ */
+async function wcReactTo(msgId,emoji){
+  wcHideCtx();
+  if(!wcUsername){wcToast('Enter your name first');return;}
+  try{
+    const ref=doc(wcDb,'messages',msgId);
+    const snap=await getDoc(ref);
+    if(!snap.exists())return;
+    const reactions=snap.data().reactions||{};
+    const users=reactions[emoji]||[];
+    const idx=users.indexOf(wcUsername);
+    if(idx>=0)users.splice(idx,1);else users.push(wcUsername);
+    reactions[emoji]=users;
+    await updateDoc(ref,{reactions});
+  }catch(e){wcToast('Reaction failed');}
 }
 
 /* ═══ CONTEXT MENU ═══ */
@@ -3379,21 +4152,21 @@ const wcCtxEl=$('wc-ctx-menu');
 function wcShowCtx(x,y,msg){
   wcCtxMsg=msg;
   const isDeleted=!!msg.deletedBy;
-  const canDelete=!isDeleted&&(wcIsAdmin||(msg.name===wcUsername));
-  // rebuild reaction row
+  const canDelete=!isDeleted&&(wcIsAdmin||(msg.name===wcUsername||msg.userId===initUserId()));
   const cr=$('wc-ctx-reactions');cr.innerHTML='';
-  if(!isDeleted){
+  if(!isDeleted&&wcMode==='group'){
     WC_REACT.forEach(e=>{
       const b=document.createElement('button');b.className='wc-ctx-react-btn';b.textContent=e;
       b.addEventListener('click',()=>wcReactTo(msg.id,e));
       cr.appendChild(b);
     });
+    cr.style.display='flex';
+  } else {
+    cr.style.display='none';
   }
-  // show/hide items
   $('wc-ctx-reply').style.display=isDeleted?'none':'flex';
   $('wc-ctx-copy').style.display=isDeleted?'none':'flex';
   $('wc-ctx-delete').style.display=canDelete?'flex':'none';
-  // position
   wcCtxEl.style.display='block';
   wcCtxEl.classList.add('show');
   requestAnimationFrame(()=>{
@@ -3407,396 +4180,167 @@ function wcShowCtx(x,y,msg){
   });
 }
 function wcHideCtx(){wcCtxEl.classList.remove('show');setTimeout(()=>{if(!wcCtxEl.classList.contains('show'))wcCtxEl.style.display='none';},200);wcCtxMsg=null;}
-document.addEventListener('click',e=>{if(wcCtxEl.style.display==='block'&&!wcCtxEl.contains(e.target))wcHideCtx();},{capture:false});
-$('wc-ctx-reply').addEventListener('click',()=>{if(wcCtxMsg)wcSetReply(wcCtxMsg);wcHideCtx();});
+document.addEventListener('click',e=>{if(wcCtxEl.style.display==='block'&&!wcCtxEl.contains(e.target))wcHideCtx();});
+$('wc-ctx-reply').addEventListener('click',()=>{
+  if(wcCtxMsg){wcReplyTo={id:wcCtxMsg.id,name:wcCtxMsg.name,text:wcCtxMsg.deletedBy?'[deleted]':wcCtxMsg.text};
+    $('wc-rb-name').textContent='↩ '+wcCtxMsg.name;$('wc-rb-text').textContent=wcReplyTo.text;
+    replyBar.classList.add('show');$('wc-msg-input').focus();}
+  wcHideCtx();
+});
 $('wc-ctx-copy').addEventListener('click',()=>{
   if(!wcCtxMsg)return;
-  const text=wcCtxMsg.text;
-  navigator.clipboard.writeText(text).then(()=>wcToast('<img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Copied!')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('<img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Copied!');
-  });
-  wcHideCtx();
+  navigator.clipboard.writeText(wcCtxMsg.text).then(()=>wcToast('📋 Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=wcCtxMsg.text;ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);wcToast('📋 Copied!');
+  });wcHideCtx();
 });
 $('wc-ctx-delete').addEventListener('click',()=>{if(wcCtxMsg)wcDeleteMsg(wcCtxMsg);wcHideCtx();});
 
-/* ═══ REACTIONS ═══ */
-async function wcReactTo(msgId,emoji){
-  wcHideCtx();
-  if(!wcUsername){wcToast('Enter your name first');return;}
-  const m=wcMessagesData.find(x=>x.id===msgId);if(!m||m.deletedBy)return;
-  const r=JSON.parse(JSON.stringify(m.reactions||{}));
-  if(!r[emoji])r[emoji]=[];
-  const idx=r[emoji].indexOf(wcUsername);
-  if(idx>-1)r[emoji].splice(idx,1);else r[emoji].push(wcUsername);
-  if(r[emoji].length===0)delete r[emoji];
-  try{await updateDoc(doc(wcDb,'messages',msgId),{reactions:r});}catch(e){wcToast('Reaction failed');}
-}
-
-/* ═══ RENDER MESSAGES ═══ */
-function wcRenderMessages(){
-  const el=$('wc-messages'),empty=$('wc-empty');
-  el.innerHTML='';
-  if(!wcMessagesData.length){el.appendChild(empty);$('wc-msg-count').textContent='0 msgs';return;}
-  $('wc-msg-count').textContent=`${wcMessagesData.length} msg${wcMessagesData.length!==1?'s':''}`;
-  let lastDay=null;
-  wcMessagesData.forEach(msg=>{
-    const ds=wcFmtDay(msg.time);
-    if(ds!==lastDay){
-      const d=document.createElement('div');d.className='wc-day-div';d.textContent=ds;
-      el.appendChild(d);lastDay=ds;
-    }
-    const isDeleted=!!msg.deletedBy;
-    const isMine=msg.name===wcUsername;
-    const isAdm=msg.role==='admin';
-    // wrapper
-    const w=document.createElement('div');
-    w.className=`wc-mw ${isMine?'mine':'other'}${isAdm?' wc-admin-msg':''}`;
-    w.dataset.msgId=msg.id;
-    // sender name (others only)
-    if(!isMine){
-      const ne=document.createElement('div');ne.className='wc-msg-name'+(isAdm?' an':'');ne.textContent=msg.name;w.appendChild(ne);
-    }
-    // admin badge
-    if(isAdm&&!isDeleted){const at=document.createElement('span');at.className='wc-admin-tag';at.textContent='ADMIN';w.appendChild(at);}
-    // row
-    const row=document.createElement('div');row.className='wc-msg-row';
-    const bubble=document.createElement('div');
-    if(isDeleted){
-      bubble.className='wc-bubble wc-bubble-deleted';
-      bubble.textContent=`🚫 Message deleted by ${msg.deletedBy}`;
-    }else{
-      bubble.className='wc-bubble';
-      // reply preview
-      if(msg.replyTo){
-        const rp=document.createElement('div');rp.className='wc-reply-preview';
-        rp.innerHTML=`<div class="wc-rp-name">${esc(msg.replyTo.name)}</div><div class="wc-rp-text">${esc(msg.replyTo.text)}</div>`;
-        bubble.appendChild(rp);
-      }
-      bubble.appendChild(document.createTextNode(msg.text));
-      // long press / right click → context menu
-      let pt=null;
-      const onLP=(x,y)=>{navigator.vibrate&&navigator.vibrate(28);wcShowCtx(x,y,msg);};
-      bubble.addEventListener('mousedown',e=>{if(e.button!==0)return;pt=setTimeout(()=>onLP(e.clientX,e.clientY),520);});
-      bubble.addEventListener('mousemove',()=>clearTimeout(pt));
-      bubble.addEventListener('mouseup',()=>clearTimeout(pt));
-      bubble.addEventListener('contextmenu',e=>{e.preventDefault();onLP(e.clientX,e.clientY);});
-      bubble.addEventListener('touchstart',e=>{const t=e.touches[0];pt=setTimeout(()=>onLP(t.clientX,t.clientY),520);},{passive:true});
-      bubble.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
-      bubble.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
-    }
-    row.appendChild(bubble);
-    w.appendChild(row);
-    // reactions
-    if(!isDeleted){
-      const rk=Object.keys(msg.reactions||{}).filter(k=>(msg.reactions[k]||[]).length>0);
-      if(rk.length){
-        const strip=document.createElement('div');strip.className='wc-reactions-strip';
-        rk.forEach(emoji=>{
-          const u=msg.reactions[emoji]||[];
-          const pill=document.createElement('div');pill.className='wc-reaction-pill';
-          if(u.includes(wcUsername))pill.style.background='rgba(0,200,255,.22)';
-          pill.innerHTML=`${emoji}<span class="wc-rc">${u.length}</span>`;
-          pill.title=u.join(', ');
-          pill.addEventListener('click',()=>wcReactTo(msg.id,emoji));
-          strip.appendChild(pill);
-        });
-        w.appendChild(strip);
-      }
-    }
-    // timestamp
-    const te=document.createElement('div');te.className='wc-msg-time';
-    te.textContent=wcFmtTime(msg.time);
-    if(isMine&&!isDeleted)te.innerHTML+=` <span class="wc-tick">✓✓</span>`;
-    w.appendChild(te);
-    el.appendChild(w);
-  });
-}
-
-/* ═══ REALTIME ═══ */
-const wcQ=query(collection(wcDb,'messages'),orderBy('time','asc'));
-
-/* Track previously seen message IDs to detect truly new ones */
-let wcSeenIds=new Set();
-let wcAlertTimer=null;
-
+/* ═══ REPLY ALERT ═══ */
 function wcShowReplyAlert(repliedMsgId){
-  /* Banner */
-  const banner=document.getElementById('wc-reply-alert');
-  if(!banner)return;
+  const banner=$('wc-reply-alert');if(!banner)return;
   if(wcAlertTimer)clearTimeout(wcAlertTimer);
-  banner.classList.add('show');
-  wcAlertTimer=setTimeout(()=>banner.classList.remove('show'),3000);
-
-  /* Glow the original message bubble */
+  banner.classList.add('show');wcAlertTimer=setTimeout(()=>banner.classList.remove('show'),3000);
   if(repliedMsgId){
     const wrapper=document.querySelector(`.wc-mw[data-msg-id="${repliedMsgId}"]`);
-    if(wrapper){
-      const bubble=wrapper.querySelector('.wc-bubble');
-      if(bubble){
-        bubble.classList.remove('reply-glow');
-        // Force reflow so re-adding the class restarts animation
-        void bubble.offsetWidth;
-        bubble.classList.add('reply-glow');
-        setTimeout(()=>bubble.classList.remove('reply-glow'),1600);
-        wrapper.scrollIntoView({behavior:'smooth',block:'center'});
-      }
-    }
+    if(wrapper){const bubble=wrapper.querySelector('.wc-bubble');if(bubble){bubble.classList.remove('reply-glow');void bubble.offsetWidth;bubble.classList.add('reply-glow');setTimeout(()=>bubble.classList.remove('reply-glow'),1600);wrapper.scrollIntoView({behavior:'smooth',block:'center'});}}
   }
 }
 
-onSnapshot(wcQ,snap=>{
-  const newData=snap.docs.map(d=>({id:d.id,...d.data()}));
+/* ═══ UNREAD BADGE (group) ═══ */
+function wcUpdateBadge(){
+  const panel=$('wechat-panel');
+  if(panel&&panel.classList.contains('open')&&wcMode==='group'){wcLastSeenCount=wcMessagesData.length;return;}
+  const unread=Math.max(0,wcMessagesData.length-wcLastSeenCount);
+  const badge=$('chat-badge');if(!badge)return;
+  if(unread>0){badge.textContent=unread>99?'99+':String(unread);badge.style.display='block';}
+  else badge.style.display='none';
+}
 
-  /* Detect new messages that reply to the current user */
-  if(wcUsername && wcSeenIds.size>0){
-    newData.forEach(msg=>{
-      if(!wcSeenIds.has(msg.id)){
-        // This is a brand-new message
-        if(
-          msg.replyTo &&
-          msg.replyTo.name === wcUsername &&
-          msg.name !== wcUsername // someone else replied to us
-        ){
-          wcShowReplyAlert(msg.replyTo.id);
-        }
-      }
-    });
-  }
+/* ═══ EMOJI GRID ═══ */
+const wg=$('wc-emoji-grid');
+WC_EMOJIS.forEach(e=>{
+  const b=document.createElement('button');b.className='wc-ep-emoji';b.textContent=e;
+  b.addEventListener('click',()=>{const mi=$('wc-msg-input');mi.value+=e;mi.focus();emojiPicker.classList.remove('show');});
+  wg.appendChild(b);
+});
+$('wc-emoji-toggle').addEventListener('click',()=>emojiPicker.classList.toggle('show'));
+$('wc-msg-input').addEventListener('focus',()=>emojiPicker.classList.remove('show'));
 
-  /* Update seen set */
-  newData.forEach(m=>wcSeenIds.add(m.id));
+/* ═══ NAME MODAL ═══ */
+function wcSubmitName(){
+  const v=$('wc-name-input').value.trim();
+  if(!v){$('wc-name-err').textContent='Please enter your name.';return;}
+  wcUsername=v;localStorage.setItem('wc_user',v);
+  $('wc-name-modal').classList.remove('show');
+  $('wc-name-modal').classList.remove('change-mode');
+  $('wc-msg-input').focus();
+  if(wcPendingMode){const m=wcPendingMode;wcPendingMode=null;window.wcSelectMode(m);}
 
-  wcMessagesData=newData;
-  wcRenderMessages();
-  wcScrollBot(!wcFirst);
-  wcUpdateBadge();
-  if(wcFirst)wcFirst=false;
-},{error:e=>console.error('Firestore error:',e)});
+/* ═══ CHANGE NAME (user can rename themselves) ═══ */
+window.wcOpenChangeName=function(){
+  const modal=$('wc-name-modal');
+  const input=$('wc-name-input');
+  const title=modal.querySelector('h2');
+  const subtitle=modal.querySelector('p');
+  // Switch modal to "change" mode
+  modal.classList.add('change-mode');
+  if(title)title.textContent='✏️ Change Your Name';
+  if(subtitle)subtitle.textContent='Enter a new display name for the chat.';
+  if(input)input.value=wcUsername||'';
+  modal.classList.add('show');
+  setTimeout(()=>{if(input)input.focus();},120);
+};
+}
+$('wc-name-submit').addEventListener('click',wcSubmitName);
+$('wc-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
+
+/* ═══ ADMIN LOGIC ═══ */
+$('wc-admin-btn').addEventListener('click',()=>{
+  if(wcIsAdmin){adminBar.classList.toggle('show');return;}
+  $('wc-admin-id').value='';$('wc-admin-pass').value='';$('wc-admin-err').textContent='';
+  $('wc-admin-modal').classList.add('show');
+  setTimeout(()=>$('wc-admin-id').focus(),120);
+});
+$('wc-admin-cancel').addEventListener('click',()=>$('wc-admin-modal').classList.remove('show'));
+$('wc-admin-submit').addEventListener('click',()=>{
+  if($('wc-admin-id').value===WC_AID&&$('wc-admin-pass').value===WC_APW){
+    wcIsAdmin=true;$('wc-admin-modal').classList.remove('show');
+    $('wc-admin-badge').classList.add('show');
+    wcToast('👑 Admin mode on');
+    if(wcMode==='group')adminBar.classList.add('show');
+  }else{$('wc-admin-err').textContent='Wrong credentials.';$('wc-admin-pass').value='';}
+});
+$('wc-admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('wc-admin-submit').click();});
+$('wc-logout-btn').addEventListener('click',()=>{
+  wcIsAdmin=false;adminBar.classList.remove('show');$('wc-admin-badge').classList.remove('show');
+  wcToast('Logged out');
+  window.wcShowModeSelector();
+});
+$('wc-back-to-inbox').addEventListener('click',wcAdminBackToInboxFn);
+$('wc-clear-btn').addEventListener('click',()=>$('wc-confirm-modal').classList.add('show'));
+$('wc-confirm-no').addEventListener('click',()=>$('wc-confirm-modal').classList.remove('show'));
+$('wc-confirm-yes').addEventListener('click',async()=>{
+  $('wc-confirm-modal').classList.remove('show');
+  try{
+    const col=wcMode==='group'?'messages':'private_messages';
+    let q;
+    if(wcMode==='private'&&wcCurrentPrivateUserId){
+      q=query(collection(wcDb,col),where('userId','==',wcCurrentPrivateUserId));
+    } else {
+      q=collection(wcDb,col);
+    }
+    const sn=await getDocs(q);
+    await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,col,d.id))));
+    wcToast('🗑 Chat cleared');
+  }catch(e){wcToast('Error: '+e.message);}
+});
+
+/* ═══ REPLY BAR ═══ */
+$('wc-rb-close').addEventListener('click',()=>{wcReplyTo=null;replyBar.classList.remove('show');});
+
+/* ═══ SEND EVENTS ═══ */
+$('wc-send-btn').addEventListener('click',wcSend);
+$('wc-msg-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();wcSend();}});
+$('wc-msg-input').addEventListener('input',()=>{const mi=$('wc-msg-input');mi.style.height='auto';mi.style.height=Math.min(mi.scrollHeight,100)+'px';});
+
+/* ═══ SCROLL DOWN BTN ═══ */
+(function(){
+  const btn=$('wc-scroll-down-btn');
+  if(!btn)return;
+  const refresh=()=>{btn.classList.toggle('visible',!wcAtBottom());};
+  let ticking=false;
+  msgEl.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{refresh();ticking=false;});},{passive:true});
+  btn.addEventListener('click',()=>{msgEl.scrollTo({top:msgEl.scrollHeight,behavior:'smooth'});setTimeout(refresh,120);});
+  new MutationObserver(()=>{requestAnimationFrame(()=>{if(wcAtBottom())msgEl.scrollTop=msgEl.scrollHeight;refresh();});}).observe(msgEl,{childList:true,subtree:true});
+})();
 
 /* ═══ PRE-FILL NAME ═══ */
 window.addEventListener('load',()=>{
   const sn=localStorage.getItem('ab_student_name');
   if(sn&&!localStorage.getItem('wc_user')){wcUsername=sn;localStorage.setItem('wc_user',sn);}
 });
+
+/* ═══ INITIAL: show mode selector on open ═══ */
+window.wcShowModeSelector=function(){
+  wcMode=null;
+  modeSelector.classList.remove('hidden');
+  hideChatUI();
+  // Kill ALL listeners to prevent ghost data leaking across mode switches
+  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;console.log('[Chat] Killed group listener on mode selector show');}
+  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;console.log('[Chat] Killed private listener on mode selector show');}
+  if(wcInboxUnsub&&!wcIsAdmin){wcInboxUnsub();wcInboxUnsub=null;}
+  // Clear rendered messages so previous chat never bleeds into next
+  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+  wcMessagesData=[];
+  inbox.classList.remove('show');
+  privateChatHeader.classList.remove('show');
+  adminBar.classList.remove('show');
+  wcCurrentPrivateUserId=null;
+  wcCheckPrivateUnread();
+};
 </script>
 
-<!-- ══════════════ MAINTENANCE NOTICE MODAL ══════════════ -->
-<style>
-#maint-overlay{
-  position:fixed;inset:0;z-index:99999;
-  background:rgba(4,8,18,0.92);
-  backdrop-filter:blur(18px) saturate(1.4);
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-  animation:mFadeIn .55s cubic-bezier(0.22,1,0.36,1) both;
-}
-@keyframes mFadeIn{from{opacity:0;}to{opacity:1;}}
-#maint-box{
-  background:linear-gradient(145deg,#0a1020 0%,#0d1528 100%);
-  border:1.5px solid rgba(91,154,255,0.22);
-  border-radius:24px;
-  padding:32px 28px 28px;
-  max-width:420px;width:100%;
-  box-shadow:0 0 60px rgba(91,154,255,0.12),0 24px 64px rgba(0,0,0,0.6);
-  animation:mBoxIn .65s cubic-bezier(0.34,1.56,0.64,1) both;
-  max-height:90vh;overflow-y:auto;
-}
-@keyframes mBoxIn{from{transform:scale(0.88) translateY(24px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-.maint-badge{
-  display:inline-flex;align-items:center;gap:7px;
-  background:rgba(255,107,107,0.14);
-  border:1px solid rgba(255,107,107,0.35);
-  border-radius:99px;padding:5px 14px;
-  font-size:11px;font-weight:800;letter-spacing:.8px;
-  color:#ff8080;text-transform:uppercase;margin-bottom:16px;
-}
-.maint-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:#ff6b6b;animation:mBlink 1.2s ease-in-out infinite;}
-@keyframes mBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
-#maint-box h2{
-  font-size:20px;font-weight:900;color:#e8eeff;
-  line-height:1.3;margin-bottom:10px;letter-spacing:-.3px;
-}
-#maint-box .maint-sub{
-  font-size:13px;color:#6b85b0;margin-bottom:20px;line-height:1.5;
-}
-.maint-divider{height:1px;background:rgba(255,255,255,0.07);margin:18px 0;}
-.maint-works{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;}
-.maint-works li{
-  font-size:13px;color:#b0c0de;line-height:1.4;
-  display:flex;align-items:flex-start;gap:8px;
-}
-.maint-works li span.mi{font-size:15px;flex-shrink:0;margin-top:1px;}
-/* Countdown */
-.maint-cd-label{
-  font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
-  color:#5b9aff;margin-bottom:10px;text-align:center;
-}
-.maint-cd{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:rgba(91,154,255,0.07);
-  border:1px solid rgba(91,154,255,0.15);
-  border-radius:16px;padding:16px 12px;margin-bottom:18px;
-}
-.maint-cd-unit{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.maint-cd-num{
-  font-size:28px;font-weight:900;color:#e8eeff;line-height:1;
-  min-width:46px;text-align:center;letter-spacing:-1px;
-  font-variant-numeric:tabular-nums;
-}
-.maint-cd-name{font-size:10px;font-weight:700;color:#3a5070;letter-spacing:1px;text-transform:uppercase;}
-.maint-cd-sep{font-size:26px;font-weight:900;color:#3a5070;line-height:1;margin-bottom:14px;}
-.maint-footer{
-  text-align:center;font-size:12px;color:#3a5070;line-height:1.5;
-}
-.maint-footer strong{color:#5b9aff;}
-/* Live soon state */
-#maint-live-msg{
-  display:none;text-align:center;padding:10px 0;
-  font-size:15px;font-weight:800;color:#2fe8a0;
-  animation:mPulseGreen 1.6s ease-in-out infinite;
-}
-@keyframes mPulseGreen{0%,100%{opacity:1;}50%{opacity:.5;}}
-/* Dismiss button */
-#maint-dismiss{
-  display:flex;align-items:center;justify-content:center;gap:7px;
-  width:100%;margin-top:18px;padding:12px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;cursor:pointer;
-  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
-  color:#6b85b0;transition:background .2s,color .2s,border-color .2s,transform .15s;
-}
-#maint-dismiss:hover{background:rgba(255,255,255,0.09);color:#e8eeff;border-color:rgba(255,255,255,0.2);}
-#maint-dismiss:active{transform:scale(0.97);}
-/* Locked strip shown during maintenance */
-#maint-locked-strip{
-  display:none;margin-top:18px;text-align:center;
-  font-size:11.5px;font-weight:700;color:#ff8080;
-  background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);
-  border-radius:10px;padding:9px 12px;letter-spacing:.2px;
-}
-</style>
-
-<div id="maint-overlay">
-  <div id="maint-box">
-    <div class="maint-badge">📢 Important Notice</div>
-    <h2>Temporary Site Closure</h2>
-    <p class="maint-sub">
-      Our website will be temporarily unavailable today,<br>
-      <strong style="color:#e8eeff;">30 April 2026</strong>, from <strong style="color:#e8eeff;">1:00 PM</strong> to <strong style="color:#e8eeff;">6:00 PM</strong> due to scheduled upgrades and maintenance.
-    </p>
-
-    <div class="maint-divider"></div>
-
-    <p class="maint-cd-label" id="cd-top-label">⏱ Maintenance ends in</p>
-    <div class="maint-cd" id="maint-cd-wrap">
-      <div class="maint-cd-unit"><div class="maint-cd-num" id="cd-h">--</div><div class="maint-cd-name">Hours</div></div>
-      <div class="maint-cd-sep">:</div>
-      <div class="maint-cd-unit"><div class="maint-cd-num" id="cd-m">--</div><div class="maint-cd-name">Mins</div></div>
-      <div class="maint-cd-sep">:</div>
-      <div class="maint-cd-unit"><div class="maint-cd-num" id="cd-s">--</div><div class="maint-cd-name">Secs</div></div>
-    </div>
-    <div id="maint-live-msg">🟢 The site will be live soon!</div>
-
-    <div class="maint-divider"></div>
-
-    <p style="font-size:12.5px;color:#6b85b0;margin-bottom:10px;font-weight:700;">During this time we are working on:</p>
-    <ul class="maint-works">
-      <li><span class="mi">🚀</span> Upgrading core features for better performance</li>
-      <li><span class="mi">🎨</span> Enhancing the user interface (UI) for a more premium experience</li>
-      <li><span class="mi">💬</span> Improving the chat system for faster and smoother communication</li>
-      <li><span class="mi">⚙️</span> General optimizations and bug fixes</li>
-    </ul>
-
-    <div class="maint-divider"></div>
-
-    <div class="maint-footer">
-      We sincerely apologize for any inconvenience and appreciate your patience.<br><br>
-      The site will be back online by <strong>6:00 PM</strong> with exciting improvements!<br><br>
-      Thank you — <strong>Team Aarambh Fan Page</strong>
-    </div>
-    <button id="maint-dismiss">✕ &nbsp;Dismiss Notice</button>
-    <div id="maint-locked-strip">🔒 Notice cannot be dismissed during maintenance</div>
-  </div>
-</div>
-
-<script>
-(function(){
-  // Maintenance window: 30 April 2026, 1 PM – 6 PM (local time)
-  const maintStart = new Date('2026-04-30T13:00:00');
-  const maintEnd   = new Date('2026-04-30T18:00:00');
-
-  const cdH = document.getElementById('cd-h');
-  const cdM = document.getElementById('cd-m');
-  const cdS = document.getElementById('cd-s');
-  const cdWrap = document.getElementById('maint-cd-wrap');
-  const liveMsg = document.getElementById('maint-live-msg');
-  const topLabel = document.getElementById('cd-top-label');
-  const overlay = document.getElementById('maint-overlay');
-  const dismissBtn = document.getElementById('maint-dismiss');
-  const lockedStrip = document.getElementById('maint-locked-strip');
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-
-  // Dismiss button: only works before maintenance starts
-  dismissBtn.addEventListener('click', function(){
-    const now = new Date();
-    if(now < maintStart){
-      overlay.style.transition = 'opacity .4s ease';
-      overlay.style.opacity = '0';
-      setTimeout(()=>{ overlay.style.display='none'; }, 400);
-    }
-  });
-
-  function tick(){
-    const now = new Date();
-
-    // Before maintenance window: show dismiss button, count down to start
-    if(now < maintStart){
-      dismissBtn.style.display = 'flex';
-      lockedStrip.style.display = 'none';
-      const diff = Math.floor((maintStart - now) / 1000);
-      const h = Math.floor(diff / 3600);
-      const m = Math.floor((diff % 3600) / 60);
-      const s = diff % 60;
-      topLabel.textContent = '\u23f1 Maintenance starts in';
-      cdH.textContent = pad(h);
-      cdM.textContent = pad(m);
-      cdS.textContent = pad(s);
-      return;
-    }
-
-    // During maintenance: LOCK — remove dismiss button, show locked strip, force overlay visible
-    if(now >= maintStart && now < maintEnd){
-      dismissBtn.style.display = 'none';
-      lockedStrip.style.display = 'block';
-      overlay.style.display = 'flex';
-      overlay.style.opacity = '1';
-      const diff = Math.floor((maintEnd - now) / 1000);
-      const h = Math.floor(diff / 3600);
-      const m = Math.floor((diff % 3600) / 60);
-      const s = diff % 60;
-      topLabel.textContent = '\u23f1 Maintenance ends in';
-      cdH.textContent = pad(h);
-      cdM.textContent = pad(m);
-      cdS.textContent = pad(s);
-      return;
-    }
-
-    // After maintenance ends
-    dismissBtn.style.display = 'none';
-    lockedStrip.style.display = 'none';
-    topLabel.style.display = 'none';
-    cdWrap.style.display = 'none';
-    liveMsg.style.display = 'block';
-  }
-
-  tick();
-  setInterval(tick, 1000);
-})();
-</script>
-<!-- ══════════════ END MAINTENANCE NOTICE ══════════════ -->
 
 <script>
 (function(){
@@ -3807,32 +4351,7 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
-<script>
-(function(){
-  const el = document.getElementById('wc-messages');
-  const btn = document.getElementById('wc-scroll-down-btn');
-  if(!el || !btn) return;
-  const atBottom = () => el.scrollHeight - el.scrollTop - el.clientHeight < 96;
-  const refresh = () => {
-    const show = !atBottom();
-    btn.classList.toggle('show', show);
-    btn.style.opacity = show ? '1' : '0';
-    btn.style.pointerEvents = show ? 'auto' : 'none';
-  };
-  let ticking = false;
-  el.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => { refresh(); ticking = false; });
-  }, {passive:true});
-  btn.addEventListener('click', () => {
-    el.scrollTo({top: el.scrollHeight, behavior: 'smooth'});
-    setTimeout(refresh, 120);
-  });
-  new MutationObserver(() => { requestAnimationFrame(() => { if (atBottom()) el.scrollTop = el.scrollHeight; refresh(); }); }).observe(el, {childList:true, subtree:true});
-  refresh();
-})();
-</script>
+
 
 </body>
 </html>
