@@ -3463,6 +3463,32 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
 #wc-cancel-closure-btn:active{transform:scale(.95);}
 #wc-cancel-closure-btn:hover{background:rgba(239,68,68,.2);}
 
+/* Minimize button inside closure box */
+#wc-closure-minimize-btn{
+  position:absolute;top:14px;right:14px;
+  width:30px;height:30px;border-radius:50%;border:1px solid rgba(239,68,68,.3);
+  background:rgba(239,68,68,.1);color:#fca5a5;
+  font-size:.8rem;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,transform .2s;
+}
+#wc-closure-minimize-btn:hover{background:rgba(239,68,68,.25);}
+#wc-closure-box{position:relative;}
+
+/* Minimized pill */
+#wc-closure-pill{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:850;
+  background:rgba(15,20,40,.95);border:1px solid rgba(239,68,68,.4);
+  color:#fca5a5;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;
+  padding:8px 18px;border-radius:99px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(239,68,68,.25);
+  white-space:nowrap;
+  animation:pillPulse 1s ease-in-out infinite;
+  backdrop-filter:blur(12px);
+}
+@keyframes pillPulse{0%,100%{box-shadow:0 4px 20px rgba(239,68,68,.25);}50%{box-shadow:0 4px 28px rgba(239,68,68,.5);}}
+
 /* ── FRESH CHAT SCREEN ── */
 #wc-fresh-screen{
   position:absolute;inset:0;z-index:800;
@@ -3504,9 +3530,9 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
     <!-- ── FRESH CHAT SCREEN (shown after chat is deleted) ── -->
     <div id="wc-fresh-screen">
       <div id="wc-fresh-icon">✨</div>
-      <div id="wc-fresh-title">Fresh Start!</div>
-      <div id="wc-fresh-sub">The previous chat session has ended. Start a new conversation below.</div>
-      <button id="wc-fresh-start-btn" onclick="wcStartFresh()">💬 Start New Chat</button>
+      <div id="wc-fresh-title">Chat Session Ended</div>
+      <div id="wc-fresh-sub">This conversation has been closed by admin. You can start a new chat below.</div>
+      <button id="wc-fresh-start-btn" onclick="wcStartFresh()">💬 Start a New Chat</button>
     </div>
 
     <!-- ── CHAT LOADING OVERLAY ── -->
@@ -3584,14 +3610,22 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
     </div>
 
     <!-- ── CHAT CLOSURE COUNTDOWN OVERLAY ── -->
+    <!-- Admin version: minimizable, has cancel button -->
     <div id="wc-closure-overlay">
       <div id="wc-closure-box">
+        <!-- Minimize button (admin only) -->
+        <button id="wc-closure-minimize-btn" title="Minimize" style="display:none;">✕</button>
         <div id="wc-closure-icon">🔴</div>
         <div id="wc-closure-title">Chat Closing In</div>
         <div id="wc-closure-timer">2:00</div>
         <div id="wc-closure-sub">This chat will be permanently deleted. You cannot send messages during this time.</div>
         <button id="wc-cancel-closure-btn" style="display:none;">⛔ Cancel Closure</button>
       </div>
+    </div>
+
+    <!-- Minimized pill (admin only, shown when overlay is minimized) -->
+    <div id="wc-closure-pill" style="display:none;" onclick="wcMaximizeClosurePill()">
+      🔴 <span id="wc-closure-pill-timer">2:00</span>
     </div>
 
     <!-- ── ADMIN INBOX ── -->
@@ -3732,7 +3766,7 @@ function wcGoBack(){
 <!-- ═══════════ DUAL CHAT JS ═══════════ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,collection,addDoc,deleteDoc,doc,updateDoc,onSnapshot,query,orderBy,getDocs,where,serverTimestamp,getDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,addDoc,deleteDoc,doc,updateDoc,onSnapshot,query,orderBy,getDocs,where,serverTimestamp,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const wcConfig={
   apiKey:"AIzaSyD8_zOJgINAZMWzqn0ozDSE98ouTAPotBU",
@@ -3914,7 +3948,7 @@ function wcDoSelectMode(mode){
       $('wc-msg-input').placeholder='Message admin privately…';
       showChatUI();
       wcFirst=true;
-      wcStartPrivateChat(initUserId());
+      wcStartPrivateChatWithClosure(initUserId());
       // mark seen
       wcPrivateLastSeen=Date.now();
       localStorage.setItem('wc_priv_last_seen',wcPrivateLastSeen);
@@ -3951,8 +3985,11 @@ function wcAdminOpenUserChat(userId,userName){
   adminBar.classList.add('show');
   $('wc-back-to-inbox').classList.add('show');
   $('wc-header-title').textContent='Private: '+userName;
+  // Show Close Chat button — only here in private 1-1
+  const ccb=$('wc-close-chat-btn');
+  if(ccb)ccb.style.display='inline-flex';
   wcFirst=true;
-  wcStartPrivateChat(userId);
+  wcStartPrivateChatWithClosure(userId);
 }
 
 function wcAdminBackToInboxFn(){
@@ -3961,6 +3998,9 @@ function wcAdminBackToInboxFn(){
   inputBar.style.display='none';
   adminBar.classList.remove('show');
   $('wc-back-to-inbox').classList.remove('show');
+  // Hide Close Chat button when leaving private 1-1
+  const ccb2=$('wc-close-chat-btn');
+  if(ccb2)ccb2.style.display='none';
   if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
   wcCurrentPrivateUserId=null;
   showInbox();
@@ -4467,130 +4507,283 @@ window.addEventListener('load',()=>{
   if(sn&&!localStorage.getItem('wc_user')){wcUsername=sn;localStorage.setItem('wc_user',sn);}
 });
 
-/* ═══ INITIAL: show mode selector on open ═══ */
-window.wcShowModeSelector=function(){
-  wcMode=null;
-  modeSelector.classList.remove('hidden');
-  hideChatUI();
-  // Kill ALL listeners to prevent ghost data leaking across mode switches
-  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;console.log('[Chat] Killed group listener on mode selector show');}
-  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;console.log('[Chat] Killed private listener on mode selector show');}
-  if(wcInboxUnsub&&!wcIsAdmin){wcInboxUnsub();wcInboxUnsub=null;}
-  // Clear rendered messages so previous chat never bleeds into next
-  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
-  wcMessagesData=[];
-  inbox.classList.remove('show');
-  privateChatHeader.classList.remove('show');
-  adminBar.classList.remove('show');
-  wcCurrentPrivateUserId=null;
-  wcCheckPrivateUnread();
-};
-
 /* ═══════════════════════════════════════════
-   CHAT CLOSURE SYSTEM
+   CHAT CLOSURE SYSTEM — Firebase-synced
+   Admin writes closure state to Firestore.
+   All clients (admin + users) listen to it
+   in real-time and react identically.
 ═══════════════════════════════════════════ */
 let wcClosureTimer=null;
 let wcClosureSeconds=120;
+let wcClosureMinimized=false;
+let wcClosureUnsub=null;
+let wcClosureTargetUserId=null; // which user's private chat is being closed
 
-// Show the confirm dialog when admin clicks Close Chat
-$('wc-close-chat-btn').addEventListener('click',()=>{
-  $('wc-close-confirm-modal').classList.add('show');
-});
-$('wc-close-confirm-no').addEventListener('click',()=>{
-  $('wc-close-confirm-modal').classList.remove('show');
-});
-$('wc-close-confirm-yes').addEventListener('click',()=>{
-  $('wc-close-confirm-modal').classList.remove('show');
-  wcStartClosure();
-});
+// ── Firestore closure doc reference ──
+// Path: chat_closure/{userId}  (per-user closure signal)
+function wcClosureDocRef(userId){
+  return doc(wcDb,'chat_closure',userId);
+}
 
-function wcStartClosure(){
-  wcClosureSeconds=120;
-  // Disable input for everyone
+// ── Hide Close Chat btn on init ──
+(function(){const btn=$('wc-close-chat-btn');if(btn)btn.style.display='none';})();
+
+// ── Confirm modal listeners ──
+(function(){
+  const closeBtn=$('wc-close-chat-btn');
+  const confirmNo=$('wc-close-confirm-no');
+  const confirmYes=$('wc-close-confirm-yes');
+  const minimizeBtn=$('wc-closure-minimize-btn');
+  const cancelBtn=$('wc-cancel-closure-btn');
+
+  if(closeBtn)closeBtn.addEventListener('click',()=>{
+    const m=$('wc-close-confirm-modal');if(m)m.classList.add('show');
+  });
+  if(confirmNo)confirmNo.addEventListener('click',()=>{
+    const m=$('wc-close-confirm-modal');if(m)m.classList.remove('show');
+  });
+  if(confirmYes)confirmYes.addEventListener('click',async()=>{
+    const m=$('wc-close-confirm-modal');if(m)m.classList.remove('show');
+    await wcAdminInitiateClosure();
+  });
+  if(minimizeBtn)minimizeBtn.addEventListener('click',()=>{
+    const ov=$('wc-closure-overlay');if(ov)ov.classList.remove('active');
+    wcClosureMinimized=true;
+    const pill=$('wc-closure-pill');if(pill)pill.style.display='flex';
+  });
+  if(cancelBtn)cancelBtn.addEventListener('click',async()=>{
+    if(!wcIsAdmin)return;
+    await wcAdminCancelClosure();
+  });
+})();
+
+window.wcMaximizeClosurePill=function(){
+  const pill=$('wc-closure-pill');if(pill)pill.style.display='none';
+  wcClosureMinimized=false;
+  const ov=$('wc-closure-overlay');if(ov)ov.classList.add('active');
+};
+
+// ══════════════════════════════════════════
+// ADMIN: write closure signal to Firestore
+// ══════════════════════════════════════════
+async function wcAdminInitiateClosure(){
+  if(!wcCurrentPrivateUserId)return;
+  wcClosureTargetUserId=wcCurrentPrivateUserId;
+  const endsAt=Date.now()+120000; // now + 2 minutes
+  try{
+    await setDoc(wcClosureDocRef(wcClosureTargetUserId),{
+      active:true,
+      endsAt,
+      startedAt:Date.now()
+    });
+  }catch(e){console.error('[Closure] Write failed:',e);wcToast('Error starting closure');}
+}
+
+async function wcAdminCancelClosure(){
+  const userId=wcClosureTargetUserId||wcCurrentPrivateUserId;
+  if(!userId)return;
+  try{
+    await setDoc(wcClosureDocRef(userId),{active:false,endsAt:0,startedAt:0});
+  }catch(e){console.error('[Closure] Cancel failed:',e);}
+}
+
+// ══════════════════════════════════════════
+// LOCAL: apply closure UI state to THIS client
+// ══════════════════════════════════════════
+function wcApplyClosureActive(endsAt){
+  // Calculate remaining seconds from server endsAt
+  const remaining=Math.max(0,Math.round((endsAt-Date.now())/1000));
+  wcClosureSeconds=remaining;
+  wcClosureMinimized=false;
+
+  // Lock inputs
   const inp=$('wc-msg-input');
   const sendBtn=$('wc-send-btn');
   const emojiBtn=$('wc-emoji-toggle');
   if(inp){inp.disabled=true;inp.placeholder='Chat is closing…';}
   if(sendBtn)sendBtn.disabled=true;
   if(emojiBtn)emojiBtn.disabled=true;
+
   // Show overlay
-  const overlay=$('wc-closure-overlay');
-  overlay.classList.add('active');
-  // Show cancel button only for admin
-  const cancelBtn=$('wc-cancel-closure-btn');
-  if(wcIsAdmin)cancelBtn.style.display='block';
-  // Update timer display
-  wcUpdateClosureTimer();
-  // Start countdown
+  $('wc-closure-overlay').classList.add('active');
+
+  // Admin gets minimize + cancel; user gets nothing
+  if(wcIsAdmin){
+    $('wc-cancel-closure-btn').style.display='block';
+    $('wc-closure-minimize-btn').style.display='flex';
+  } else {
+    $('wc-cancel-closure-btn').style.display='none';
+    $('wc-closure-minimize-btn').style.display='none';
+  }
+
+  wcUpdateClosureDisplay();
+
+  // Start/restart local countdown display
+  if(wcClosureTimer){clearInterval(wcClosureTimer);wcClosureTimer=null;}
   wcClosureTimer=setInterval(()=>{
-    wcClosureSeconds--;
-    wcUpdateClosureTimer();
+    wcClosureSeconds=Math.max(0,Math.round((endsAt-Date.now())/1000));
+    wcUpdateClosureDisplay();
     if(wcClosureSeconds<=0){
       clearInterval(wcClosureTimer);
       wcClosureTimer=null;
-      wcExecuteClosure();
+      // Execution is triggered by the Firestore listener detecting endsAt passed
+      // but we also execute locally in case listener is slow
+      wcLocalExecuteClosure();
     }
-  },1000);
+  },500);
 }
 
-function wcUpdateClosureTimer(){
+function wcApplyClosureCancelled(){
+  if(wcClosureTimer){clearInterval(wcClosureTimer);wcClosureTimer=null;}
+  wcClosureMinimized=false;
+  $('wc-closure-overlay').classList.remove('active');
+  $('wc-closure-pill').style.display='none';
+  // Re-enable inputs
+  const inp=$('wc-msg-input');
+  const sendBtn=$('wc-send-btn');
+  const emojiBtn=$('wc-emoji-toggle');
+  if(inp){inp.disabled=false;inp.placeholder=wcMode==='group'?'Ask a doubt…':'Message admin privately…';}
+  if(sendBtn)sendBtn.disabled=false;
+  if(emojiBtn)emojiBtn.disabled=false;
+  if(wcIsAdmin)wcToast('✅ Chat closure cancelled');
+}
+
+function wcUpdateClosureDisplay(){
   const m=Math.floor(wcClosureSeconds/60);
   const s=wcClosureSeconds%60;
-  $('wc-closure-timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  const str=`${m}:${s.toString().padStart(2,'0')}`;
+  const timerEl=$('wc-closure-timer');
+  const pillTimer=$('wc-closure-pill-timer');
+  if(timerEl)timerEl.textContent=str;
+  if(pillTimer)pillTimer.textContent=str;
 }
 
-async function wcExecuteClosure(){
-  // Delete all messages from both collections
-  try{
-    const cols=['messages','private_messages'];
-    for(const col of cols){
-      const sn=await getDocs(collection(wcDb,col));
-      await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,col,d.id))));
+// ══════════════════════════════════════════
+// LOCAL EXECUTION after countdown hits zero
+// ══════════════════════════════════════════
+let wcClosureExecuted=false;
+async function wcLocalExecuteClosure(){
+  if(wcClosureExecuted)return;
+  wcClosureExecuted=true;
+
+  // Hide overlays
+  $('wc-closure-overlay').classList.remove('active');
+  $('wc-closure-pill').style.display='none';
+  wcClosureMinimized=false;
+
+  // Re-enable inputs
+  const inp=$('wc-msg-input');
+  const sendBtn=$('wc-send-btn');
+  const emojiBtn=$('wc-emoji-toggle');
+  if(inp){inp.disabled=false;inp.placeholder='Type a message…';}
+  if(sendBtn)sendBtn.disabled=false;
+  if(emojiBtn)emojiBtn.disabled=false;
+
+  // Admin: delete ONLY this specific user's messages, then go back to inbox
+  if(wcIsAdmin){
+    const targetId=wcClosureTargetUserId||wcCurrentPrivateUserId;
+    try{
+      if(targetId){
+        // Delete only this user's private messages — not anyone else's
+        const q=query(collection(wcDb,'private_messages'),where('userId','==',targetId));
+        const sn=await getDocs(q);
+        await Promise.all(sn.docs.map(d=>deleteDoc(doc(wcDb,'private_messages',d.id))));
+      }
+      // Clear closure signal in Firestore
+      if(targetId){
+        await setDoc(wcClosureDocRef(targetId),{active:false,endsAt:0,startedAt:0});
+      }
+    }catch(e){console.error('[Closure] Delete failed:',e);}
+
+    // Stop this private chat's listener
+    if(wcClosureUnsub){wcClosureUnsub();wcClosureUnsub=null;}
+    if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+
+    // Clear local message render
+    Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+    wcMessagesData=[];
+
+    // Reset tracking
+    wcClosureTargetUserId=null;
+    wcCurrentPrivateUserId=null;
+
+    // Hide private chat UI, go back to inbox (keep inbox listener alive)
+    privateChatHeader.classList.remove('show');
+    msgEl.style.display='none';
+    inputBar.style.display='none';
+    adminBar.classList.remove('show');
+    $('wc-back-to-inbox').classList.remove('show');
+    const ccb=$('wc-close-chat-btn');
+    if(ccb)ccb.style.display='none';
+    modeSelector.classList.add('hidden');
+    mainHeader.style.display='none';
+
+    // Return admin to inbox
+    showInbox();
+    wcToast('🗑 Chat closed and deleted');
+
+  } else {
+    // User: stop listeners, clear UI, show fresh screen
+    if(wcClosureUnsub){wcClosureUnsub();wcClosureUnsub=null;}
+    if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
+
+    Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
+    wcMessagesData=[];
+
+    mainHeader.style.display='none';
+    adminBar.classList.remove('show');
+    modeSelector.classList.add('hidden');
+    inbox.classList.remove('show');
+    privateChatHeader.classList.remove('show');
+    wcCurrentPrivateUserId=null;
+
+    // Show fresh screen for user
+    $('wc-fresh-screen').classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════════
+// LISTEN to closure state for a given userId
+// Called when user/admin enters a private chat
+// ══════════════════════════════════════════
+function wcListenClosure(userId){
+  if(wcClosureUnsub){wcClosureUnsub();wcClosureUnsub=null;}
+  wcClosureExecuted=false;
+  wcClosureUnsub=onSnapshot(wcClosureDocRef(userId),snap=>{
+    if(!snap.exists()){return;}
+    const data=snap.data();
+    if(!data.active){
+      // Cancelled or not started
+      wcApplyClosureCancelled();
+      return;
     }
-  }catch(e){console.error('Closure delete error:',e);}
-  // Hide closure overlay
-  $('wc-closure-overlay').classList.remove('active');
-  // Re-enable inputs
-  const inp=$('wc-msg-input');
-  const sendBtn=$('wc-send-btn');
-  const emojiBtn=$('wc-emoji-toggle');
-  if(inp){inp.disabled=false;inp.placeholder='Type a message…';}
-  if(sendBtn)sendBtn.disabled=false;
-  if(emojiBtn)emojiBtn.disabled=false;
-  // Kill listeners
-  if(wcGroupUnsub){wcGroupUnsub();wcGroupUnsub=null;}
-  if(wcPrivateUnsub){wcPrivateUnsub();wcPrivateUnsub=null;}
-  if(wcInboxUnsub){wcInboxUnsub();wcInboxUnsub=null;}
-  // Clear rendered messages
-  Array.from(msgEl.children).forEach(c=>{if(c.id!=='wc-empty')c.remove();});
-  wcMessagesData=[];
-  // Hide all chat UI
-  mainHeader.style.display='none';
-  adminBar.classList.remove('show');
-  modeSelector.classList.add('hidden');
-  inbox.classList.remove('show');
-  privateChatHeader.classList.remove('show');
-  // Show fresh screen
-  $('wc-fresh-screen').classList.add('active');
+    const endsAt=data.endsAt||0;
+    const now=Date.now();
+    if(endsAt>0&&now>=endsAt){
+      // Already expired — execute immediately
+      wcLocalExecuteClosure();
+    } else if(endsAt>0){
+      // Active closure — sync timer
+      wcApplyClosureActive(endsAt);
+    }
+  });
 }
 
-// Cancel closure (admin only)
-$('wc-cancel-closure-btn').addEventListener('click',()=>{
-  if(!wcIsAdmin)return;
-  if(wcClosureTimer){clearInterval(wcClosureTimer);wcClosureTimer=null;}
-  // Re-enable inputs
-  const inp=$('wc-msg-input');
-  const sendBtn=$('wc-send-btn');
-  const emojiBtn=$('wc-emoji-toggle');
-  if(inp){inp.disabled=false;inp.placeholder='Type a message…';}
-  if(sendBtn)sendBtn.disabled=false;
-  if(emojiBtn)emojiBtn.disabled=false;
-  $('wc-closure-overlay').classList.remove('active');
-  wcToast('✅ Chat closure cancelled');
-});
+// ══════════════════════════════════════════
+// HOOK: start listening when private chat opens
+// ══════════════════════════════════════════
+// wcStartPrivateChat is a function declaration so we wrap calls at the call sites.
+// Both wcAdminOpenUserChat and wcDoSelectMode call it — we intercept via a global wrapper.
+const _wcStartPrivateChatOrig=wcStartPrivateChat;
+function wcStartPrivateChatWithClosure(userId){
+  wcListenClosure(userId);
+  _wcStartPrivateChatOrig(userId);
+}
 
 // Fresh screen — start new chat
 window.wcStartFresh=function(){
+  wcClosureExecuted=false;
+  if(wcClosureUnsub){wcClosureUnsub();wcClosureUnsub=null;}
   $('wc-fresh-screen').classList.remove('active');
   mainHeader.style.display='';
   window.wcShowModeSelector();
