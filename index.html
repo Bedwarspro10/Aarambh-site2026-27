@@ -77,6 +77,30 @@ body::before{
 }
 .llbl{font-size:20px;font-weight:900;letter-spacing:.3px;background:var(--grd-blue);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .lsub{font-size:12.5px;color:var(--txt2);}
+
+/* ── GREEN GRADIENT TEXT (Next Toppers - Feed) ── */
+@keyframes ntHighlight{
+  0%,100%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+}
+@keyframes ntGlow{
+  0%,100%{text-shadow:0 0 8px rgba(0,200,100,0.0),0 0 0px rgba(47,232,160,0);}
+  50%{text-shadow:0 0 18px rgba(0,200,100,0.55),0 0 40px rgba(47,232,160,0.3);}
+}
+.nt-gradient-text{
+  background:linear-gradient(135deg,#00c853,#2fe8a0,#007a33,#2fe8a0,#00c853);
+  background-size:300% 300%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  font-weight:900;
+  animation:ntHighlight 3s ease infinite,ntGlow 3s ease infinite;
+}
+.nt-topbar-name{
+  font-size:14.5px;
+  letter-spacing:-.2px;
+  display:inline-block;
+}
 .ltrack{width:200px;height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-top:4px;}
 .lfill{height:100%;width:0%;border-radius:99px;background:var(--grd-blue);animation:lp 2s var(--spring) forwards;}
 @keyframes lp{to{width:100%;}}
@@ -836,6 +860,103 @@ body::before{
   color:rgba(255,130,130,1);margin-top:5px;
 }
 
+/* ── REAL YT API CARD ── */
+.yt-api-card{
+  display:flex;flex-direction:column;gap:0;
+  background:rgba(255,20,20,0.07);
+  border:1px solid rgba(255,60,60,0.18);
+  border-radius:22px;overflow:hidden;margin-bottom:18px;
+  box-shadow:0 0 0 0 rgba(255,60,60,0);
+  animation:ytCardIn .55s var(--spring) both;
+  transition:box-shadow .3s,border-color .3s;
+  backdrop-filter:blur(18px);
+}
+.yt-api-card:hover{
+  border-color:rgba(255,80,80,0.35);
+  box-shadow:0 0 28px rgba(255,50,50,0.14);
+}
+@keyframes ytCardIn{
+  from{opacity:0;transform:translateY(18px) scale(0.97);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.yt-api-banner{
+  width:100%;height:6px;
+  background:linear-gradient(90deg,#ff0000,#ff6b6b,#ff0000);
+  background-size:200% 100%;
+  animation:ytBanner 3s linear infinite;
+}
+@keyframes ytBanner{0%{background-position:0% 0;}100%{background-position:200% 0;}}
+.yt-api-body{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 16px 8px;
+}
+.yt-api-avatar{
+  width:58px;height:58px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;overflow:hidden;
+  box-shadow:0 4px 18px rgba(255,0,0,0.35);
+  border:2px solid rgba(255,80,80,0.3);
+}
+.yt-api-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.yt-api-info{flex:1;min-width:0;}
+.yt-api-name{
+  font-size:15px;font-weight:900;letter-spacing:-.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.yt-api-handle{
+  font-size:11px;color:var(--txt2);margin-top:2px;font-weight:500;
+}
+.yt-api-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,0,0,0.1);border:1px solid rgba(255,60,60,0.22);
+  border-radius:99px;padding:4px 12px;font-size:11px;font-weight:800;
+  color:#ff7070;margin-top:6px;letter-spacing:.2px;
+}
+.yt-api-badge .dot-live{
+  width:7px;height:7px;border-radius:50%;background:#ff4545;
+  animation:blink 1.4s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
+.yt-api-open-btn{
+  flex-shrink:0;width:36px;height:36px;border-radius:50%;
+  background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.22);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#ff7070;cursor:pointer;
+  transition:transform .2s var(--bounce),background .15s;
+  text-decoration:none;
+}
+.yt-api-open-btn:hover{background:rgba(255,60,60,0.22);transform:scale(1.1);}
+.yt-api-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px 14px;
+  border-top:1px solid rgba(255,60,60,0.1);margin-top:8px;
+}
+.yt-api-footer-stat{text-align:center;flex:1;}
+.yt-api-footer-val{
+  font-size:17px;font-weight:900;letter-spacing:-.3px;
+  background:linear-gradient(135deg,#ff6060,#ffaaaa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.yt-api-footer-lbl{font-size:10px;color:var(--txt2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
+.yt-api-divider{width:1px;height:32px;background:rgba(255,60,60,0.15);}
+.yt-api-refresh{
+  font-size:10px;color:var(--txt3);text-align:center;padding:0 16px 10px;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.yt-api-refresh .spin{display:inline-block;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.yt-api-error{
+  padding:14px 16px;text-align:center;font-size:12px;color:#ff7070;
+  background:rgba(255,0,0,0.05);
+}
+.yt-api-skeleton{
+  background:linear-gradient(90deg,var(--sf) 25%,var(--sf2) 50%,var(--sf) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;
+  border-radius:8px;
+}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
 /* Planet decoration on home */
 .planet-deco{
   position:absolute;right:-20px;top:50%;transform:translateY(-50%);
@@ -1108,8 +1229,8 @@ button,
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2HHOvkjOy76FsghTVyB5Yl9RARb7fkdpj7g&s" alt="AB" onerror="this.parentElement.textContent='AB'"></div>
-  <div class="llbl">Aarambh Batch</div>
+  <div class="lorb"><img src="https://res-console.cloudinary.com/dju83xyco/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/MTc3NzkwNDI2MzU0Nl93ZW9jbHc=/template_primary" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+  <div class="llbl nt-gradient-text">Next Toppers - Feed</div>
   <div class="lsub">2026–27 · NextToppers Fanpage</div>
   <div class="ltrack"><div class="lfill"></div></div>
 </div>
@@ -1146,8 +1267,8 @@ button,
 <div id="app">
   <div class="topbar">
     <div class="tbl">
-      <div class="tlogo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2HHOvkjOy76FsghTVyB5Yl9RARb7fkdpj7g&s" alt="AB" onerror="this.parentElement.textContent='AB'"></div>
-      <div class="tname">Aarambh Batch <span>NextToppers Fanpage</span></div>
+      <div class="tlogo"><img src="https://res-console.cloudinary.com/dju83xyco/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/MTc3NzkwNDI2MzU0Nl93ZW9jbHc=/template_primary" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+      <div class="tname"><span class="nt-gradient-text nt-topbar-name">Next Toppers - Feed</span><span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
 
@@ -1343,7 +1464,52 @@ button,
         YouTube
       </div>
       <div class="cpsub">Official &amp; Recommended Channels</div>
-      <div id="yt-home-list"><div class="ecatxt" style="padding:40px 16px;"><span class="ei">▶️</span>No YouTube channels added yet.<br>Admin can add channels from the Admin Panel.</div></div>
+
+      <!-- REAL YT API FEATURED CARD -->
+      <div id="yt-api-featured" style="margin-bottom:6px;">
+        <div class="yt-api-card" id="yt-api-card-main">
+          <div class="yt-api-banner"></div>
+          <div class="yt-api-body">
+            <div class="yt-api-avatar" id="yt-api-avatar">
+              <div class="yt-api-skeleton" style="width:100%;height:100%;border-radius:50%;"></div>
+            </div>
+            <div class="yt-api-info">
+              <div class="yt-api-name" id="yt-api-name">
+                <span class="yt-api-skeleton" style="display:block;width:140px;height:16px;margin-bottom:4px;"></span>
+              </div>
+              <div class="yt-api-handle" id="yt-api-handle">
+                <span class="yt-api-skeleton" style="display:inline-block;width:90px;height:11px;"></span>
+              </div>
+              <div class="yt-api-badge" id="yt-api-badge" style="opacity:0;">
+                <span class="dot-live"></span>
+                <span id="yt-sub-count">--</span> Subscribers
+              </div>
+            </div>
+            <a id="yt-api-open-btn" class="yt-api-open-btn" href="https://www.youtube.com/channel/UCP6_K13ftqob8yBB-19b3Qg" target="_blank" rel="noopener">&#8599;</a>
+          </div>
+          <div class="yt-api-footer" id="yt-api-footer" style="opacity:0;">
+            <div class="yt-api-footer-stat">
+              <div class="yt-api-footer-val" id="yt-view-count">--</div>
+              <div class="yt-api-footer-lbl">Total Views</div>
+            </div>
+            <div class="yt-api-divider"></div>
+            <div class="yt-api-footer-stat">
+              <div class="yt-api-footer-val" id="yt-video-count">--</div>
+              <div class="yt-api-footer-lbl">Videos</div>
+            </div>
+            <div class="yt-api-divider"></div>
+            <div class="yt-api-footer-stat">
+              <div class="yt-api-footer-val" id="yt-sub-exact">--</div>
+              <div class="yt-api-footer-lbl">Subscribers</div>
+            </div>
+          </div>
+          <div class="yt-api-refresh" id="yt-api-refresh-lbl">
+            <span class="spin" id="yt-spin">&#8635;</span> Loading channel data...
+          </div>
+        </div>
+      </div>
+
+      <div id="yt-home-list"><div class="ecatxt" style="padding:40px 16px;"><span class="ei">&#9654;&#65039;</span>No additional channels added yet.<br>Admin can add more channels from the Admin Panel.</div></div>
     </div>
   </div>
 
@@ -1942,7 +2108,8 @@ function switchTab(t){
     document.getElementById('pg-'+k).classList.toggle('on',k===t);
     document.getElementById('nt-'+k)?.classList.toggle('on',k===t);
   });
-  if(t==='yt')renderYTHome();
+  if(t==='yt'){renderYTHome();if(typeof window._ytLiveStart==='function')window._ytLiveStart();}
+  else{if(typeof window._ytLiveStop==='function')window._ytLiveStop();}
 }
 
 /* ====== SUBJECT OPEN — FIXED ====== */
@@ -2587,20 +2754,160 @@ function renderYTHome(){
   if(!el)return;
   el.innerHTML='';
   if(!YT_DB.length){
-    el.innerHTML=`<div class="ecatxt" style="padding:40px 16px;"><span class="ei">▶️</span>No YouTube channels added yet.<br>Admin can add channels from the Admin Panel.</div>`;
+    el.innerHTML=`<div class="ecatxt" style="padding:40px 16px;"><span class="ei">&#9654;&#65039;</span>No additional channels added yet.<br>Admin can add channels from the Admin Panel.</div>`;
     return;
   }
   const sec=document.createElement('div');sec.className='ytsec';
-  const lbl=document.createElement('div');lbl.className='ytsec-lbl';lbl.textContent='📺 YouTube Channels';
+  const lbl=document.createElement('div');lbl.className='ytsec-lbl';lbl.textContent='&#128954; More Channels';
   sec.appendChild(lbl);
   YT_DB.forEach(c=>{
     const a=document.createElement('a');
     a.className='ytcard';a.href=c.url;a.target='_blank';a.rel='noopener';
-    a.innerHTML=`<div class="ytlogo">▶️</div><div class="ytinfo"><div class="ytname">${esc(c.name)}</div><div class="yturl">${esc(c.url)}</div></div><div class="ytarrow">↗</div>`;
+    a.innerHTML=`<div class="ytlogo">&#9654;&#65039;</div><div class="ytinfo"><div class="ytname">${esc(c.name)}</div><div class="yturl">${esc(c.url)}</div></div><div class="ytarrow">&#8599;</div>`;
     sec.appendChild(a);
   });
   el.appendChild(sec);
 }
+
+/* ══════════════════════════════════════
+   YOUTUBE DATA API v3 — REAL INTEGRATION
+   ══════════════════════════════════════ */
+(function(){
+  const YT_API_KEY   = 'AIzaSyDqba0KvcBcZIxHU-ghj272Qd04Afw6PqU';
+  const YT_CHANNEL_ID= 'UCP6_K13ftqob8yBB-19b3Qg';
+  const YT_API_URL   = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${YT_CHANNEL_ID}&key=${YT_API_KEY}`;
+  const REFRESH_MS   = 15000;
+
+  let prevSubs = 0;
+  let refreshTimer = null;
+
+  /* ── Friendly number format ── */
+  function fmtNum(n){
+    if(n>=1e9) return (n/1e9).toFixed(2)+'B';
+    if(n>=1e6) return (n/1e6).toFixed(2)+'M';
+    if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+    return n.toLocaleString();
+  }
+
+  /* ── Animated count-up ── */
+  function animateCount(el, from, to, durationMs, formatter){
+    if(!el) return;
+    const start = performance.now();
+    const diff  = to - from;
+    function step(now){
+      const elapsed = now - start;
+      const progress= Math.min(elapsed / durationMs, 1);
+      // ease-out-cubic
+      const eased   = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + diff * eased);
+      el.textContent = formatter ? formatter(current) : current.toLocaleString();
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── Fetch & update ── */
+  async function fetchYTData(){
+    const spinEl    = document.getElementById('yt-spin');
+    const refreshLbl= document.getElementById('yt-api-refresh-lbl');
+    if(spinEl) spinEl.style.animation='spin .8s linear infinite';
+
+    try{
+      const res  = await fetch(YT_API_URL);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      if(!data.items||!data.items.length) throw new Error('No channel found');
+
+      const ch    = data.items[0];
+      const snip  = ch.snippet;
+      const stats = ch.statistics;
+
+      const name      = snip.title   || 'NextToppers';
+      const handle    = snip.customUrl ? '@'+snip.customUrl.replace('@','') : '@nexttoppers';
+      const thumb     = (snip.thumbnails.high||snip.thumbnails.medium||snip.thumbnails.default||{}).url || '';
+      const subs      = parseInt(stats.subscriberCount||0,10);
+      const views     = parseInt(stats.viewCount||0,10);
+      const videos    = parseInt(stats.videoCount||0,10);
+
+      /* — Avatar — */
+      const avatarEl = document.getElementById('yt-api-avatar');
+      if(avatarEl){
+        avatarEl.innerHTML = thumb
+          ? `<img src="${thumb}" alt="${name}" onerror="this.parentElement.innerHTML='&#9654;&#65039;'">`
+          : '&#9654;&#65039;';
+      }
+
+      /* — Name — */
+      const nameEl = document.getElementById('yt-api-name');
+      if(nameEl){ nameEl.textContent=''; nameEl.textContent = name; }
+
+      /* — Handle — */
+      const handleEl = document.getElementById('yt-api-handle');
+      if(handleEl) handleEl.textContent = handle;
+
+      /* — Subscriber badge with count-up — */
+      const badgeEl  = document.getElementById('yt-api-badge');
+      const subEl    = document.getElementById('yt-sub-count');
+      if(subEl){
+        animateCount(subEl, prevSubs, subs, 1200, fmtNum);
+      }
+      if(badgeEl) badgeEl.style.opacity = '1';
+
+      /* — Footer stats with animations — */
+      const footerEl = document.getElementById('yt-api-footer');
+      if(footerEl) footerEl.style.opacity = '1';
+
+      const viewEl  = document.getElementById('yt-view-count');
+      const videoEl = document.getElementById('yt-video-count');
+      const subExEl = document.getElementById('yt-sub-exact');
+      if(viewEl)  animateCount(viewEl,  0, views,  1400, fmtNum);
+      if(videoEl) animateCount(videoEl, 0, videos, 1000, fmtNum);
+      if(subExEl) animateCount(subExEl, prevSubs, subs, 1200, fmtNum);
+
+      prevSubs = subs;
+
+      /* — Open link — */
+      const openBtn = document.getElementById('yt-api-open-btn');
+      if(openBtn) openBtn.href = `https://www.youtube.com/channel/${YT_CHANNEL_ID}`;
+
+      /* — Refresh label — */
+      if(refreshLbl){
+        refreshLbl.innerHTML = '&#9654;&#65039; Live data &bull; refreshes every 15s';
+        refreshLbl.style.color = 'rgba(255,130,130,0.6)';
+      }
+
+    } catch(err){
+      console.warn('[YT API]', err);
+      const refreshLbl2 = document.getElementById('yt-api-refresh-lbl');
+      if(refreshLbl2){
+        refreshLbl2.innerHTML = '&#9888; Error loading data &mdash; retrying...';
+        refreshLbl2.style.color = 'rgba(255,100,100,0.7)';
+      }
+    } finally {
+      if(spinEl) spinEl.style.animation = 'none';
+    }
+  }
+
+  /* ── Start when YT tab becomes visible ── */
+  function startYTLive(){
+    fetchYTData();
+    if(refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(fetchYTData, REFRESH_MS);
+  }
+  function stopYTLive(){
+    if(refreshTimer){ clearInterval(refreshTimer); refreshTimer=null; }
+  }
+
+  /* Expose so switchTab can call them */
+  window._ytLiveStart = startYTLive;
+  window._ytLiveStop  = stopYTLive;
+
+  /* Fetch immediately if YT tab is active on first load */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const activeTab = document.querySelector('.ntab.on');
+    if(activeTab && activeTab.id==='nt-yt') startYTLive();
+  });
+})();
 
 /* RIPPLE */
 function ripple(el){
