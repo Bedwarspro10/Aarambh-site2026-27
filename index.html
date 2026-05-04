@@ -821,38 +821,87 @@ body::before{
 .lstitle{font-size:22px;font-weight:900;letter-spacing:-.3px;}
 .lssub{font-size:13px;color:var(--txt2);text-align:center;max-width:280px;line-height:1.6;font-weight:600;}
 
-/* YT CHANNEL SECTION IN ADMIN */
-.ytrow{display:flex;align-items:center;gap:10px;background:rgba(255,69,69,0.06);border:1px solid rgba(255,69,69,0.15);border-radius:16px;padding:12px 14px;margin-bottom:8px;backdrop-filter:blur(10px);animation:fcIn .3s var(--spring) both;}
-.ytico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#ff0000,#cc0000);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+/* ══════════════════════════════════════════
+   YT CHANNEL SECTION IN ADMIN
+══════════════════════════════════════════ */
+.ytrow{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:16px;padding:12px 14px;margin-bottom:9px;
+  backdrop-filter:blur(16px);
+  animation:fcIn .3s var(--spring) both;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.ytrow:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,100,100,0.25);box-shadow:0 4px 20px rgba(255,60,60,0.12);}
+.ytico{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0;flex-shrink:0;overflow:hidden;
+  box-shadow:0 2px 10px rgba(255,0,0,0.3);
+}
 .ytnm{flex:1;font-size:13px;font-weight:700;min-width:0;}
-.ytnm span{color:var(--txt2);font-size:11px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ytdel{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--bounce),background .15s;flex-shrink:0;}
+.ytnm span{color:var(--txt2);font-size:11px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.ytdel{
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,107,107,0.1);color:var(--red);font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;
+}
 .ytdel:active{transform:scale(0.82);}
+.ytdel:hover{background:rgba(255,107,107,0.22);transform:scale(1.08);}
 
-/* YT SECTION IN HOME/COURSES */
-.ytsec{margin-bottom:18px;}
+/* ══════════════════════════════════════════
+   YT SECTION IN HOME/COURSES (additional channels)
+══════════════════════════════════════════ */
+.ytsec{margin-bottom:20px;}
 .ytsec-lbl{
-  font-size:11px;font-weight:800;color:var(--txt2);letter-spacing:2px;
-  text-transform:uppercase;margin-bottom:14px;
+  font-size:10px;font-weight:900;
+  background:linear-gradient(90deg,#a78bfa,#818cf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;
   display:flex;align-items:center;gap:10px;
 }
-.ytsec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--br),transparent);}
+.ytsec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(167,139,250,0.4),transparent);}
 .ytcard{
   display:flex;align-items:center;gap:14px;
-  background:rgba(255,30,30,0.06);border:1px solid rgba(255,30,30,0.15);
-  border-radius:18px;padding:14px 16px;cursor:pointer;margin-bottom:10px;
-  transition:transform .28s var(--bounce),background .2s,box-shadow .28s;will-change:transform;
-  text-decoration:none;color:inherit;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:20px;padding:14px 16px;cursor:pointer;margin-bottom:10px;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;text-decoration:none;color:inherit;
+  backdrop-filter:blur(20px);
+  box-shadow:0 2px 12px rgba(0,0,0,0.2);
 }
 .ytcard:active{transform:scale(0.97);}
-.ytcard:hover{background:rgba(255,30,30,0.1);border-color:rgba(255,30,30,0.25);box-shadow:0 6px 24px rgba(255,30,30,0.12);}
-.ytlogo{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#ff0000,#cc0000);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 14px rgba(255,0,0,0.3);}
+.ytcard:hover{
+  transform:scale(1.02);
+  background:rgba(255,255,255,0.07);
+  border-color:rgba(167,139,250,0.35);
+  box-shadow:0 8px 32px rgba(139,92,246,0.2),0 0 0 1px rgba(167,139,250,0.15);
+}
+.ytlogo{
+  width:50px;height:50px;border-radius:14px;
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0;flex-shrink:0;overflow:hidden;
+  box-shadow:0 4px 16px rgba(255,0,0,0.3);
+}
 .ytinfo{flex:1;min-width:0;}
 .ytname{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .yturl{font-size:11px;color:var(--txt2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
-.ytarrow{font-size:18px;color:rgba(255,69,69,0.7);flex-shrink:0;}
+.ytarrow{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.2);
+  font-size:14px;color:rgba(167,139,250,0.9);
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.ytcard:hover .ytarrow{background:rgba(167,139,250,0.25);border-color:rgba(167,139,250,0.5);transform:translate(2px,-2px);}
 
-/* YT subscriber badge */
+/* YT subscriber badge (unused now but kept for compat) */
 .ytsub-badge{
   display:inline-flex;align-items:center;gap:4px;
   background:rgba(255,69,69,0.1);border:1px solid rgba(255,69,69,0.2);
@@ -860,102 +909,211 @@ body::before{
   color:rgba(255,130,130,1);margin-top:5px;
 }
 
-/* ── REAL YT API CARD ── */
-.yt-api-card{
-  display:flex;flex-direction:column;gap:0;
-  background:rgba(255,20,20,0.07);
-  border:1px solid rgba(255,60,60,0.18);
-  border-radius:22px;overflow:hidden;margin-bottom:18px;
-  box-shadow:0 0 0 0 rgba(255,60,60,0);
-  animation:ytCardIn .55s var(--spring) both;
-  transition:box-shadow .3s,border-color .3s;
-  backdrop-filter:blur(18px);
-}
-.yt-api-card:hover{
-  border-color:rgba(255,80,80,0.35);
-  box-shadow:0 0 28px rgba(255,50,50,0.14);
-}
+/* ══════════════════════════════════════════
+   REAL YT API CARD — GLASSMORPHISM REDESIGN
+══════════════════════════════════════════ */
 @keyframes ytCardIn{
-  from{opacity:0;transform:translateY(18px) scale(0.97);}
+  from{opacity:0;transform:translateY(22px) scale(0.96);}
   to{opacity:1;transform:translateY(0) scale(1);}
 }
+@keyframes ytOrb{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(18px,-12px) scale(1.1);}
+  66%{transform:translate(-12px,10px) scale(0.92);}
+}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px #ff4545,0 0 12px rgba(255,69,69,0.5);}50%{opacity:0.3;box-shadow:none;}}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes ytFadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ytPulseRing{
+  0%{box-shadow:0 0 0 0 rgba(139,92,246,0.4),0 0 0 0 rgba(91,154,255,0.3);}
+  70%{box-shadow:0 0 0 12px rgba(139,92,246,0),0 0 0 20px rgba(91,154,255,0);}
+  100%{box-shadow:0 0 0 0 rgba(139,92,246,0),0 0 0 0 rgba(91,154,255,0);}
+}
+
+.yt-api-card{
+  position:relative;overflow:hidden;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:24px;
+  margin-bottom:20px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  animation:ytCardIn .6s var(--spring) both;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.yt-api-card:hover{
+  transform:scale(1.02);
+  border-color:rgba(139,92,246,0.35);
+  box-shadow:0 16px 48px rgba(0,0,0,0.4),0 0 0 1px rgba(139,92,246,0.2),0 0 40px rgba(91,154,255,0.12);
+}
+
+/* Ambient orb glow behind card */
+.yt-api-card::before{
+  content:'';position:absolute;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 70%);
+  top:-60px;right:-60px;pointer-events:none;
+  animation:ytOrb 8s ease-in-out infinite;
+}
+.yt-api-card::after{
+  content:'';position:absolute;
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(91,154,255,0.12) 0%,transparent 70%);
+  bottom:-50px;left:-30px;pointer-events:none;
+  animation:ytOrb 10s ease-in-out infinite reverse;
+}
+
+/* Top accent bar */
 .yt-api-banner{
-  width:100%;height:6px;
-  background:linear-gradient(90deg,#ff0000,#ff6b6b,#ff0000);
-  background-size:200% 100%;
-  animation:ytBanner 3s linear infinite;
+  width:100%;height:3px;
+  background:linear-gradient(90deg,#6d28d9,#5b9aff,#9b6dff,#5b9aff,#6d28d9);
+  background-size:300% 100%;
+  animation:ytBanner 4s linear infinite;
+  position:relative;z-index:1;
 }
-@keyframes ytBanner{0%{background-position:0% 0;}100%{background-position:200% 0;}}
+@keyframes ytBanner{0%{background-position:0% 0;}100%{background-position:300% 0;}}
+
+/* Card body */
 .yt-api-body{
-  display:flex;align-items:center;gap:14px;
-  padding:16px 16px 8px;
+  display:flex;align-items:center;gap:16px;
+  padding:20px 18px 12px;
+  position:relative;z-index:1;
 }
+
+/* Avatar */
 .yt-api-avatar{
-  width:58px;height:58px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,#ff0000,#cc0000);
+  width:60px;height:60px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#6d28d9,#5b9aff);
   display:flex;align-items:center;justify-content:center;
-  font-size:24px;overflow:hidden;
-  box-shadow:0 4px 18px rgba(255,0,0,0.35);
-  border:2px solid rgba(255,80,80,0.3);
+  font-size:26px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(109,40,217,0.45);
+  border:2px solid rgba(255,255,255,0.15);
+  animation:ytPulseRing 3s ease-out infinite;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
+.yt-api-card:hover .yt-api-avatar{transform:scale(1.06);}
 .yt-api-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* Info block */
 .yt-api-info{flex:1;min-width:0;}
 .yt-api-name{
-  font-size:15px;font-weight:900;letter-spacing:-.2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:16px;font-weight:900;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt);
 }
 .yt-api-handle{
-  font-size:11px;color:var(--txt2);margin-top:2px;font-weight:500;
+  font-size:11px;color:var(--txt2);margin-top:2px;font-weight:500;letter-spacing:.2px;
 }
+
+/* Live subscriber badge */
 .yt-api-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(255,0,0,0.1);border:1px solid rgba(255,60,60,0.22);
-  border-radius:99px;padding:4px 12px;font-size:11px;font-weight:800;
-  color:#ff7070;margin-top:6px;letter-spacing:.2px;
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:99px;padding:5px 12px 5px 8px;
+  margin-top:8px;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 .yt-api-badge .dot-live{
-  width:7px;height:7px;border-radius:50%;background:#ff4545;
-  animation:blink 1.4s ease-in-out infinite;flex-shrink:0;
+  width:7px;height:7px;border-radius:50%;background:#22c55e;
+  animation:blink 1.6s ease-in-out infinite;flex-shrink:0;
 }
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
+.yt-api-badge-count{
+  font-size:13px;font-weight:900;letter-spacing:-.2px;
+  background:linear-gradient(135deg,#e2e8f0,#c7d2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.yt-api-badge-img{height:17px;width:auto;object-fit:contain;display:inline-block;vertical-align:middle;}
+
+/* Visit Channel button */
 .yt-api-open-btn{
-  flex-shrink:0;width:36px;height:36px;border-radius:50%;
-  background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.22);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;color:#ff7070;cursor:pointer;
-  transition:transform .2s var(--bounce),background .15s;
-  text-decoration:none;
+  flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  padding:9px 15px;border-radius:99px;
+  background:linear-gradient(135deg,#6d28d9,#5b9aff);
+  border:none;color:#fff;
+  font-size:11px;font-weight:800;letter-spacing:.3px;
+  cursor:pointer;text-decoration:none;
+  box-shadow:0 4px 18px rgba(109,40,217,0.45);
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  white-space:nowrap;
 }
-.yt-api-open-btn:hover{background:rgba(255,60,60,0.22);transform:scale(1.1);}
+.yt-api-open-btn:hover{
+  transform:translateY(-2px) scale(1.04);
+  box-shadow:0 8px 28px rgba(109,40,217,0.6);
+  filter:brightness(1.1);
+}
+.yt-api-open-btn:active{transform:scale(0.95);}
+
+/* Divider */
+.yt-api-inner-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+  margin:0 18px;
+  position:relative;z-index:1;
+}
+
+/* Footer stats */
 .yt-api-footer{
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 16px 14px;
-  border-top:1px solid rgba(255,60,60,0.1);margin-top:8px;
+  padding:14px 18px 18px;
+  position:relative;z-index:1;
+  transition:opacity 0.4s ease;
 }
 .yt-api-footer-stat{text-align:center;flex:1;}
 .yt-api-footer-val{
-  font-size:17px;font-weight:900;letter-spacing:-.3px;
-  background:linear-gradient(135deg,#ff6060,#ffaaaa);
+  font-size:18px;font-weight:900;letter-spacing:-.4px;
+  background:linear-gradient(135deg,#a78bfa,#818cf8,#5b9aff);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
 }
-.yt-api-footer-lbl{font-size:10px;color:var(--txt2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
-.yt-api-divider{width:1px;height:32px;background:rgba(255,60,60,0.15);}
+.yt-api-footer-lbl{
+  font-size:9px;color:var(--txt3);font-weight:800;
+  text-transform:uppercase;letter-spacing:1.8px;margin-top:2px;
+}
+.yt-api-divider{width:1px;height:36px;background:rgba(255,255,255,0.07);}
+
+/* Refresh / loading label */
 .yt-api-refresh{
-  font-size:10px;color:var(--txt3);text-align:center;padding:0 16px 10px;
-  display:flex;align-items:center;justify-content:center;gap:5px;
+  font-size:10px;color:var(--txt3);text-align:center;
+  padding:0 18px 14px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  position:relative;z-index:1;
 }
-.yt-api-refresh .spin{display:inline-block;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.yt-api-error{
-  padding:14px 16px;text-align:center;font-size:12px;color:#ff7070;
-  background:rgba(255,0,0,0.05);
+.yt-api-refresh .spin{
+  display:inline-block;font-size:12px;
+  animation:spin .9s linear infinite;
 }
+
+/* Error state — hidden, graceful */
+.yt-api-error{display:none;}
+
+/* Shimmer skeleton */
 .yt-api-skeleton{
-  background:linear-gradient(90deg,var(--sf) 25%,var(--sf2) 50%,var(--sf) 75%);
-  background-size:200% 100%;animation:shimmer 1.5s infinite;
-  border-radius:8px;
+  background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.04) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.8s ease-in-out infinite;
+  border-radius:10px;
 }
-@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* Empty state for additional channels */
+.yt-empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:44px 20px;text-align:center;
+  animation:ytFadeUp 0.5s var(--spring) both;
+}
+.yt-empty-icon{
+  width:64px;height:64px;border-radius:20px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+.yt-empty-icon img{width:100%;height:100%;object-fit:cover;border-radius:20px;}
+.yt-empty-title{font-size:15px;font-weight:800;color:var(--txt);margin-bottom:6px;letter-spacing:-.2px;}
+.yt-empty-sub{font-size:12px;color:var(--txt3);line-height:1.6;font-weight:500;}
 
 /* Planet decoration on home */
 .planet-deco{
@@ -1229,7 +1387,7 @@ button,
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb"><img src="https://res-console.cloudinary.com/dju83xyco/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/MTc3NzkwNDI2MzU0Nl93ZW9jbHc=/template_primary" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+  <div class="lorb"><img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
   <div class="llbl nt-gradient-text">Next Toppers - Feed</div>
   <div class="lsub">2026–27 · NextToppers Fanpage</div>
   <div class="ltrack"><div class="lfill"></div></div>
@@ -1267,7 +1425,7 @@ button,
 <div id="app">
   <div class="topbar">
     <div class="tbl">
-      <div class="tlogo"><img src="https://res-console.cloudinary.com/dju83xyco/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/MTc3NzkwNDI2MzU0Nl93ZW9jbHc=/template_primary" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+      <div class="tlogo"><img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
       <div class="tname"><span class="nt-gradient-text nt-topbar-name">Next Toppers - Feed</span><span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
@@ -1459,38 +1617,60 @@ button,
   <!-- PAGE YOUTUBE -->
   <div id="pg-yt" class="pg">
     <div class="cpg-scroll">
-      <div class="cptitle" style="display:flex;align-items:center;gap:10px;">
-        <span style="width:38px;height:38px;background:#ff0000;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 16px rgba(255,0,0,0.35);">▶️</span>
-        YouTube
-      </div>
-      <div class="cpsub">Official &amp; Recommended Channels</div>
 
-      <!-- REAL YT API FEATURED CARD -->
-      <div id="yt-api-featured" style="margin-bottom:6px;">
+      <!-- Page header -->
+      <div class="cptitle" style="display:flex;align-items:center;gap:10px;">
+        <span style="width:38px;height:38px;background:#ff0000;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 4px 16px rgba(255,0,0,0.35);overflow:hidden;padding:0;"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YouTube" style="width:100%;height:100%;object-fit:cover;border-radius:12px;display:block;"></span>
+        <span class="yt-title-text">YouTube</span>
+      </div>
+      <div class="cpsub" style="margin-bottom:20px;">Official &amp; Recommended Channels</div>
+
+      <!-- ── MAIN CHANNEL CARD (API-powered) ── -->
+      <div id="yt-api-featured" style="margin-bottom:8px;">
         <div class="yt-api-card" id="yt-api-card-main">
+
+          <!-- Top accent bar -->
           <div class="yt-api-banner"></div>
+
+          <!-- Body: avatar + info + button -->
           <div class="yt-api-body">
+
+            <!-- Avatar -->
             <div class="yt-api-avatar" id="yt-api-avatar">
               <div class="yt-api-skeleton" style="width:100%;height:100%;border-radius:50%;"></div>
             </div>
+
+            <!-- Info -->
             <div class="yt-api-info">
               <div class="yt-api-name" id="yt-api-name">
-                <span class="yt-api-skeleton" style="display:block;width:140px;height:16px;margin-bottom:4px;"></span>
+                <span class="yt-api-skeleton" style="display:block;width:130px;height:15px;margin-bottom:5px;border-radius:8px;"></span>
               </div>
               <div class="yt-api-handle" id="yt-api-handle">
-                <span class="yt-api-skeleton" style="display:inline-block;width:90px;height:11px;"></span>
+                <span class="yt-api-skeleton" style="display:inline-block;width:85px;height:10px;border-radius:6px;"></span>
               </div>
+              <!-- Subscriber badge -->
               <div class="yt-api-badge" id="yt-api-badge" style="opacity:0;">
                 <span class="dot-live"></span>
-                <span id="yt-sub-count">--</span> Subscribers
+                <span class="yt-api-badge-count" id="yt-sub-count">--</span>
+                <img src="https://i.postimg.cc/GpYDv00y/file-00000000232071faa3ce6e4d01cdc2a1.png" alt="Subscribers" class="yt-api-badge-img">
               </div>
             </div>
-            <a id="yt-api-open-btn" class="yt-api-open-btn" href="https://www.youtube.com/channel/UCP6_K13ftqob8yBB-19b3Qg" target="_blank" rel="noopener">&#8599;</a>
+
+            <!-- Visit Channel button -->
+            <a id="yt-api-open-btn" class="yt-api-open-btn" href="https://www.youtube.com/channel/UCP6_K13ftqob8yBB-19b3Qg" target="_blank" rel="noopener">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Visit
+            </a>
           </div>
+
+          <!-- Divider -->
+          <div class="yt-api-inner-divider"></div>
+
+          <!-- Footer stats -->
           <div class="yt-api-footer" id="yt-api-footer" style="opacity:0;">
             <div class="yt-api-footer-stat">
               <div class="yt-api-footer-val" id="yt-view-count">--</div>
-              <div class="yt-api-footer-lbl">Total Views</div>
+              <div class="yt-api-footer-lbl">Views</div>
             </div>
             <div class="yt-api-divider"></div>
             <div class="yt-api-footer-stat">
@@ -1503,13 +1683,26 @@ button,
               <div class="yt-api-footer-lbl">Subscribers</div>
             </div>
           </div>
+
+          <!-- Refresh label -->
           <div class="yt-api-refresh" id="yt-api-refresh-lbl">
-            <span class="spin" id="yt-spin">&#8635;</span> Loading channel data...
+            <span class="spin" id="yt-spin">⟳</span> Loading channel data…
           </div>
+
         </div>
       </div>
 
-      <div id="yt-home-list"><div class="ecatxt" style="padding:40px 16px;"><span class="ei">&#9654;&#65039;</span>No additional channels added yet.<br>Admin can add more channels from the Admin Panel.</div></div>
+      <!-- Additional channels list -->
+      <div id="yt-home-list">
+        <div class="yt-empty-state">
+          <div class="yt-empty-icon">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YouTube">
+          </div>
+          <div class="yt-empty-title">No channels added yet</div>
+          <div class="yt-empty-sub">Admin can add more channels<br>from the Admin Panel.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1840,9 +2033,19 @@ let YT_DB = [];
    FIRESTORE — FILES
 ═══════════════════════════════════════════ */
 async function fbAddFile(subject, name, link, thumbnail, category, folder) {
+  // ── FIX: never write empty category to Firestore ──
+  const safeCategory = (category || '').trim() || (SUBJ[subject] && SUBJ[subject].cats[0]) || 'general';
   // Get max order for this subject
   const maxOrder = DB[subject] ? DB[subject].length : 0;
-  await addDoc(collection(db, 'files'), { subject, name, link, thumbnail, category, folder: folder||'', order: maxOrder });
+  await addDoc(collection(db, 'files'), {
+    subject,
+    name: name || 'Untitled',
+    link,
+    thumbnail,
+    category: safeCategory,
+    folder: folder || '',
+    order: maxOrder
+  });
 }
 
 async function fbDeleteFile(id) {
@@ -1860,12 +2063,15 @@ async function fbLoadFiles() {
     const d = docSnap.data();
     const subj = d.subject;
     if (DB[subj]) {
+      // ── FIX: safe category fallback — missing/empty → first known cat or 'general' ──
+      const rawCat = (d.category || '').trim();
+      const safeCat = rawCat || (SUBJ[subj] && SUBJ[subj].cats[0]) || 'general';
       DB[subj].push({
         id: docSnap.id,
-        name: d.name,
-        link: d.link,
+        name: d.name || 'Untitled',
+        link: d.link || '',
         thumb: d.thumbnail || '📄',
-        category: d.category || 'NOTES',
+        category: safeCat,
         folder: d.folder || '',
         order: typeof d.order === 'number' ? d.order : 9999,
         subject: subj
@@ -1963,6 +2169,38 @@ function fixDrive(u){
 /* ═══════════════════════════════════════════
    LOADER — waits for Firebase data
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   ONE-TIME MIGRATION — fix missing category field
+   Runs silently on load; skips already-patched docs
+═══════════════════════════════════════════ */
+async function migrateFixMissingCategories(){
+  const MIG_KEY = 'ab_cat_migration_v1';
+  if(localStorage.getItem(MIG_KEY)) return; // already ran
+
+  const snapshot = await getDocs(collection(db, 'files'));
+  const fixes = [];
+  snapshot.forEach(docSnap => {
+    const d = docSnap.data();
+    const rawCat = (d.category || '').trim();
+    if(!rawCat){
+      // Assign first known category for the subject, or 'general'
+      const fallback = (SUBJ[d.subject] && SUBJ[d.subject].cats[0]) || 'general';
+      fixes.push(updateDoc(doc(db, 'files', docSnap.id), { category: fallback }));
+    }
+  });
+
+  if(fixes.length){
+    await Promise.all(fixes);
+    console.log(`[Migration] Patched ${fixes.length} file(s) missing category.`);
+    // Reload so UI reflects patched data
+    await fbLoadFiles();
+    updateCounts();
+    if(curSubj) renderFiles(curSubj);
+  }
+
+  localStorage.setItem(MIG_KEY, '1'); // mark done
+}
+
 window.addEventListener('load', async () => {
   // Start loading Firebase data in background during loader animation
   let firebaseReady = false;
@@ -1980,6 +2218,8 @@ window.addEventListener('load', async () => {
   try {
     await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
     firebaseReady = true;
+    // ── ONE-TIME MIGRATION: patch Firestore docs missing category ──
+    migrateFixMissingCategories().catch(e=>console.warn('[Migration] skipped:',e));
   } catch(e) {
     console.error('Firebase load error:', e);
     toast('⚠️ Could not load data. Check connection.');
@@ -2217,9 +2457,9 @@ function renderFiles(key){
 
     const body=folderBlk.querySelector('.folder-body');
 
-    // Group files inside folder by category
+    // Group files inside folder by category — safe fallback per file
     s.cats.forEach(cat=>{
-      const catFiles=folderFiles.filter(f=>f.category===cat);
+      const catFiles=folderFiles.filter(f=>(f.category||s.cats[0]||'general')===cat);
       if(!catFiles.length) return;
       // Category sub-label inside folder
       const catLbl=document.createElement('div');
@@ -2230,12 +2470,25 @@ function renderFiles(key){
       catFiles.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
     });
 
+    // ── FIX: also show files inside folder whose category isn't in s.cats ──
+    const knownCats=new Set(s.cats);
+    const orphans=folderFiles.filter(f=>!knownCats.has(f.category||''));
+    if(orphans.length){
+      const catLbl=document.createElement('div');
+      catLbl.className='catlbl';
+      catLbl.style.cssText='font-size:10px;padding:6px 12px 4px;opacity:0.7;margin-top:4px;';
+      catLbl.textContent='OTHER';
+      body.appendChild(catLbl);
+      orphans.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
+    }
+
     sc.appendChild(folderBlk);
   });
 
   // ── 2. RENDER UNGROUPED FILES (no folder) grouped by category ──
   s.cats.forEach((cat,ci)=>{
-    const catFsNoFolder=files.filter(f=>f.category===cat && !f.folder);
+    // ── FIX: safe category comparison using fallback ──
+    const catFsNoFolder=files.filter(f=>(f.category||s.cats[0]||'general')===cat && !f.folder);
     if(!catFsNoFolder.length) return; // skip empty categories
 
     const blk=document.createElement('div');
@@ -2254,6 +2507,24 @@ function renderFiles(key){
 
     sc.appendChild(blk);
   });
+
+  // ── FIX: catch any files whose category doesn't match ANY known cat (and no folder) ──
+  const knownCats=new Set(s.cats);
+  const uncategorised=files.filter(f=>!f.folder && !knownCats.has(f.category||''));
+  if(uncategorised.length){
+    const blk=document.createElement('div');
+    blk.className='catblk';
+    blk.style.animationDelay=(cardIdx*0.07)+'s';
+    cardIdx++;
+    const lbl=document.createElement('div');
+    lbl.className='catlbl';lbl.textContent='OTHER';
+    blk.appendChild(lbl);
+    const list=document.createElement('div');
+    list.className='flist';
+    uncategorised.forEach((f,fi)=>list.appendChild(mkFCard(f,fi)));
+    blk.appendChild(list);
+    sc.appendChild(blk);
+  }
 
   // ── 3. EMPTY STATE (nothing at all) ──
   if(!sc.children.length){
@@ -2754,16 +3025,16 @@ function renderYTHome(){
   if(!el)return;
   el.innerHTML='';
   if(!YT_DB.length){
-    el.innerHTML=`<div class="ecatxt" style="padding:40px 16px;"><span class="ei">&#9654;&#65039;</span>No additional channels added yet.<br>Admin can add channels from the Admin Panel.</div>`;
+    el.innerHTML=`<div class="yt-empty-state"><div class="yt-empty-icon"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YouTube"></div><div class="yt-empty-title">No channels added yet</div><div class="yt-empty-sub">Admin can add more channels<br>from the Admin Panel.</div></div>`;
     return;
   }
   const sec=document.createElement('div');sec.className='ytsec';
-  const lbl=document.createElement('div');lbl.className='ytsec-lbl';lbl.textContent='&#128954; More Channels';
+  const lbl=document.createElement('div');lbl.className='ytsec-lbl';lbl.textContent='More Channels';
   sec.appendChild(lbl);
   YT_DB.forEach(c=>{
     const a=document.createElement('a');
     a.className='ytcard';a.href=c.url;a.target='_blank';a.rel='noopener';
-    a.innerHTML=`<div class="ytlogo">&#9654;&#65039;</div><div class="ytinfo"><div class="ytname">${esc(c.name)}</div><div class="yturl">${esc(c.url)}</div></div><div class="ytarrow">&#8599;</div>`;
+    a.innerHTML=`<div class="ytlogo" style="padding:0;overflow:hidden;"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YT" style="width:100%;height:100%;object-fit:cover;border-radius:14px;display:block;"></div><div class="ytinfo"><div class="ytname">${esc(c.name)}</div><div class="yturl">${esc(c.url)}</div></div><div class="ytarrow">↗</div>`;
     sec.appendChild(a);
   });
   el.appendChild(sec);
@@ -2872,16 +3143,16 @@ function renderYTHome(){
 
       /* — Refresh label — */
       if(refreshLbl){
-        refreshLbl.innerHTML = '&#9654;&#65039; Live data &bull; refreshes every 15s';
-        refreshLbl.style.color = 'rgba(255,130,130,0.6)';
+        refreshLbl.innerHTML = '<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YT" style="width:12px;height:12px;object-fit:cover;border-radius:3px;vertical-align:middle;margin-right:4px;"> Live data &bull; refreshes every 15s';
+        refreshLbl.style.color = 'rgba(167,139,250,0.55)';
       }
 
     } catch(err){
       console.warn('[YT API]', err);
       const refreshLbl2 = document.getElementById('yt-api-refresh-lbl');
       if(refreshLbl2){
-        refreshLbl2.innerHTML = '&#9888; Error loading data &mdash; retrying...';
-        refreshLbl2.style.color = 'rgba(255,100,100,0.7)';
+        refreshLbl2.innerHTML = '⟳ Retrying…';
+        refreshLbl2.style.color = 'rgba(148,163,184,0.5)';
       }
     } finally {
       if(spinEl) spinEl.style.animation = 'none';
