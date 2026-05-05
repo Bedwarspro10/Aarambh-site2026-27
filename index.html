@@ -1381,6 +1381,322 @@ button,
 .fcard:nth-child(7){animation-delay:.27s;}
 .fcard:nth-child(8){animation-delay:.31s;}
 
+/* ══════════════════════════════════════════
+   SHORTS / VIDEO FEED — REEL STRIP v2
+══════════════════════════════════════════ */
+@keyframes shortsFadeIn{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes shortsShimmer{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+@keyframes shortsBadgePop{
+  0%{transform:scale(0.6);opacity:0;}
+  70%{transform:scale(1.12);}
+  100%{transform:scale(1);opacity:1;}
+}
+@keyframes shortsGlow{
+  0%,100%{box-shadow:0 4px 18px rgba(0,0,0,0.3);}
+  50%{box-shadow:0 12px 36px rgba(255,0,0,0.22),0 0 0 1px rgba(255,60,60,0.18);}
+}
+@keyframes sheetUp{
+  from{transform:translateY(100%);}
+  to{transform:translateY(0);}
+}
+@keyframes sheetDown{
+  from{transform:translateY(0);}
+  to{transform:translateY(100%);}
+}
+@keyframes modalFadeIn{
+  from{opacity:0;transform:scale(0.9);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes newBlink{
+  0%,100%{opacity:1;}50%{opacity:0.6;}
+}
+@keyframes trendingPulse{
+  0%,100%{box-shadow:0 2px 10px rgba(251,146,60,0.4);}
+  50%{box-shadow:0 2px 18px rgba(251,146,60,0.75),0 0 0 3px rgba(251,146,60,0.15);}
+}
+
+.shorts-section{
+  margin:18px 0 4px;
+  animation:shortsFadeIn .5s cubic-bezier(0.22,1,0.36,1) both;
+}
+.shorts-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:13px;
+}
+.shorts-header-left{display:flex;align-items:center;gap:9px;}
+.shorts-header-icon{
+  width:30px;height:30px;border-radius:9px;overflow:hidden;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(255,0,0,0.3);
+}
+.shorts-header-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.shorts-header-title{
+  font-size:13px;font-weight:900;letter-spacing:-.2px;
+  background:linear-gradient(90deg,#fff,rgba(255,255,255,0.75));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.shorts-header-sub{font-size:10px;color:var(--txt3);font-weight:600;margin-top:1px;}
+.shorts-refresh-btn{
+  width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;color:var(--txt2);
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.shorts-refresh-btn:hover{background:rgba(255,255,255,0.1);transform:rotate(180deg);}
+.shorts-refresh-btn.spinning{animation:spin .6s linear;}
+
+/* Horizontal reel strip */
+.shorts-strip{
+  display:flex;gap:12px;
+  overflow-x:auto;overflow-y:visible;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  padding:6px 2px 14px;
+  scrollbar-width:none;scroll-behavior:smooth;
+}
+.shorts-strip::-webkit-scrollbar{display:none;}
+
+/* Individual short card */
+.short-card{
+  flex:0 0 130px;width:130px;border-radius:16px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  overflow:hidden;cursor:pointer;scroll-snap-align:start;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;
+  box-shadow:0 4px 18px rgba(0,0,0,0.3);
+  animation:shortsFadeIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
+  will-change:transform,box-shadow;
+  text-decoration:none;color:inherit;display:block;
+  user-select:none;-webkit-user-select:none;
+}
+.short-card:hover{
+  transform:scale(1.05) translateY(-3px);
+  border-color:rgba(255,60,60,0.35);
+  animation:shortsGlow 1.8s ease-in-out infinite;
+}
+.short-card:active,.short-card.pressing{transform:scale(0.96)!important;}
+
+/* Thumbnail — 9:16 */
+.short-thumb-wrap{
+  width:100%;aspect-ratio:9/16;position:relative;overflow:hidden;background:#0d0d0d;
+}
+.short-thumb-wrap img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.short-card:hover .short-thumb-wrap img{transform:scale(1.07);}
+
+/* Duration pill */
+.short-dur{
+  position:absolute;top:7px;right:7px;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);
+  color:#fff;font-size:9px;font-weight:800;
+  padding:2px 6px;border-radius:5px;letter-spacing:.3px;
+}
+
+/* Type badge — SHORT / VIDEO (bottom of stacked badges) */
+.short-badge{
+  position:absolute;left:7px;
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+  color:#fff;font-size:7px;font-weight:900;
+  padding:2px 6px;border-radius:4px;
+  letter-spacing:1px;text-transform:uppercase;
+  animation:shortsBadgePop .35s cubic-bezier(0.22,1,0.36,1) both;
+  box-shadow:0 2px 8px rgba(255,0,0,0.45);
+  top:7px;
+}
+
+/* NEW badge — glowing red, pulses */
+.short-badge-new{
+  position:absolute;left:7px;
+  background:linear-gradient(135deg,#ff1744,#d50000);
+  color:#fff;font-size:7px;font-weight:900;
+  padding:2px 7px;border-radius:4px;
+  letter-spacing:1.2px;text-transform:uppercase;
+  animation:shortsBadgePop .3s cubic-bezier(0.22,1,0.36,1) both,newBlink 1.6s ease-in-out 0.4s infinite;
+  box-shadow:0 0 10px rgba(255,23,68,0.6),0 2px 6px rgba(255,0,0,0.4);
+  top:7px;z-index:3;
+}
+/* When NEW is present, push type badge down */
+.short-badge-new + .short-badge{top:24px;}
+
+/* TRENDING badge — orange/gold glow */
+.short-badge-trending{
+  position:absolute;right:7px;bottom:42px;
+  background:linear-gradient(135deg,#fb923c,#f59e0b);
+  color:#fff;font-size:7px;font-weight:900;
+  padding:2px 6px;border-radius:4px;
+  letter-spacing:.8px;text-transform:uppercase;
+  animation:shortsBadgePop .35s .1s cubic-bezier(0.22,1,0.36,1) both,trendingPulse 2s ease-in-out infinite;
+  z-index:3;
+}
+
+/* Bottom gradient overlay */
+.short-thumb-gradient{
+  position:absolute;bottom:0;left:0;right:0;height:60%;
+  background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.35) 55%,transparent 100%);
+  pointer-events:none;
+}
+
+/* Stats overlay */
+.short-stats-overlay{
+  position:absolute;bottom:8px;left:0;right:0;
+  display:flex;align-items:center;justify-content:center;gap:9px;padding:0 8px;
+}
+.short-stat{
+  display:flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:800;color:rgba(255,255,255,0.94);
+  text-shadow:0 1px 4px rgba(0,0,0,0.9);
+}
+.short-stat-ico{font-size:10px;line-height:1;}
+
+/* Title strip — 1 line clamp */
+.short-title{
+  padding:7px 9px 9px;font-size:10px;font-weight:700;
+  color:var(--txt);line-height:1.35;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* Skeleton */
+.short-skeleton{
+  flex:0 0 130px;width:130px;border-radius:16px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+  overflow:hidden;aspect-ratio:9/16;
+}
+.short-skeleton-inner{
+  width:100%;height:100%;
+  background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.03) 75%);
+  background-size:200% 100%;animation:shortsShimmer 1.6s ease-in-out infinite;
+}
+
+/* Empty / error */
+.shorts-empty{width:100%;padding:28px 16px;text-align:center;color:var(--txt3);font-size:12px;font-weight:600;}
+
+/* ══════════════════════════════════
+   BOTTOM SHEET
+══════════════════════════════════ */
+#shorts-sheet-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,0);
+  pointer-events:none;
+  transition:background 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+#shorts-sheet-overlay.open{
+  background:rgba(0,0,0,0.62);pointer-events:all;
+}
+#shorts-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:9001;
+  background:rgba(18,18,28,0.96);
+  backdrop-filter:blur(28px) saturate(1.5);
+  -webkit-backdrop-filter:blur(28px) saturate(1.5);
+  border-radius:22px 22px 0 0;
+  border-top:1px solid rgba(255,255,255,0.1);
+  padding:0 0 env(safe-area-inset-bottom,16px);
+  transform:translateY(100%);
+  transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);
+  box-shadow:0 -12px 56px rgba(0,0,0,0.55);
+  max-height:85vh;overflow-y:auto;
+  scrollbar-width:none;
+}
+#shorts-sheet::-webkit-scrollbar{display:none;}
+#shorts-sheet.open{transform:translateY(0);}
+.sheet-handle{
+  width:36px;height:4px;border-radius:99px;
+  background:rgba(255,255,255,0.18);margin:12px auto 0;
+}
+.sheet-body{padding:16px 20px 24px;}
+.sheet-thumb{
+  width:100%;aspect-ratio:16/9;border-radius:14px;
+  overflow:hidden;background:#0d0d0d;margin-bottom:14px;position:relative;
+}
+.sheet-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.sheet-play-overlay{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.18);
+}
+.sheet-play-btn{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,0.18);backdrop-filter:blur(10px);
+  border:1.5px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.sheet-play-btn:hover{background:rgba(255,255,255,0.28);transform:scale(1.08);}
+.sheet-title{
+  font-size:15px;font-weight:900;letter-spacing:-.3px;
+  color:var(--txt);line-height:1.35;margin-bottom:14px;
+}
+.sheet-stats{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;
+}
+.sheet-stat-pill{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:99px;padding:5px 12px;
+  font-size:11px;font-weight:800;color:var(--txt2);
+}
+.sheet-watch-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 0;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+  color:#fff;font-size:13px;font-weight:900;letter-spacing:.2px;
+  box-shadow:0 4px 20px rgba(255,0,0,0.4);
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  text-decoration:none;font-family:inherit;
+}
+.sheet-watch-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px rgba(255,0,0,0.55);}
+.sheet-watch-btn:active{transform:scale(0.97);}
+
+/* ══════════════════════════════════
+   LONG-PRESS PREVIEW MODAL
+══════════════════════════════════ */
+#shorts-preview-overlay{
+  position:fixed;inset:0;z-index:9100;
+  background:rgba(0,0,0,0);
+  pointer-events:none;
+  transition:background 0.25s cubic-bezier(0.4,0,0.2,1);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#shorts-preview-overlay.open{
+  background:rgba(0,0,0,0.78);pointer-events:all;
+}
+#shorts-preview-modal{
+  width:min(340px,90vw);
+  border-radius:20px;overflow:hidden;
+  background:rgba(12,12,20,0.95);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 24px 64px rgba(0,0,0,0.7);
+  opacity:0;transform:scale(0.88);
+  transition:opacity 0.25s cubic-bezier(0.22,1,0.36,1),transform 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+#shorts-preview-overlay.open #shorts-preview-modal{opacity:1;transform:scale(1);}
+.preview-iframe-wrap{
+  width:100%;aspect-ratio:9/16;background:#000;position:relative;
+}
+.preview-iframe-wrap iframe{
+  width:100%;height:100%;border:none;display:block;
+}
+.preview-close{
+  position:absolute;top:10px;right:10px;z-index:2;
+  width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.preview-close:hover{background:rgba(255,0,0,0.55);transform:scale(1.1);}
+.preview-title{
+  padding:12px 14px 14px;
+  font-size:12px;font-weight:700;color:var(--txt);
+  line-height:1.4;
+}
 </style>
 </head>
 <body>
@@ -1703,6 +2019,33 @@ button,
         </div>
       </div>
 
+      <!-- ── SHORTS / VIDEO FEED ── -->
+      <div class="shorts-section" id="shorts-section">
+
+        <div class="shorts-header">
+          <div class="shorts-header-left">
+            <div class="shorts-header-icon">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtSsD_I85MznoyUIZXUHaRBzfiRPL4DNZhjw&s" alt="YT">
+            </div>
+            <div>
+              <div class="shorts-header-title">Latest Shorts</div>
+              <div class="shorts-header-sub" id="shorts-status">Loading…</div>
+            </div>
+          </div>
+          <button class="shorts-refresh-btn" id="shorts-refresh-btn" onclick="shortsRefresh()" title="Refresh">⟳</button>
+        </div>
+
+        <div class="shorts-strip" id="shorts-strip">
+          <!-- Skeletons shown while loading -->
+          <div class="short-skeleton"><div class="short-skeleton-inner"></div></div>
+          <div class="short-skeleton"><div class="short-skeleton-inner"></div></div>
+          <div class="short-skeleton"><div class="short-skeleton-inner"></div></div>
+          <div class="short-skeleton"><div class="short-skeleton-inner"></div></div>
+          <div class="short-skeleton"><div class="short-skeleton-inner"></div></div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -1984,6 +2327,40 @@ button,
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- SHORTS BOTTOM SHEET -->
+<div id="shorts-sheet-overlay" onclick="shortsCloseSheet()"></div>
+<div id="shorts-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-body">
+    <div class="sheet-thumb">
+      <img id="sheet-thumb-img" src="" alt="">
+      <div class="sheet-play-overlay">
+        <div class="sheet-play-btn" id="sheet-play-btn">▶</div>
+      </div>
+    </div>
+    <div class="sheet-title" id="sheet-title"></div>
+    <div class="sheet-stats">
+      <div class="sheet-stat-pill">👁 <span id="sheet-views">0</span></div>
+      <div class="sheet-stat-pill">👍 <span id="sheet-likes">0</span></div>
+      <div class="sheet-stat-pill">💬 <span id="sheet-comms">0</span></div>
+    </div>
+    <a id="sheet-watch-btn" class="sheet-watch-btn" href="#" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+      Watch on YouTube
+    </a>
+  </div>
+</div>
+
+<!-- SHORTS LONG-PRESS PREVIEW MODAL -->
+<div id="shorts-preview-overlay" onclick="shortsClosePreview(event)">
+  <div id="shorts-preview-modal">
+    <div class="preview-iframe-wrap" id="preview-iframe-wrap">
+      <button class="preview-close" onclick="shortsClosePreview()">✕</button>
+    </div>
+    <div class="preview-title" id="preview-title"></div>
+  </div>
+</div>
+
 <script type="module">
 'use strict';
 
@@ -2033,19 +2410,9 @@ let YT_DB = [];
    FIRESTORE — FILES
 ═══════════════════════════════════════════ */
 async function fbAddFile(subject, name, link, thumbnail, category, folder) {
-  // ── FIX: never write empty category to Firestore ──
-  const safeCategory = (category || '').trim() || (SUBJ[subject] && SUBJ[subject].cats[0]) || 'general';
   // Get max order for this subject
   const maxOrder = DB[subject] ? DB[subject].length : 0;
-  await addDoc(collection(db, 'files'), {
-    subject,
-    name: name || 'Untitled',
-    link,
-    thumbnail,
-    category: safeCategory,
-    folder: folder || '',
-    order: maxOrder
-  });
+  await addDoc(collection(db, 'files'), { subject, name, link, thumbnail, category, folder: folder||'', order: maxOrder });
 }
 
 async function fbDeleteFile(id) {
@@ -2063,15 +2430,12 @@ async function fbLoadFiles() {
     const d = docSnap.data();
     const subj = d.subject;
     if (DB[subj]) {
-      // ── FIX: safe category fallback — missing/empty → first known cat or 'general' ──
-      const rawCat = (d.category || '').trim();
-      const safeCat = rawCat || (SUBJ[subj] && SUBJ[subj].cats[0]) || 'general';
       DB[subj].push({
         id: docSnap.id,
-        name: d.name || 'Untitled',
-        link: d.link || '',
+        name: d.name,
+        link: d.link,
         thumb: d.thumbnail || '📄',
-        category: safeCat,
+        category: d.category || 'NOTES',
         folder: d.folder || '',
         order: typeof d.order === 'number' ? d.order : 9999,
         subject: subj
@@ -2169,38 +2533,6 @@ function fixDrive(u){
 /* ═══════════════════════════════════════════
    LOADER — waits for Firebase data
 ═══════════════════════════════════════════ */
-/* ═══════════════════════════════════════════
-   ONE-TIME MIGRATION — fix missing category field
-   Runs silently on load; skips already-patched docs
-═══════════════════════════════════════════ */
-async function migrateFixMissingCategories(){
-  const MIG_KEY = 'ab_cat_migration_v1';
-  if(localStorage.getItem(MIG_KEY)) return; // already ran
-
-  const snapshot = await getDocs(collection(db, 'files'));
-  const fixes = [];
-  snapshot.forEach(docSnap => {
-    const d = docSnap.data();
-    const rawCat = (d.category || '').trim();
-    if(!rawCat){
-      // Assign first known category for the subject, or 'general'
-      const fallback = (SUBJ[d.subject] && SUBJ[d.subject].cats[0]) || 'general';
-      fixes.push(updateDoc(doc(db, 'files', docSnap.id), { category: fallback }));
-    }
-  });
-
-  if(fixes.length){
-    await Promise.all(fixes);
-    console.log(`[Migration] Patched ${fixes.length} file(s) missing category.`);
-    // Reload so UI reflects patched data
-    await fbLoadFiles();
-    updateCounts();
-    if(curSubj) renderFiles(curSubj);
-  }
-
-  localStorage.setItem(MIG_KEY, '1'); // mark done
-}
-
 window.addEventListener('load', async () => {
   // Start loading Firebase data in background during loader animation
   let firebaseReady = false;
@@ -2218,8 +2550,6 @@ window.addEventListener('load', async () => {
   try {
     await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
     firebaseReady = true;
-    // ── ONE-TIME MIGRATION: patch Firestore docs missing category ──
-    migrateFixMissingCategories().catch(e=>console.warn('[Migration] skipped:',e));
   } catch(e) {
     console.error('Firebase load error:', e);
     toast('⚠️ Could not load data. Check connection.');
@@ -2457,9 +2787,9 @@ function renderFiles(key){
 
     const body=folderBlk.querySelector('.folder-body');
 
-    // Group files inside folder by category — safe fallback per file
+    // Group files inside folder by category
     s.cats.forEach(cat=>{
-      const catFiles=folderFiles.filter(f=>(f.category||s.cats[0]||'general')===cat);
+      const catFiles=folderFiles.filter(f=>f.category===cat);
       if(!catFiles.length) return;
       // Category sub-label inside folder
       const catLbl=document.createElement('div');
@@ -2470,25 +2800,12 @@ function renderFiles(key){
       catFiles.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
     });
 
-    // ── FIX: also show files inside folder whose category isn't in s.cats ──
-    const knownCats=new Set(s.cats);
-    const orphans=folderFiles.filter(f=>!knownCats.has(f.category||''));
-    if(orphans.length){
-      const catLbl=document.createElement('div');
-      catLbl.className='catlbl';
-      catLbl.style.cssText='font-size:10px;padding:6px 12px 4px;opacity:0.7;margin-top:4px;';
-      catLbl.textContent='OTHER';
-      body.appendChild(catLbl);
-      orphans.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
-    }
-
     sc.appendChild(folderBlk);
   });
 
   // ── 2. RENDER UNGROUPED FILES (no folder) grouped by category ──
   s.cats.forEach((cat,ci)=>{
-    // ── FIX: safe category comparison using fallback ──
-    const catFsNoFolder=files.filter(f=>(f.category||s.cats[0]||'general')===cat && !f.folder);
+    const catFsNoFolder=files.filter(f=>f.category===cat && !f.folder);
     if(!catFsNoFolder.length) return; // skip empty categories
 
     const blk=document.createElement('div');
@@ -2507,24 +2824,6 @@ function renderFiles(key){
 
     sc.appendChild(blk);
   });
-
-  // ── FIX: catch any files whose category doesn't match ANY known cat (and no folder) ──
-  const knownCats=new Set(s.cats);
-  const uncategorised=files.filter(f=>!f.folder && !knownCats.has(f.category||''));
-  if(uncategorised.length){
-    const blk=document.createElement('div');
-    blk.className='catblk';
-    blk.style.animationDelay=(cardIdx*0.07)+'s';
-    cardIdx++;
-    const lbl=document.createElement('div');
-    lbl.className='catlbl';lbl.textContent='OTHER';
-    blk.appendChild(lbl);
-    const list=document.createElement('div');
-    list.className='flist';
-    uncategorised.forEach((f,fi)=>list.appendChild(mkFCard(f,fi)));
-    blk.appendChild(list);
-    sc.appendChild(blk);
-  }
 
   // ── 3. EMPTY STATE (nothing at all) ──
   if(!sc.children.length){
@@ -3180,6 +3479,298 @@ function renderYTHome(){
   });
 })();
 
+/* ═══════════════════════════════════════════
+   SHORTS / VIDEO FEED ENGINE v2
+   Playlist: UUP6_K13ftqob8yBB-19b3Qg
+═══════════════════════════════════════════ */
+(()=>{
+  const PLAYLIST_ID  = 'UUP6_K13ftqob8yBB-19b3Qg';
+  const YT_KEY       = 'AIzaSyDqba0KvcBcZIxHU-ghj272Qd04Afw6PqU';
+  const MAX_RESULTS  = 10;
+  const REFRESH_MS   = 30000;
+  const TRENDING_MIN = 10000;
+  const NEW_MS       = 24*60*60*1000; // 24 hours
+
+  let _shortsTimer  = null;
+  let _fetching     = false;
+  let _videoDB      = []; // cache for sheet/preview
+
+  /* ─── Helpers ─── */
+  function parseDuration(iso){
+    if(!iso) return 9999;
+    const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if(!m) return 9999;
+    return (parseInt(m[1]||0)*3600)+(parseInt(m[2]||0)*60)+parseInt(m[3]||0);
+  }
+  function fmtDur(sec){
+    const m=Math.floor(sec/60),s=sec%60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+  function fmtN(n){
+    n=parseInt(n)||0;
+    if(n>=1e6) return (n/1e6).toFixed(1).replace('.0','')+'M';
+    if(n>=1e3) return (n/1e3).toFixed(1).replace('.0','')+'K';
+    return String(n);
+  }
+  function setStatus(txt){const el=document.getElementById('shorts-status');if(el)el.textContent=txt;}
+  function isNew(publishedAt){return publishedAt && (Date.now()-new Date(publishedAt).getTime())<NEW_MS;}
+  function isTrending(views){return parseInt(views)||0 >= TRENDING_MIN;}
+
+  /* ─── Skeletons ─── */
+  function showSkeletons(){
+    const s=document.getElementById('shorts-strip');if(!s)return;
+    s.innerHTML='';
+    for(let i=0;i<5;i++){const d=document.createElement('div');d.className='short-skeleton';d.innerHTML='<div class="short-skeleton-inner"></div>';s.appendChild(d);}
+  }
+
+  /* ─── Fetch ─── */
+  async function fetchShorts(){
+    if(_fetching) return;
+    _fetching=true;
+    const btn=document.getElementById('shorts-refresh-btn');
+    if(btn) btn.classList.add('spinning');
+    setStatus('Refreshing…');
+
+    try{
+      const plRes=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&maxResults=${MAX_RESULTS}&key=${YT_KEY}`);
+      if(!plRes.ok) throw new Error('Playlist failed');
+      const plData=await plRes.json();
+      const items=(plData.items||[]).filter(it=>it.snippet?.resourceId?.videoId);
+      if(!items.length){setStatus('No videos found');renderEmpty();return;}
+
+      const ids=items.map(it=>it.snippet.resourceId.videoId).join(',');
+      const vRes=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics,snippet&id=${ids}&key=${YT_KEY}`);
+      if(!vRes.ok) throw new Error('Stats failed');
+      const vData=await vRes.json();
+
+      const vMap={};
+      (vData.items||[]).forEach(v=>{
+        vMap[v.id]={
+          dur:         parseDuration(v.contentDetails?.duration),
+          views:       v.statistics?.viewCount    || 0,
+          likes:       v.statistics?.likeCount    || 0,
+          comms:       v.statistics?.commentCount || 0,
+          title:       v.snippet?.title           || '',
+          publishedAt: v.snippet?.publishedAt     || '',
+          thumb:       v.snippet?.thumbnails?.maxres?.url
+                    || v.snippet?.thumbnails?.high?.url
+                    || v.snippet?.thumbnails?.medium?.url
+                    || v.snippet?.thumbnails?.default?.url
+                    || ''
+        };
+      });
+
+      const enriched=items
+        .filter(it=>vMap[it.snippet.resourceId.videoId])
+        .map(it=>{
+          const vid=it.snippet.resourceId.videoId;
+          return {vid, isShort:vMap[vid].dur<=60, ...vMap[vid]};
+        });
+
+      const sorted=[...enriched.filter(v=>v.isShort),...enriched.filter(v=>!v.isShort)];
+      _videoDB=sorted;
+      renderCards(sorted);
+      setStatus(`${sorted.filter(v=>v.isShort).length} Shorts · ${sorted.filter(v=>!v.isShort).length} Videos · auto-refresh`);
+
+    }catch(err){
+      console.warn('[Shorts]',err);
+      setStatus('Could not load — tap ⟳ to retry');
+      renderEmpty(true);
+    }finally{
+      _fetching=false;
+      if(btn) btn.classList.remove('spinning');
+    }
+  }
+
+  /* ─── Render Cards ─── */
+  function renderCards(videos){
+    const strip=document.getElementById('shorts-strip');
+    if(!strip) return;
+    strip.innerHTML='';
+    if(!videos.length){renderEmpty();return;}
+
+    videos.forEach((v,i)=>{
+      const div=document.createElement('div');
+      div.className='short-card';
+      div.dataset.vid=v.vid;
+      div.style.animationDelay=(i*0.055)+'s';
+
+      const newBadge = isNew(v.publishedAt)
+        ? `<div class="short-badge-new">NEW</div>` : '';
+      const trendBadge = isTrending(v.views)
+        ? `<div class="short-badge-trending">🔥 TRENDING</div>` : '';
+      const typeBadge = v.isShort
+        ? `<div class="short-badge">SHORT</div>`
+        : `<div class="short-badge" style="background:linear-gradient(135deg,#5b9aff,#9b6dff);">VIDEO</div>`;
+
+      div.innerHTML=`
+        <div class="short-thumb-wrap">
+          <img src="${v.thumb}" alt="" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${v.vid}/hqdefault.jpg'">
+          <div class="short-thumb-gradient"></div>
+          ${newBadge}${typeBadge}
+          <div class="short-dur">${fmtDur(v.dur)}</div>
+          ${trendBadge}
+          <div class="short-stats-overlay">
+            <div class="short-stat"><span class="short-stat-ico">👁</span>${fmtN(v.views)}</div>
+            <div class="short-stat"><span class="short-stat-ico">👍</span>${fmtN(v.likes)}</div>
+          </div>
+        </div>
+        <div class="short-title">${v.title}</div>
+      `;
+
+      /* ── Long-press detection ── */
+      let _lpTimer=null;
+      const startLP=()=>{
+        _lpTimer=setTimeout(()=>{ _lpTimer=null; openPreview(v); },500);
+      };
+      const cancelLP=(e)=>{
+        if(_lpTimer){clearTimeout(_lpTimer);_lpTimer=null;}
+      };
+      div.addEventListener('touchstart',startLP,{passive:true});
+      div.addEventListener('touchend',e=>{
+        if(_lpTimer){clearTimeout(_lpTimer);_lpTimer=null;/* normal tap → sheet */openSheet(v);}
+        e.preventDefault();
+      });
+      div.addEventListener('touchmove',cancelLP,{passive:true});
+      div.addEventListener('touchcancel',cancelLP);
+      /* Desktop click → sheet */
+      div.addEventListener('click',()=>openSheet(v));
+      /* Press visual */
+      div.addEventListener('touchstart',()=>div.classList.add('pressing'),{passive:true});
+      div.addEventListener('touchend',()=>div.classList.remove('pressing'));
+      div.addEventListener('touchcancel',()=>div.classList.remove('pressing'));
+
+      strip.appendChild(div);
+    });
+
+    /* Event delegation backup for any missed clicks */
+    strip.onclick=null;
+  }
+
+  function renderEmpty(isErr){
+    const s=document.getElementById('shorts-strip');if(!s)return;
+    s.innerHTML=`<div class="shorts-empty">${isErr?'⚠️ Failed to load':'📭 No content yet'}</div>`;
+  }
+
+  /* ─── Bottom Sheet ─── */
+  function openSheet(v){
+    document.getElementById('sheet-thumb-img').src=v.thumb||`https://i.ytimg.com/vi/${v.vid}/hqdefault.jpg`;
+    document.getElementById('sheet-title').textContent=v.title;
+    document.getElementById('sheet-views').textContent=fmtN(v.views);
+    document.getElementById('sheet-likes').textContent=fmtN(v.likes);
+    document.getElementById('sheet-comms').textContent=fmtN(v.comms);
+    const link=v.isShort?`https://youtube.com/shorts/${v.vid}`:`https://www.youtube.com/watch?v=${v.vid}`;
+    document.getElementById('sheet-watch-btn').href=link;
+    /* play button inside sheet → opens YT link */
+    document.getElementById('sheet-play-btn').onclick=()=>window.open(link,'_blank');
+    document.getElementById('shorts-sheet-overlay').classList.add('open');
+    document.getElementById('shorts-sheet').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  window.shortsCloseSheet=function(){
+    document.getElementById('shorts-sheet-overlay').classList.remove('open');
+    document.getElementById('shorts-sheet').classList.remove('open');
+    document.body.style.overflow='';
+  };
+
+  /* ─── Long-Press Preview Modal ─── */
+  function openPreview(v){
+    const wrap=document.getElementById('preview-iframe-wrap');
+    /* Remove old iframe if any */
+    const old=wrap.querySelector('iframe');if(old)old.remove();
+    const iframe=document.createElement('iframe');
+    iframe.src=`https://www.youtube.com/embed/${v.vid}?autoplay=1&mute=1&playsinline=1`;
+    iframe.allow='autoplay;encrypted-media';
+    iframe.setAttribute('allowfullscreen','');
+    iframe.style.cssText='width:100%;height:100%;border:none;display:block;';
+    /* Insert before close btn */
+    wrap.insertBefore(iframe,wrap.firstChild);
+    document.getElementById('preview-title').textContent=v.title;
+    document.getElementById('shorts-preview-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  window.shortsClosePreview=function(e){
+    if(e&&e.target!==document.getElementById('shorts-preview-overlay')&&!e.target.classList.contains('preview-close'))return;
+    const overlay=document.getElementById('shorts-preview-overlay');
+    overlay.classList.remove('open');
+    /* Kill iframe to stop video */
+    setTimeout(()=>{
+      const w=document.getElementById('preview-iframe-wrap');
+      const f=w.querySelector('iframe');if(f)f.remove();
+    },280);
+    document.body.style.overflow='';
+  };
+
+  /* ─── Public refresh ─── */
+  window.shortsRefresh=function(){showSkeletons();fetchShorts();};
+
+  /* ─── Show skeletons immediately so strip is never blank ─── */
+  showSkeletons();
+
+  /* ─── Safe switchTab hook — waits until module has exposed window.switchTab ─── */
+  function hookSwitchTab(){
+    const orig=window.switchTab;
+    if(typeof orig!=='function'||orig._shortsHooked) return;
+    window.switchTab=function(t){
+      orig(t);
+      if(t==='yt'){
+        if(!_fetching) fetchShorts();
+        if(_shortsTimer) clearInterval(_shortsTimer);
+        _shortsTimer=setInterval(fetchShorts,REFRESH_MS);
+      }else{
+        if(_shortsTimer){clearInterval(_shortsTimer);_shortsTimer=null;}
+      }
+    };
+    window.switchTab._shortsHooked=true;
+  }
+  /* Expose for immediate call from the module script's globals block */
+  window._hookShortsTab=hookSwitchTab;
+
+  /* Poll until module script has assigned window.switchTab, then hook it */
+  let _hookAttempts=0;
+  const _hookInterval=setInterval(()=>{
+    _hookAttempts++;
+    if(typeof window.switchTab==='function'&&!window.switchTab._shortsHooked){
+      hookSwitchTab();
+    }
+    /* Stop polling after 6 seconds — module definitely loaded by then */
+    if(_hookAttempts>60) clearInterval(_hookInterval);
+  },100);
+
+  /* ─── Auto-start: fetch as soon as YT tab is the active one ─── */
+  function bootIfYT(){
+    const active=document.querySelector('.ntab.on');
+    if(active&&active.id==='nt-yt'){
+      fetchShorts();
+      if(_shortsTimer) clearInterval(_shortsTimer);
+      _shortsTimer=setInterval(fetchShorts,REFRESH_MS);
+    }
+  }
+
+  /* Run after DOM ready */
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', bootIfYT);
+  } else {
+    bootIfYT();
+  }
+
+  /* Also run after the window load event (covers late hydration) */
+  window.addEventListener('load', ()=>{
+    /* If YT tab is active and we haven't loaded yet, fetch now */
+    const active=document.querySelector('.ntab.on');
+    if(active&&active.id==='nt-yt'&&!_shortsTimer){
+      fetchShorts();
+      _shortsTimer=setInterval(fetchShorts,REFRESH_MS);
+    }
+    /* If YT tab is not active, pre-fetch silently in background after 2s */
+    if(!active||active.id!=='nt-yt'){
+      setTimeout(()=>{
+        if(!_fetching) fetchShorts();
+      }, 2000);
+    }
+  });
+})();
+
 /* RIPPLE */
 function ripple(el){
   if(!el)return;
@@ -3345,6 +3936,8 @@ window.addYT=addYT;window.delYT=delYT;
 window.toggleTheme=toggleTheme;window.ripple=ripple;
 window.addFolder=addFolder;window.delFolder=delFolder;
 window.apSwitchTab=apSwitchTab;
+/* Immediately apply the Shorts switchTab hook now that window.switchTab is set */
+if(typeof window._hookShortsTab==='function') window._hookShortsTab();
 
 /* ═══════════════════════════════════════════
    FOLDER ORGANIZER — assign files to folders
