@@ -2370,7 +2370,7 @@ button,
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
-  query, orderBy, updateDoc, setDoc, getDoc
+  query, orderBy, updateDoc, setDoc, getDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
@@ -2410,13 +2410,57 @@ let YT_DB = [];
    FIRESTORE — FILES
 ═══════════════════════════════════════════ */
 async function fbAddFile(subject, name, link, thumbnail, category, folder) {
+  // SAFETY CHECK: always ensure a valid category is saved
+  if (!category || category.trim() === '') {
+    const subjCats = SUBJ[subject]?.cats;
+    category = (subjCats && subjCats.length) ? subjCats[0] : 'NOTES';
+  }
+  console.log('[fbAddFile] Saving file with category:', category, '| subject:', subject);
   // Get max order for this subject
   const maxOrder = DB[subject] ? DB[subject].length : 0;
-  await addDoc(collection(db, 'files'), { subject, name, link, thumbnail, category, folder: folder||'', order: maxOrder });
+  await addDoc(collection(db, 'files'), {
+    subject, name, link, thumbnail,
+    category,
+    folder: folder || '',
+    order: maxOrder,
+    createdAt: serverTimestamp()
+  });
 }
 
 async function fbDeleteFile(id) {
   await deleteDoc(doc(db, 'files', id));
+}
+
+/* ═══════════════════════════════════════════
+   ONE-TIME CLEANUP — Fix existing docs with missing/empty category
+   Runs silently on load; safe to run multiple times (no-ops if already fixed)
+═══════════════════════════════════════════ */
+async function fixMissingCategories() {
+  try {
+    const snapshot = await getDocs(collection(db, 'files'));
+    const fixes = [];
+    snapshot.forEach(docSnap => {
+      const d = docSnap.data();
+      const cat = d.category;
+      if (!cat || cat.trim() === '') {
+        // Determine best default category from subject
+        const subjCats = SUBJ[d.subject]?.cats;
+        const defaultCat = (subjCats && subjCats.length) ? subjCats[0] : 'NOTES';
+        console.warn('[fixMissingCategories] Fixing doc', docSnap.id, '— assigning category:', defaultCat, '| subject:', d.subject);
+        fixes.push(updateDoc(doc(db, 'files', docSnap.id), { category: defaultCat }));
+      }
+    });
+    if (fixes.length) {
+      await Promise.all(fixes);
+      console.log('[fixMissingCategories] Fixed', fixes.length, 'document(s) with missing category.');
+      // Reload files after cleanup
+      await fbLoadFiles();
+    } else {
+      console.log('[fixMissingCategories] No documents needed fixing.');
+    }
+  } catch (e) {
+    console.error('[fixMissingCategories] Error:', e);
+  }
 }
 
 async function fbUpdateFileOrder(id, order) {
@@ -2435,7 +2479,7 @@ async function fbLoadFiles() {
         name: d.name,
         link: d.link,
         thumb: d.thumbnail || '📄',
-        category: d.category || 'NOTES',
+        category: (d.category && d.category.trim() !== '') ? d.category : ((SUBJ[subj]?.cats?.[0]) || 'NOTES'),
         folder: d.folder || '',
         order: typeof d.order === 'number' ? d.order : 9999,
         subject: subj
@@ -2549,6 +2593,8 @@ window.addEventListener('load', async () => {
   // Firebase load
   try {
     await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
+    // One-time cleanup: fix any existing docs with missing/empty category
+    await fixMissingCategories();
     firebaseReady = true;
   } catch(e) {
     console.error('Firebase load error:', e);
@@ -2794,11 +2840,25 @@ function renderFiles(key){
       // Category sub-label inside folder
       const catLbl=document.createElement('div');
       catLbl.className='catlbl';
-      catLbl.style.cssText='font-size:10px;padding:6px 12px 4px;opacity:0.7;margin-top:4px;';
+      catLbl.style.cssText='font-size:10px;padding:6px 12px 4pt;opacity:0.7;margin-top:4px;';
       catLbl.textContent=cat;
       body.appendChild(catLbl);
-      catFiles.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
+      catFiles.forEach((f,fi)=>{
+        console.log('[renderFiles folder] File category:', f.category, '| name:', f.name);
+        body.appendChild(mkFCard(f,fi));
+      });
     });
+    // Safety net: show folder files with unknown category under "Other"
+    const folderOrphans=folderFiles.filter(f=>!s.cats.includes(f.category));
+    if(folderOrphans.length){
+      console.warn('[renderFiles folder] Found', folderOrphans.length, 'file(s) with unrecognised category in folder:', fo.name);
+      const catLbl=document.createElement('div');
+      catLbl.className='catlbl';
+      catLbl.style.cssText='font-size:10px;padding:6px 12px 4px;opacity:0.7;margin-top:4px;';
+      catLbl.textContent='OTHER';
+      body.appendChild(catLbl);
+      folderOrphans.forEach((f,fi)=>body.appendChild(mkFCard(f,fi)));
+    }
 
     sc.appendChild(folderBlk);
   });
@@ -2819,11 +2879,37 @@ function renderFiles(key){
 
     const list=document.createElement('div');
     list.className='flist';
-    catFsNoFolder.forEach((f,fi)=>list.appendChild(mkFCard(f,fi)));
+    catFsNoFolder.forEach((f,fi)=>{
+      console.log('[renderFiles] File category:', f.category, '| name:', f.name);
+      list.appendChild(mkFCard(f,fi));
+    });
     blk.appendChild(list);
 
     sc.appendChild(blk);
   });
+
+  // ── 2b. RENDER FILES WITH UNKNOWN/MISSING CATEGORY (safety net) ──
+  // Files whose category isn't in the known list won't be filtered out — shown under "Other"
+  const knownCats = s.cats;
+  const orphanFiles = files.filter(f => !f.folder && !knownCats.includes(f.category));
+  if(orphanFiles.length){
+    console.warn('[renderFiles] Found', orphanFiles.length, 'file(s) with unrecognised category — showing under "Other"');
+    const blk=document.createElement('div');
+    blk.className='catblk';
+    blk.style.animationDelay=(cardIdx*0.07)+'s';
+    cardIdx++;
+    const lbl=document.createElement('div');
+    lbl.className='catlbl';lbl.textContent='OTHER';
+    blk.appendChild(lbl);
+    const list=document.createElement('div');
+    list.className='flist';
+    orphanFiles.forEach((f,fi)=>{
+      console.log('[renderFiles] Orphan file category:', f.category, '| name:', f.name);
+      list.appendChild(mkFCard(f,fi));
+    });
+    blk.appendChild(list);
+    sc.appendChild(blk);
+  }
 
   // ── 3. EMPTY STATE (nothing at all) ──
   if(!sc.children.length){
@@ -3157,7 +3243,12 @@ function setUMode(m) {
 async function addFile(){
   const n = document.getElementById('af-n').value.trim();
   const s = document.getElementById('af-s').value;
-  const c = document.getElementById('af-c').value;
+  let c = document.getElementById('af-c').value;
+  // SAFETY CHECK: ensure category is never empty before saving
+  if (!c || c.trim() === '') {
+    c = (SUBJ[s]?.cats?.[0]) || 'NOTES';
+    console.warn('[addFile] Category was empty — defaulting to:', c);
+  }
   if(!n){ toast('⚠️ File name is required'); return; }
 
   const btn = document.getElementById('af-submit-btn');
