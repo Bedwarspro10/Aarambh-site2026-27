@@ -1700,6 +1700,596 @@ button,
   font-size:12px;font-weight:700;color:var(--txt);
   line-height:1.4;
 }
+
+/* ══════════════════════════════════════
+   GOOGLE AUTH — PREMIUM LOGIN POPUP
+══════════════════════════════════════ */
+#auth-overlay{
+  position:fixed;inset:0;z-index:1200;
+  background:rgba(0,0,0,0.78);
+  backdrop-filter:blur(28px) saturate(1.7);
+  -webkit-backdrop-filter:blur(28px) saturate(1.7);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .4s cubic-bezier(0.4,0,0.2,1);
+}
+#auth-overlay.open{opacity:1;pointer-events:all;}
+#auth-overlay.open .auth-card{transform:translateY(0) scale(1);opacity:1;}
+
+@keyframes neonBorderPulse{
+  0%,100%{box-shadow:0 0 0 1px rgba(91,154,255,0.4),0 0 30px rgba(91,154,255,0.22),0 0 70px rgba(91,154,255,0.08),0 36px 90px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);}
+  50%{box-shadow:0 0 0 1px rgba(155,109,255,0.6),0 0 42px rgba(155,109,255,0.32),0 0 90px rgba(91,154,255,0.14),0 36px 90px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);}
+}
+@keyframes authCardIn{
+  from{transform:translateY(36px) scale(0.9);opacity:0;}
+  to{transform:translateY(0) scale(1);opacity:1;}
+}
+
+.auth-card{
+  width:100%;max-width:340px;
+  background:linear-gradient(150deg,rgba(14,22,44,0.98),rgba(6,9,22,0.99));
+  border:1px solid rgba(91,154,255,0.4);
+  border-radius:32px;
+  padding:32px 24px 28px;
+  text-align:center;
+  transform:translateY(36px) scale(0.9);
+  opacity:0;
+  transition:transform .52s cubic-bezier(0.34,1.56,0.64,1),opacity .38s cubic-bezier(0.4,0,0.2,1);
+}
+#auth-overlay.open .auth-card{
+  animation:neonBorderPulse 3s ease-in-out infinite;
+}
+
+.auth-glow{
+  position:absolute;top:-60px;left:50%;transform:translateX(-50%);
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(91,154,255,0.26) 0%,rgba(155,109,255,0.12) 40%,transparent 70%);
+  pointer-events:none;
+  animation:authGlowPulse 3s ease-in-out infinite;
+}
+@keyframes authGlowPulse{
+  0%,100%{opacity:.65;transform:translateX(-50%) scale(1);}
+  50%{opacity:1;transform:translateX(-50%) scale(1.18);}
+}
+
+.auth-lock-icon{
+  width:72px;height:72px;border-radius:22px;
+  background:linear-gradient(135deg,rgba(91,154,255,0.18),rgba(155,109,255,0.18));
+  border:1px solid rgba(91,154,255,0.45);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 18px;
+  box-shadow:0 0 0 7px rgba(91,154,255,0.09),0 0 28px rgba(91,154,255,0.28);
+  animation:authIconPop .55s cubic-bezier(0.34,1.56,0.64,1) both;
+  position:relative;
+}
+@keyframes authIconPop{
+  from{transform:scale(0.4) rotate(-15deg);opacity:0;}
+  to{transform:scale(1) rotate(0deg);opacity:1;}
+}
+
+.auth-badge{
+  display:inline-block;
+  padding:4px 14px;border-radius:99px;
+  background:linear-gradient(135deg,rgba(155,109,255,0.18),rgba(91,154,255,0.12));
+  border:1px solid rgba(155,109,255,0.45);
+  font-size:10px;font-weight:900;letter-spacing:1.5px;
+  color:var(--purple);text-transform:uppercase;
+  margin-bottom:14px;
+  box-shadow:0 0 16px rgba(155,109,255,0.2);
+}
+
+.auth-title{
+  font-size:23px;font-weight:900;letter-spacing:-.4px;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,#e8eeff,#c8d8ff,#baaeff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+.auth-sub{
+  font-size:13px;color:var(--txt2);line-height:1.65;
+  margin-bottom:24px;font-weight:600;
+}
+.auth-sub strong{color:var(--blue);}
+
+.auth-stars{
+  display:flex;justify-content:center;gap:5px;margin-bottom:20px;
+}
+.auth-stars span{
+  font-size:13px;
+  animation:starTwinkle 2s ease-in-out infinite;
+}
+.auth-stars span:nth-child(2){animation-delay:.3s;}
+.auth-stars span:nth-child(3){animation-delay:.6s;}
+@keyframes starTwinkle{
+  0%,100%{opacity:.5;transform:scale(1);}
+  50%{opacity:1;transform:scale(1.3);}
+}
+
+.auth-google-btn{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;padding:15px 20px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.09),rgba(255,255,255,0.05));
+  border:1px solid rgba(91,154,255,0.35);
+  border-radius:18px;
+  color:var(--txt);font-family:'Nunito',sans-serif;
+  font-size:15px;font-weight:800;
+  cursor:pointer;
+  transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),box-shadow .25s,background .2s,border-color .2s;
+  will-change:transform;
+  position:relative;overflow:hidden;
+  margin-bottom:12px;
+  box-shadow:0 4px 22px rgba(91,154,255,0.14);
+}
+.auth-google-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(91,154,255,0.15),rgba(155,109,255,0.1));
+  opacity:0;transition:opacity .25s;
+}
+.auth-google-btn:hover::before{opacity:1;}
+.auth-google-btn:hover{
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 14px 44px rgba(91,154,255,0.32),0 0 0 1px rgba(91,154,255,0.5);
+  border-color:rgba(91,154,255,0.6);
+}
+.auth-google-btn:active{transform:scale(0.96);}
+.auth-google-btn.loading{opacity:.7;pointer-events:none;}
+
+.auth-google-icon{width:22px;height:22px;flex-shrink:0;}
+
+.auth-dismiss{
+  background:none;border:none;
+  color:var(--txt3);font-family:'Nunito',sans-serif;
+  font-size:12px;font-weight:700;
+  cursor:pointer;padding:6px 16px;border-radius:12px;
+  transition:color .2s,background .2s;
+  width:100%;margin-top:4px;
+}
+.auth-dismiss:hover{color:var(--txt2);background:rgba(255,255,255,0.05);}
+
+@keyframes authSpin{to{transform:rotate(360deg);}}
+.auth-spinner{
+  width:18px;height:18px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,0.2);
+  border-top-color:var(--blue);
+  animation:authSpin .7s linear infinite;
+  flex-shrink:0;
+}
+
+/* ═══════════════════════════════════
+   ⭐ LECTURE RATING SYSTEM
+═══════════════════════════════════ */
+#lec-rating-overlay{
+  position:fixed;inset:0;z-index:9600;
+  background:rgba(0,0,0,0);
+  backdrop-filter:blur(0px);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  pointer-events:none;
+  transition:background .45s cubic-bezier(0.4,0,0.2,1),backdrop-filter .45s;
+}
+#lec-rating-overlay.open{
+  background:rgba(0,0,0,0.72);
+  backdrop-filter:blur(18px) saturate(1.4);
+  pointer-events:all;
+}
+.lec-rating-card{
+  width:100%;max-width:360px;
+  background:linear-gradient(145deg,rgba(14,10,35,0.98),rgba(8,6,22,0.99));
+  border:1px solid rgba(168,85,247,0.3);
+  border-radius:32px;
+  padding:32px 26px 28px;
+  text-align:center;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(168,85,247,0.15),
+    0 0 60px rgba(168,85,247,0.08);
+  transform:translateY(40px) scale(0.88);
+  opacity:0;
+  transition:transform .5s cubic-bezier(0.34,1.56,0.64,1),opacity .38s cubic-bezier(0.4,0,0.2,1);
+  position:relative;overflow:hidden;
+}
+#lec-rating-overlay.open .lec-rating-card{transform:translateY(0) scale(1);opacity:1;}
+
+/* card ambient glow orbs */
+.lec-rating-card::before{
+  content:'';position:absolute;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(168,85,247,0.14) 0%,transparent 70%);
+  top:-80px;right:-60px;pointer-events:none;
+  animation:ratingOrb1 6s ease-in-out infinite;
+}
+.lec-rating-card::after{
+  content:'';position:absolute;width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%);
+  bottom:-60px;left:-40px;pointer-events:none;
+  animation:ratingOrb1 8s ease-in-out infinite reverse;
+}
+@keyframes ratingOrb1{
+  0%,100%{transform:translate(0,0) scale(1);}
+  50%{transform:translate(12px,-8px) scale(1.1);}
+}
+
+/* Top accent bar */
+.rating-accent-bar{
+  position:absolute;top:0;left:0;right:0;height:3px;border-radius:32px 32px 0 0;
+  background:linear-gradient(90deg,#7c3aed,#a855f7,#6366f1,#a855f7,#7c3aed);
+  background-size:300% 100%;
+  animation:ratingBarFlow 3.5s linear infinite;
+}
+@keyframes ratingBarFlow{0%{background-position:0% 0;}100%{background-position:300% 0;}}
+
+/* Trophy/star icon */
+.rating-icon{
+  width:76px;height:76px;border-radius:24px;
+  background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2));
+  border:1px solid rgba(168,85,247,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+  margin:0 auto 16px;
+  box-shadow:0 8px 32px rgba(168,85,247,0.2),inset 0 1px 0 rgba(255,255,255,0.1);
+  animation:ratingIconPop .55s cubic-bezier(0.34,1.56,0.64,1) both .1s;
+  position:relative;z-index:1;
+}
+@keyframes ratingIconPop{from{transform:scale(0.3) rotate(-20deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+
+.rating-badge{
+  display:inline-block;padding:4px 16px;border-radius:99px;
+  background:linear-gradient(135deg,rgba(168,85,247,0.18),rgba(99,102,241,0.14));
+  border:1px solid rgba(168,85,247,0.35);
+  font-size:10px;font-weight:900;letter-spacing:1.5px;color:#c084fc;
+  text-transform:uppercase;margin-bottom:14px;position:relative;z-index:1;
+}
+.rating-title{
+  font-size:22px;font-weight:900;letter-spacing:-.4px;margin-bottom:6px;
+  background:linear-gradient(135deg,#f0e7ff,#c4b5fd);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  position:relative;z-index:1;
+}
+.rating-subtitle{
+  font-size:12.5px;color:rgba(255,255,255,0.45);line-height:1.6;
+  margin-bottom:24px;font-weight:600;position:relative;z-index:1;
+}
+.rating-lec-name{
+  font-size:13px;font-weight:800;color:rgba(168,85,247,0.9);
+  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
+  border-radius:12px;padding:8px 14px;margin-bottom:22px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  position:relative;z-index:1;
+}
+
+/* STARS */
+.rating-stars{
+  display:flex;gap:10px;justify-content:center;margin-bottom:10px;
+  position:relative;z-index:1;
+}
+.rstar{
+  font-size:40px;cursor:pointer;line-height:1;
+  transition:transform .22s cubic-bezier(0.34,1.56,0.64,1),filter .22s;
+  filter:grayscale(1) opacity(0.35);
+  user-select:none;will-change:transform,filter;
+}
+.rstar.lit{
+  filter:grayscale(0) opacity(1) drop-shadow(0 0 10px rgba(251,191,36,0.7));
+  transform:scale(1.15);
+}
+.rstar.hover{
+  filter:grayscale(0) opacity(0.8);
+  transform:scale(1.08);
+}
+@keyframes starBurst{
+  0%{transform:scale(1.15);}
+  30%{transform:scale(1.45) rotate(-8deg);}
+  60%{transform:scale(1.1) rotate(4deg);}
+  100%{transform:scale(1.15) rotate(0);}
+}
+.rstar.burst{animation:starBurst .5s cubic-bezier(0.34,1.56,0.64,1) both;}
+
+.rating-label{
+  font-size:12px;font-weight:800;color:rgba(168,85,247,0.8);
+  min-height:18px;margin-bottom:22px;letter-spacing:.3px;
+  position:relative;z-index:1;
+  transition:opacity .2s;
+}
+
+/* Submit button */
+.rating-submit-btn{
+  width:100%;padding:15px 20px;border-radius:18px;border:none;
+  background:linear-gradient(135deg,#7c3aed,#a855f7,#6366f1);
+  background-size:200% 100%;
+  color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;
+  cursor:pointer;letter-spacing:.2px;
+  box-shadow:0 8px 28px rgba(168,85,247,0.4),0 0 0 0 rgba(168,85,247,0.4);
+  transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),box-shadow .3s,filter .2s,background-position .4s;
+  will-change:transform;position:relative;z-index:1;
+  margin-bottom:10px;
+}
+.rating-submit-btn:hover{
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 14px 40px rgba(168,85,247,0.55);
+  background-position:100% 0;
+}
+.rating-submit-btn:active{transform:scale(0.96);}
+.rating-submit-btn:disabled{opacity:.5;pointer-events:none;}
+
+.rating-skip-btn{
+  background:none;border:none;color:rgba(255,255,255,0.3);
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;padding:8px 16px;border-radius:12px;
+  transition:color .2s,background .2s;width:100%;
+  position:relative;z-index:1;
+}
+.rating-skip-btn:hover{color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.04);}
+
+/* Already rated state */
+.rating-already{font-size:13px;color:rgba(168,85,247,0.8);font-weight:700;margin-bottom:16px;position:relative;z-index:1;}
+
+/* ─── RATINGS DISPLAY BELOW LECTURE CARDS ─── */
+.lec-ratings-section{
+  margin-top:14px;padding:14px 16px;
+  background:rgba(168,85,247,0.04);
+  border:1px solid rgba(168,85,247,0.12);
+  border-radius:20px;
+  position:relative;z-index:1;
+}
+.lec-ratings-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.lec-ratings-title{font-size:12px;font-weight:900;color:rgba(255,255,255,0.55);letter-spacing:.6px;text-transform:uppercase;}
+.lec-avg-badge{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);
+  border-radius:99px;padding:4px 12px;
+}
+.lec-avg-stars{font-size:13px;font-weight:900;color:#fbbf24;}
+.lec-avg-count{font-size:10px;color:rgba(255,255,255,0.4);font-weight:700;}
+
+.lec-rating-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  animation:ratingItemIn .35s cubic-bezier(0.22,1,0.36,1) both;
+}
+.lec-rating-item:last-child{border-bottom:none;}
+@keyframes ratingItemIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.lec-rating-ava{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;
+  overflow:hidden;border:1.5px solid rgba(168,85,247,0.3);
+}
+.lec-rating-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.lec-rating-info{flex:1;min-width:0;}
+.lec-rating-name{font-size:12px;font-weight:800;color:rgba(255,255,255,0.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lec-rating-time{font-size:10px;color:rgba(255,255,255,0.3);font-weight:600;margin-top:1px;}
+.lec-rating-stars-display{font-size:14px;flex-shrink:0;letter-spacing:1px;}
+.lec-rating-del{
+  width:26px;height:26px;border-radius:50%;border:none;
+  background:rgba(255,107,107,0.1);color:var(--red);
+  font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .2s cubic-bezier(0.34,1.56,0.64,1),background .15s;flex-shrink:0;
+}
+.lec-rating-del:active{transform:scale(0.8);background:rgba(255,107,107,0.3);}
+
+.lec-ratings-empty{
+  text-align:center;padding:16px 0 4px;
+  font-size:11.5px;color:rgba(255,255,255,0.25);font-weight:700;
+}
+
+/* ═══════════════════════════════════
+   🎛 ADMIN LECTURE CONTROLS
+═══════════════════════════════════ */
+
+/* Edit overlay open state */
+#lec-edit-overlay.open{
+  background:rgba(0,0,0,0.72);
+  backdrop-filter:blur(18px) saturate(1.4);
+  pointer-events:all;
+}
+#lec-edit-overlay.open #lec-edit-card{
+  transform:translateY(0);
+}
+
+/* Admin lecture row */
+.ap-lec-row{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(168,85,247,0.04);
+  border:1px solid rgba(168,85,247,0.14);
+  border-radius:16px;padding:10px 12px;margin-bottom:10px;
+  animation:fcIn .3s cubic-bezier(0.22,1,0.36,1) both;
+  transition:border-color .2s,background .2s;
+}
+.ap-lec-row:hover{border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.07);}
+
+.ap-lec-thumb{
+  width:46px;height:46px;border-radius:12px;
+  background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);
+  overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:18px;position:relative;
+}
+.ap-lec-thumb img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.ap-lec-vis-dot{
+  position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;
+  border:1.5px solid rgba(0,0,0,0.5);
+}
+.vis-pub{background:#2fe8a0;box-shadow:0 0 6px rgba(47,232,160,0.7);}
+.vis-priv{background:#ff6b6b;box-shadow:0 0 6px rgba(255,107,107,0.7);}
+
+.ap-lec-meta{flex:1;min-width:0;}
+.ap-lec-row-title{
+  font-size:12.5px;font-weight:800;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--txt);margin-bottom:3px;
+}
+.ap-lec-row-sub{font-size:10px;color:var(--txt2);font-weight:600;}
+.ap-vis-pub{color:var(--green);font-weight:800;}
+.ap-vis-priv{color:var(--red);font-weight:800;}
+
+/* Action buttons strip */
+.ap-lec-actions{display:flex;gap:5px;flex-shrink:0;}
+.ap-lec-btn{
+  width:30px;height:30px;border-radius:9px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;cursor:pointer;
+  transition:transform .22s cubic-bezier(0.34,1.56,0.64,1),opacity .15s,box-shadow .2s;
+  will-change:transform;
+}
+.ap-lec-btn:active{transform:scale(0.82)!important;}
+
+.ap-lec-vis-btn.btn-pub{background:rgba(47,232,160,0.13);border:1px solid rgba(47,232,160,0.28);color:var(--green);}
+.ap-lec-vis-btn.btn-pub:hover{background:rgba(47,232,160,0.22);box-shadow:0 2px 12px rgba(47,232,160,0.3);}
+.ap-lec-vis-btn.btn-priv{background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.28);color:var(--red);}
+.ap-lec-vis-btn.btn-priv:hover{background:rgba(255,107,107,0.22);box-shadow:0 2px 12px rgba(255,107,107,0.3);}
+
+.ap-lec-edit-btn{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.28);color:#c084fc;}
+.ap-lec-edit-btn:hover{background:rgba(168,85,247,0.22);box-shadow:0 2px 12px rgba(168,85,247,0.3);}
+
+.ap-lec-delrat-btn{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);color:var(--yellow);font-size:11px;}
+.ap-lec-delrat-btn:hover{background:rgba(251,191,36,0.2);box-shadow:0 2px 12px rgba(251,191,36,0.25);}
+
+.ap-lec-del-btn{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.28);color:var(--red);}
+.ap-lec-del-btn:hover{background:rgba(255,107,107,0.2);box-shadow:0 2px 12px rgba(255,107,107,0.3);}
+
+/* ── Inline admin controls on lecture grid card ── */
+.lec-admin-bar{
+  display:flex;gap:5px;padding:8px 10px 10px;
+  border-top:1px solid rgba(168,85,247,0.1);
+  background:rgba(168,85,247,0.04);
+  animation:fcIn .3s cubic-bezier(0.22,1,0.36,1) both;
+}
+.lec-admin-bar button{
+  flex:1;padding:6px 4px;border-radius:10px;border:none;
+  font-family:'Nunito',sans-serif;font-size:10px;font-weight:900;
+  cursor:pointer;letter-spacing:.2px;
+  transition:transform .22s cubic-bezier(0.34,1.56,0.64,1),opacity .15s;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+}
+.lec-admin-bar button:active{transform:scale(0.9)!important;}
+.lab-vis{background:rgba(47,232,160,0.12);border:1px solid rgba(47,232,160,0.25);color:var(--green);}
+.lab-vis.is-priv{background:rgba(255,107,107,0.1);border-color:rgba(255,107,107,0.25);color:var(--red);}
+.lab-edit{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#c084fc;}
+.lab-del{background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:var(--red);}
+
+/* ── PROFILE AUTH SECTION ── */
+.prof-auth-section{
+  margin-top:0;
+}
+.prof-google-avatar{
+  width:88px;height:88px;border-radius:50%;
+  margin:0 auto 14px;
+  border:3px solid rgba(91,154,255,0.4);
+  box-shadow:0 0 0 8px rgba(91,154,255,0.08),0 8px 32px rgba(91,154,255,0.3);
+  object-fit:cover;
+  animation:avatarPulse 3s ease-in-out infinite;
+  display:block;
+}
+.prof-default-ava{
+  width:88px;height:88px;border-radius:50%;
+  margin:0 auto 14px;
+  background:var(--grd-blue);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;font-weight:900;color:#fff;
+  border:3px solid rgba(91,154,255,0.4);
+  box-shadow:0 0 0 8px rgba(91,154,255,0.08),0 8px 32px rgba(91,154,255,0.3);
+  animation:avatarPulse 3s ease-in-out infinite;
+}
+
+.prof-google-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 14px;border-radius:99px;
+  background:rgba(91,154,255,0.1);
+  border:1px solid rgba(91,154,255,0.25);
+  font-size:11px;font-weight:800;color:var(--blue);
+  margin-bottom:8px;
+}
+
+.prof-email{
+  font-size:12px;color:var(--txt2);font-weight:600;
+  margin-bottom:16px;
+  word-break:break-all;
+}
+
+@keyframes logoutGlow{
+  0%,100%{box-shadow:0 0 10px rgba(255,107,107,0.2),0 4px 18px rgba(255,107,107,0.1);}
+  50%{box-shadow:0 0 24px rgba(255,107,107,0.45),0 4px 28px rgba(255,107,107,0.22);}
+}
+.prof-logout-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:12px 20px;
+  background:rgba(255,107,107,0.1);
+  border:1px solid rgba(255,107,107,0.45);
+  border-radius:14px;
+  color:var(--red);font-family:'Nunito',sans-serif;
+  font-size:13px;font-weight:800;
+  cursor:pointer;margin-top:8px;
+  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),background .2s,box-shadow .25s;
+  animation:logoutGlow 2.5s ease-in-out infinite;
+}
+.prof-logout-btn:active{transform:scale(0.95);}
+.prof-logout-btn:hover{background:rgba(255,107,107,0.2);box-shadow:0 0 32px rgba(255,107,107,0.55),0 4px 24px rgba(255,107,107,0.28);animation:none;}
+
+.prof-login-prompt{
+  background:linear-gradient(135deg,rgba(91,154,255,0.08),rgba(155,109,255,0.06));
+  border:1px dashed rgba(91,154,255,0.3);
+  border-radius:20px;padding:24px 18px;
+  text-align:center;margin-bottom:16px;
+}
+.prof-login-prompt p{font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6;}
+.prof-login-prompt-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:14px;
+  background:var(--grd-blue);
+  border:none;color:#fff;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  cursor:pointer;
+  transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
+  box-shadow:0 6px 24px rgba(91,154,255,0.3);
+}
+.prof-login-prompt-btn:active{transform:scale(0.95);}
+.prof-login-prompt-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(91,154,255,0.4);}
+
+/* topbar user avatar chip */
+.topbar-user-chip{
+  display:none;align-items:center;gap:7px;
+  padding:4px 10px 4px 4px;
+  background:rgba(91,154,255,0.1);
+  border:1px solid rgba(91,154,255,0.25);
+  border-radius:99px;
+  cursor:pointer;
+  transition:background .2s,transform .2s;
+}
+.topbar-user-chip:active{transform:scale(0.93);}
+.topbar-user-chip img{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+.topbar-user-chip .chip-initials{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--grd-blue);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:#fff;
+}
+.topbar-user-chip .chip-name{
+  font-size:11px;font-weight:800;color:var(--txt);
+  max-width:70px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ─── LECTURE SYSTEM STYLES ─── */
+#lec-player-overlay{
+  position:fixed;inset:0;z-index:9500;
+  background:#000;flex-direction:column;
+}
+#lec-player-overlay *{box-sizing:border-box;}
+#lec-timeline-wrap:active{height:8px!important;margin-top:-2px;}
+.lec-card-hover:hover .lec-play-hover{opacity:1!important;}
+@media (orientation:landscape) and (max-width:900px){
+  #lec-player-overlay{position:fixed!important;inset:0!important;}
+  #lec-video{width:100vw!important;height:100vh!important;}
+}
+/* Lecture grid card hover */
+#lec-grid > div:hover .lec-play-hover{opacity:1!important;}
+/* Filter pill active state */
+.lec-filter-btn:active{transform:scale(0.92)!important;}
+
 </style>
 </head>
 <body>
@@ -1752,6 +2342,11 @@ button,
       <div id="admin-badge" style="display:none;align-items:center;gap:6px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="document.getElementById('apanel').classList.add('open');renderAF&&renderAF();">
         <span style="font-size:11px;font-weight:900;color:#ff6b6b;">⚡ ADMIN</span>
         <button style="background:none;border:none;color:#ff6b6b;font-size:11px;font-weight:800;cursor:pointer;padding:0 2px;" onclick="event.stopPropagation();adminOut()">✕ Logout</button>
+      </div>
+      <!-- TOPBAR USER CHIP (shows when logged in) -->
+      <div class="topbar-user-chip" id="topbar-user-chip" onclick="window.switchTab&&window.switchTab('profile')">
+        <div class="chip-initials" id="chip-initials">S</div>
+        <span class="chip-name" id="chip-name">Student</span>
       </div>
       <button class="ib" id="themeib" onclick="toggleTheme()">🌙</button>
       <button class="ib" onclick="openAL()">⚙️</button>
@@ -1906,10 +2501,24 @@ button,
   <div id="pg-profile" class="pg">
     <div class="pscroll">
       <div class="profcard">
-        <div class="ava" id="prof-ava">S</div>
+        <!-- Auth-aware avatar & name — populated by JS -->
+        <div id="prof-ava-wrap">
+          <!-- Filled by updateProfileUI() -->
+          <div class="ava" id="prof-ava">S</div>
+        </div>
         <div class="pname" id="prof-name-display">Student</div>
         <div class="pbatch">Aarambh Batch 2026–27</div>
-        <!-- Name edit row -->
+
+        <!-- Google badge (only visible when signed in) -->
+        <div id="prof-google-badge" class="prof-google-badge" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Signed in with Google
+        </div>
+
+        <!-- Email (only when signed in) -->
+        <div id="prof-email" class="prof-email" style="display:none;"></div>
+
+        <!-- Name edit (only when NOT signed in via Google) -->
         <div id="prof-name-edit" style="display:none;flex-direction:column;gap:8px;width:100%;margin-top:8px;">
           <input id="prof-name-inp" class="fi" placeholder="Enter your name…" maxlength="32" style="text-align:center;font-size:14px;font-weight:700;">
           <div style="display:flex;gap:8px;justify-content:center;">
@@ -1918,6 +2527,21 @@ button,
           </div>
         </div>
         <button id="prof-edit-btn" onclick="startEditName()" style="margin-top:10px;background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.3);color:var(--blue);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:6px 16px;border-radius:99px;cursor:pointer;transition:background .2s;">✏️ Edit Name</button>
+
+        <!-- Logout button (only when signed in) -->
+        <button id="prof-logout-btn" class="prof-logout-btn" style="display:none;" onclick="googleSignOut()">
+          <span>🚪</span> Sign Out
+        </button>
+
+        <!-- Sign in prompt (only when NOT signed in) -->
+        <div id="prof-signin-prompt" class="prof-login-prompt" style="display:none;margin-top:16px;">
+          <p>🔐 Sign in with Google to access<br><strong>lectures, DPPs &amp; premium content</strong></p>
+          <button class="prof-login-prompt-btn" onclick="googleSignIn()">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign in with Google
+          </button>
+        </div>
+
         <div class="pstats">
           <div class="pst"><div class="pstn" id="pf-cnt">0</div><div class="pstl">Files</div></div>
           <div class="pst"><div class="pstn" style="color:var(--purple)">3</div><div class="pstl">Subjects</div></div>
@@ -2060,6 +2684,7 @@ button,
     <button class="ntab" id="nt-profile" onclick="switchTab('profile')"><img class="ni-img" src="https://img.magnific.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Profile"><span class="nl">Profile</span></button>
     <button class="ntab" id="nt-yt" onclick="switchTab('yt')"><img class="ni-img" src="https://img.magnific.com/premium-vector/youtube-app-round-icon-social-media-logo-vector-illustration_277909-797.jpg?semt=ais_hybrid&w=740&q=80" alt="YouTube"><span class="nl">YouTube</span></button>
     <button class="ntab" id="nt-chat" onclick="openWeChat()"><img class="ni-img ni-gif" src="https://cdn-icons-gif.flaticon.com/16275/16275695.gif" alt="Chat"><span class="nl">Chat</span><span id="chat-badge"></span></button>
+    <button class="ntab" id="nt-lectures" onclick="switchTab('lectures')"><span class="ni">🎬</span><span class="nl">Lectures</span></button>
   </div>
 </div>
 
@@ -2124,6 +2749,7 @@ button,
     <button class="ap-tab" id="apt-cats" onclick="apSwitchTab('cats')">🏷 Categories</button>
     <button class="ap-tab" id="apt-yt" onclick="apSwitchTab('yt')">▶️ YouTube</button>
     <button class="ap-tab" id="apt-chat" onclick="apSwitchTab('chat')">💬 Chat</button>
+    <button class="ap-tab" id="apt-lec" onclick="apSwitchTab('lec')">🎬 Lectures</button>
   </div>
 
   <div class="apscroll">
@@ -2273,6 +2899,113 @@ button,
       </div>
     </div>
 
+    <!-- ─── LECTURES TAB ─── -->
+    <div class="ap-tabpane" id="aptp-lec">
+      <div class="ap-card">
+        <div class="ap-card-hdr">🎬 Add New Lecture</div>
+        <div class="fg"><label class="fl">Lecture Title</label><input class="fi" id="lec-title" placeholder="e.g. Chapter 1 – Introduction"></div>
+        <div class="ap-row2">
+          <div class="fg" style="flex:1"><label class="fl">Subject</label>
+            <select class="fi fi-sel" id="lec-subj">
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
+            </select>
+          </div>
+          <div class="fg" style="flex:1"><label class="fl">Visibility</label>
+            <select class="fi fi-sel" id="lec-visibility">
+              <option value="public">🌐 Public</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg"><label class="fl">Thumbnail URL</label><input class="fi" id="lec-thumb" placeholder="https://…"></div>
+        <div class="fg"><label class="fl">HLS Link (.m3u8)</label><input class="fi" id="lec-hls" placeholder="https://…/playlist.m3u8"></div>
+        <div class="fg"><label class="fl">Duration (e.g. 45:30)</label><input class="fi" id="lec-dur" placeholder="45:30"></div>
+        <button class="btnm" onclick="window.addLecture&&window.addLecture()" style="background:linear-gradient(135deg,#a855f7,#6366f1);box-shadow:0 4px 20px rgba(168,85,247,0.3);">🎬 Add Lecture</button>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-hdr">📋 Manage Lectures</div>
+        <div id="ap-lec-list"><div style="color:var(--txt3);font-size:12px;text-align:center;padding:16px;">No lectures yet.</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LECTURE VIDEO PLAYER OVERLAY -->
+<div id="lec-player-overlay" style="display:none;position:fixed;inset:0;z-index:9500;background:#000;flex-direction:column;">
+  <div id="lec-player-topbar" style="position:absolute;top:0;left:0;right:0;z-index:10;background:linear-gradient(to bottom,rgba(0,0,0,0.85),transparent);padding:14px 16px 40px;display:flex;align-items:center;gap:12px;transition:opacity .4s;">
+    <button onclick="window.closeLecPlayer&&window.closeLecPlayer()" style="width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">←</button>
+    <div style="flex:1;min-width:0;">
+      <div id="lec-player-title" style="font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="lec-player-subj" style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;"></div>
+    </div>
+    <button id="lec-fullscreen-btn" onclick="window.lecToggleFullscreen&&window.lecToggleFullscreen()" style="width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">⛶</button>
+  </div>
+  <!-- VIDEO WRAPPER -->
+  <div id="lec-video-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;">
+    <video id="lec-video" style="width:100%;height:100%;object-fit:contain;" playsinline webkit-playsinline></video>
+    <!-- WATERMARK -->
+    <div id="lec-watermark" style="position:absolute;pointer-events:none;z-index:20;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:rgba(255,255,255,0.18);text-shadow:0 1px 4px rgba(0,0,0,0.5);letter-spacing:.5px;transition:top .8s ease,left .8s ease;white-space:nowrap;user-select:none;">Next Toppers - Feed</div>
+    <!-- CENTER CONTROLS (tap to show) -->
+    <div id="lec-center-ctrls" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:36px;opacity:0;transition:opacity .3s;pointer-events:none;">
+      <button onclick="window.lecSeek&&window.lecSeek(-10)" style="width:56px;height:56px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:all;">⏪<span style="font-size:9px;">10s</span></button>
+      <button id="lec-play-pause-btn" onclick="window.lecTogglePlay&&window.lecTogglePlay()" style="width:68px;height:68px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);backdrop-filter:blur(12px);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;">▶</button>
+      <button onclick="window.lecSeek&&window.lecSeek(10)" style="width:56px;height:56px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:all;">⏩<span style="font-size:9px;">10s</span></button>
+    </div>
+  </div>
+  <!-- BOTTOM CONTROLS -->
+  <div id="lec-player-bottombar" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);padding:40px 16px 20px;transition:opacity .4s;">
+    <!-- Timeline -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span id="lec-time-cur" style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(255,255,255,0.8);font-weight:700;min-width:36px;">0:00</span>
+      <div id="lec-timeline-wrap" style="flex:1;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;cursor:pointer;position:relative;" onclick="window.lecTimelineClick&&window.lecTimelineClick(event)">
+        <div id="lec-timeline-fill" style="height:100%;background:linear-gradient(90deg,#a855f7,#6366f1);border-radius:99px;width:0%;position:relative;transition:width .1s;">
+          <div style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(168,85,247,0.6);"></div>
+        </div>
+      </div>
+      <span id="lec-time-dur" style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(255,255,255,0.8);font-weight:700;min-width:36px;text-align:right;">0:00</span>
+    </div>
+    <!-- Controls row -->
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="lec-play-btn2" onclick="window.lecTogglePlay&&window.lecTogglePlay()" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
+      <div style="flex:1;"></div>
+      <!-- Speed selector -->
+      <select id="lec-speed-sel" onchange="window.lecSetSpeed&&window.lecSetSpeed(this.value)" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:5px 8px;cursor:pointer;outline:none;">
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="1.75">1.75x</option>
+        <option value="2">2x</option>
+      </select>
+      <!-- Quality selector -->
+      <select id="lec-quality-sel" onchange="window.lecSetQuality&&window.lecSetQuality(this.value)" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:5px 8px;cursor:pointer;outline:none;">
+        <option value="-1">Auto</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- LECTURES PAGE (injected into app) -->
+<div id="pg-lectures" class="pg" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+  <div class="scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 90px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:24px;font-weight:900;letter-spacing:-.4px;">🎬 Lectures</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px;font-weight:600;">Premium Video Classes</div>
+      </div>
+    </div>
+    <!-- Subject filter tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
+      <button class="lec-filter-btn active" data-filter="all" onclick="window.lecFilter&&window.lecFilter('all',this)" style="flex:none;padding:7px 16px;border-radius:99px;border:none;background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">All</button>
+      <button class="lec-filter-btn" data-filter="english" onclick="window.lecFilter&&window.lecFilter('english',this)" style="flex:none;padding:7px 16px;border-radius:99px;border:1px solid var(--br2);background:var(--sf);color:var(--txt2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">🇬🇧 English</button>
+      <button class="lec-filter-btn" data-filter="hindi" onclick="window.lecFilter&&window.lecFilter('hindi',this)" style="flex:none;padding:7px 16px;border-radius:99px;border:1px solid var(--br2);background:var(--sf);color:var(--txt2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">🇮🇳 Hindi</button>
+    </div>
+    <div id="lec-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--txt3);font-size:13px;">Loading lectures…</div>
+    </div>
   </div>
 </div>
 
@@ -2330,6 +3063,104 @@ button,
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- ══════════════════════════════
+     GOOGLE AUTH POPUP
+══════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-card" style="position:relative;">
+    <div class="auth-glow"></div>
+    <div class="auth-lock-icon">🔐</div>
+    <div class="auth-badge">✦ Premium Content</div>
+    <div class="auth-title">Login to Unlock</div>
+    <div class="auth-sub">
+      <strong>Lectures &amp; DPPs</strong> are exclusive to logged-in students.<br>
+      Sign in with Google — it's free &amp; instant.
+    </div>
+    <div class="auth-stars">
+      <span>⭐</span><span>🚀</span><span>⭐</span>
+    </div>
+    <button class="auth-google-btn" id="auth-google-btn" onclick="googleSignIn()">
+      <svg class="auth-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      <span id="auth-btn-text">Continue with Google</span>
+    </button>
+    <button class="auth-dismiss" onclick="closeAuthPopup()">Maybe later</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     EDIT LECTURE MODAL
+══════════════════════════════ -->
+<div id="lec-edit-overlay" style="position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,0);backdrop-filter:blur(0px);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;transition:background .35s,backdrop-filter .35s;">
+  <div id="lec-edit-card" style="width:100%;max-width:480px;background:linear-gradient(160deg,#0d0820,#08051a);border:1px solid rgba(168,85,247,0.3);border-radius:28px 28px 0 0;padding:0 0 env(safe-area-inset-bottom,20px);box-shadow:0 -24px 72px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);transform:translateY(100%);transition:transform .42s cubic-bezier(0.34,1.2,0.64,1);overflow:hidden;">
+    <!-- Accent bar -->
+    <div style="height:3px;background:linear-gradient(90deg,#7c3aed,#a855f7,#6366f1,#a855f7,#7c3aed);background-size:300% 100%;animation:ratingBarFlow 3s linear infinite;"></div>
+    <!-- Handle -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;">
+      <div style="font-size:16px;font-weight:900;background:linear-gradient(135deg,#e9d5ff,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">✏️ Edit Lecture</div>
+      <button onclick="window.lecCloseEdit()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;">✕</button>
+    </div>
+    <!-- Form -->
+    <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto;">
+      <div class="fg"><label class="fl">Lecture Title</label><input class="fi" id="lec-edit-title" placeholder="e.g. Chapter 1 – Introduction"></div>
+      <div style="display:flex;gap:10px;">
+        <div class="fg" style="flex:1"><label class="fl">Subject</label>
+          <select class="fi fi-sel" id="lec-edit-subj">
+            <option value="english">🇬🇧 English</option>
+            <option value="hindi">🇮🇳 Hindi</option>
+          </select>
+        </div>
+        <div class="fg" style="flex:1"><label class="fl">Visibility</label>
+          <select class="fi fi-sel" id="lec-edit-vis">
+            <option value="public">🌐 Public</option>
+            <option value="private">🔒 Private</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Thumbnail URL</label><input class="fi" id="lec-edit-thumb" placeholder="https://…"></div>
+      <div class="fg"><label class="fl">HLS Link (.m3u8)</label><input class="fi" id="lec-edit-hls" placeholder="https://…/playlist.m3u8"></div>
+      <div class="fg"><label class="fl">Duration (e.g. 45:30)</label><input class="fi" id="lec-edit-dur" placeholder="45:30"></div>
+      <button id="lec-edit-save-btn" onclick="window.lecSaveEdit()" style="width:100%;padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,#7c3aed,#a855f7,#6366f1);color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(168,85,247,0.4);transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),opacity .2s;margin-top:4px;">✅ Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     LECTURE RATING POPUP
+══════════════════════════════ -->
+<div id="lec-rating-overlay">
+  <div class="lec-rating-card">
+    <div class="rating-accent-bar"></div>
+    <div class="rating-icon" id="rating-icon">⭐</div>
+    <div class="rating-badge">Rate This Lecture</div>
+    <div class="rating-title" id="rating-card-title">How was the lecture?</div>
+    <div class="rating-lec-name" id="rating-lec-name">—</div>
+    <div class="rating-subtitle">Your feedback helps others learn better</div>
+
+    <!-- Already rated state -->
+    <div class="rating-already" id="rating-already-msg" style="display:none;">
+      ✅ You already rated this lecture
+    </div>
+
+    <!-- Stars -->
+    <div class="rating-stars" id="rating-stars">
+      <span class="rstar" data-val="1">⭐</span>
+      <span class="rstar" data-val="2">⭐</span>
+      <span class="rstar" data-val="3">⭐</span>
+      <span class="rstar" data-val="4">⭐</span>
+      <span class="rstar" data-val="5">⭐</span>
+    </div>
+    <div class="rating-label" id="rating-label">Tap a star to rate</div>
+
+    <button class="rating-submit-btn" id="rating-submit-btn" onclick="window.submitLecRating()" disabled>Submit Rating</button>
+    <button class="rating-skip-btn" onclick="window.closeRatingPopup()">Maybe later</button>
+  </div>
+</div>
+
 <!-- SHORTS BOTTOM SHEET -->
 <div id="shorts-sheet-overlay" onclick="shortsCloseSheet()"></div>
 <div id="shorts-sheet">
@@ -2364,6 +3195,7 @@ button,
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
 <script type="module">
 'use strict';
 
@@ -2373,14 +3205,19 @@ button,
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
-  query, orderBy, updateDoc, setDoc, getDoc, serverTimestamp
+  query, orderBy, updateDoc, setDoc, getDoc, serverTimestamp, where, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, signOut, onAuthStateChanged,
+  browserLocalPersistence, setPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDCXzf4ns32LSHbXBHYgkfUy81IGdh2Z2E",
+  apiKey: "AIzaSyBdTbN0nNiR5nm2IIDl4xgS36e3AbKBmGs",
   authDomain: "aarambh26-27.firebaseapp.com",
   projectId: "aarambh26-27",
   storageBucket: "aarambh26-27.firebasestorage.app",
@@ -2392,6 +3229,226 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+/* ── Persist login across page refresh ── */
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+/* ── Auth state ── */
+let currentUser = null;
+
+/* ── Pending open: stored when auth popup fires mid-action ── */
+let _pendingOpenFileId = null;
+let _pendingOpenLectureId = null;
+
+/* ── LECTURE categories (require login) ── */
+const LECTURE_CATS = ['DPP','MODULE','ACP','WPP','LECTURE','VIDEO'];
+
+function isLectureCat(cat){
+  return LECTURE_CATS.includes((cat||'').toUpperCase());
+}
+
+/* ── Auth state observer (persistent login) ── */
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  updateProfileUI(user);
+  updateTopbarChip(user);
+});
+
+/* ── Handle redirect result on page load (mobile fallback) ── */
+getRedirectResult(auth).then(result => {
+  if(result && result.user){
+    currentUser = result.user;
+    closeAuthPopup();
+    updateProfileUI(currentUser);
+    updateTopbarChip(currentUser);
+    toast('✅ Logged in successfully! Welcome, ' + (currentUser.displayName||'Student') + '!');
+    _resumePendingOpen();
+  }
+}).catch(e => {
+  if(e && e.code && e.code !== 'auth/popup-closed-by-user'){
+    console.error('[Auth redirect]', e);
+    toast('❌ Sign-in error: ' + (e.message||'Please try again.'));
+  }
+});
+
+/* ── Detect mobile ── */
+function _isMobile(){
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+
+const _GOOGLE_BTN_HTML = `<svg class="auth-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span id="auth-btn-text">Continue with Google</span>`;
+
+/* ── Google Sign In (popup with mobile redirect fallback) ── */
+async function googleSignIn(){
+  const btn = document.getElementById('auth-google-btn');
+  const profBtn = document.querySelector('.prof-login-prompt-btn');
+  if(btn){
+    btn.classList.add('loading');
+    btn.innerHTML = `<div class="auth-spinner"></div><span>Signing in…</span>`;
+  }
+  if(profBtn){
+    profBtn.style.opacity = '0.7';
+    profBtn.style.pointerEvents = 'none';
+    profBtn.innerHTML = `<div class="auth-spinner" style="border-top-color:#fff;"></div><span>Signing in…</span>`;
+  }
+  try{
+    const result = await signInWithPopup(auth, googleProvider);
+    currentUser = result.user;
+    closeAuthPopup();
+    updateProfileUI(currentUser);
+    updateTopbarChip(currentUser);
+    toast('✅ Logged in successfully! Welcome, ' + (currentUser.displayName||'Student') + '!');
+    _resumePendingOpen();
+  } catch(e){
+    console.warn('[Auth popup]', e.code, e.message);
+    const redirectCodes = [
+      'auth/popup-blocked',
+      'auth/popup-closed-by-user',
+      'auth/cancelled-popup-request',
+      'auth/operation-not-supported-in-this-environment',
+      'auth/web-storage-unsupported'
+    ];
+    if(redirectCodes.includes(e.code) || _isMobile()){
+      try{
+        toast('🔄 Redirecting to Google…');
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      } catch(re){
+        console.error('[Auth redirect]', re);
+        toast('❌ Sign-in failed. Please try again.');
+      }
+    } else if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request'){
+      /* User dismissed — silent */
+    } else {
+      toast('❌ Sign-in failed: ' + (e.message||'Unknown error'));
+    }
+    if(btn){
+      btn.classList.remove('loading');
+      btn.innerHTML = _GOOGLE_BTN_HTML;
+    }
+    if(profBtn){
+      profBtn.style.opacity = '';
+      profBtn.style.pointerEvents = '';
+      profBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Sign in with Google`;
+    }
+  }
+}
+
+/* ── Google Sign Out ── */
+async function googleSignOut(){
+  try{
+    await signOut(auth);
+    currentUser = null;
+    updateProfileUI(null);
+    updateTopbarChip(null);
+    toast('👋 Signed out successfully');
+  } catch(e){
+    toast('❌ Sign-out failed');
+  }
+}
+
+/* ── Auth Popup Controls ── */
+function openAuthPopup(){
+  document.getElementById('auth-overlay').classList.add('open');
+}
+function closeAuthPopup(){
+  document.getElementById('auth-overlay').classList.remove('open');
+}
+
+/* ── Resume pending file/lecture after successful login ── */
+function _resumePendingOpen(){
+  const fid = _pendingOpenFileId;
+  const lid = _pendingOpenLectureId;
+  _pendingOpenFileId = null;
+  _pendingOpenLectureId = null;
+  if(fid){
+    setTimeout(()=>{ if(typeof openFile === 'function') openFile(fid); }, 300);
+  } else if(lid){
+    setTimeout(()=>{ if(typeof window.openLecture === 'function') window.openLecture(lid); }, 300);
+  }
+}
+
+/* ── Update Profile Page UI ── */
+function updateProfileUI(user){
+  const nameEl    = document.getElementById('prof-name-display');
+  const avaWrap   = document.getElementById('prof-ava-wrap');
+  const emailEl   = document.getElementById('prof-email');
+  const badgeEl   = document.getElementById('prof-google-badge');
+  const logoutBtn = document.getElementById('prof-logout-btn');
+  const editBtn   = document.getElementById('prof-edit-btn');
+  const nameEdit  = document.getElementById('prof-name-edit');
+  const signinP   = document.getElementById('prof-signin-prompt');
+
+  if(user){
+    /* Logged in */
+    const name = user.displayName || 'Student';
+    nameEl.textContent = name;
+
+    /* Avatar */
+    if(avaWrap){
+      if(user.photoURL){
+        avaWrap.innerHTML = `<img class="prof-google-avatar" src="${user.photoURL}" alt="${name}" onerror="this.parentElement.innerHTML='<div class=\\'prof-default-ava\\'>'+ (name.charAt(0)||'S') +'</div>'">`;
+      } else {
+        avaWrap.innerHTML = `<div class="prof-default-ava">${name.charAt(0).toUpperCase()||'S'}</div>`;
+      }
+    }
+
+    /* Email */
+    if(emailEl){ emailEl.textContent = user.email || ''; emailEl.style.display = user.email ? '' : 'none'; }
+    if(badgeEl) badgeEl.style.display = '';
+    if(logoutBtn) logoutBtn.style.display = '';
+    if(editBtn)  editBtn.style.display   = 'none';
+    if(nameEdit) nameEdit.style.display  = 'none';
+    if(signinP)  signinP.style.display   = 'none';
+  } else {
+    /* Not logged in */
+    const savedName = localStorage.getItem('ab_student_name') || 'Student';
+    nameEl.textContent = savedName;
+
+    if(avaWrap){
+      avaWrap.innerHTML = `<div class="ava" id="prof-ava">${savedName.charAt(0).toUpperCase()||'S'}</div>`;
+    }
+
+    if(emailEl)  emailEl.style.display  = 'none';
+    if(badgeEl)  badgeEl.style.display  = 'none';
+    if(logoutBtn) logoutBtn.style.display = 'none';
+    if(editBtn)  editBtn.style.display  = '';
+    if(signinP)  signinP.style.display  = '';
+  }
+}
+
+/* ── Update Topbar Chip ── */
+function updateTopbarChip(user){
+  const chip = document.getElementById('topbar-user-chip');
+  if(!chip) return;
+  if(user){
+    chip.style.display = 'flex';
+    const name = user.displayName || 'Student';
+    const initials = document.getElementById('chip-initials');
+    const chipName = document.getElementById('chip-name');
+    if(chipName) chipName.textContent = name.split(' ')[0];
+    if(initials){
+      if(user.photoURL){
+        initials.innerHTML = `<img src="${user.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${name.charAt(0).toUpperCase()}'">`;
+        initials.style.background = 'transparent';
+        initials.style.padding = '0';
+      } else {
+        initials.textContent = name.charAt(0).toUpperCase();
+        initials.style.background = '';
+      }
+    }
+  } else {
+    chip.style.display = 'none';
+  }
+}
+
+/* Expose auth functions globally */
+window.googleSignIn  = googleSignIn;
+window.googleSignOut = googleSignOut;
+window.openAuthPopup = openAuthPopup;
+window.closeAuthPopup= closeAuthPopup;
 
 /* ═══════════════════════════════════════════
    APP CONSTANTS & STATE
@@ -2584,25 +3641,43 @@ window.addEventListener('load', async () => {
   // Start loading Firebase data in background during loader animation
   let firebaseReady = false;
   let loaderDone = false;
+  let proceeded = false;
 
   const proceed = () => {
+    if (proceeded) return;
     if (firebaseReady && loaderDone) {
+      proceeded = true;
       const ld = document.getElementById('loader');
       ld.classList.add('out');
       setTimeout(() => { ld.style.display = 'none'; showPC(); }, 650);
     }
   };
 
-  // Firebase load
+  // Helper: run a promise with a max timeout
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+  }
+
+  // Firebase load — 8 second timeout so loader never gets stuck on slow connections
   try {
-    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
-    // One-time cleanup: fix any existing docs with missing/empty category
-    await fixMissingCategories();
+    await withTimeout(
+      Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]),
+      8000
+    );
+    // Run category cleanup in background — don't block the loader for it
+    fixMissingCategories().catch(e => console.warn('[fixMissingCategories]', e));
     firebaseReady = true;
   } catch(e) {
     console.error('Firebase load error:', e);
-    toast('⚠️ Could not load data. Check connection.');
-    firebaseReady = true; // proceed anyway
+    if (e.message === 'timeout') {
+      toast('⚠️ Slow connection — loading with cached data.');
+    } else {
+      toast('⚠️ Could not load data. Check connection.');
+    }
+    firebaseReady = true; // proceed anyway so loader is never stuck
   }
   proceed();
 
@@ -2723,12 +3798,22 @@ function toggleTheme(){
 
 /* TABS */
 function switchTab(t){
-  ['home','courses','profile','yt'].forEach(k=>{
-    document.getElementById('pg-'+k).classList.toggle('on',k===t);
-    document.getElementById('nt-'+k)?.classList.toggle('on',k===t);
+  const allTabs=['home','courses','profile','yt','lectures'];
+  allTabs.forEach(k=>{
+    const pg=document.getElementById('pg-'+k);
+    const nt=document.getElementById('nt-'+k);
+    if(pg){
+      if(k===t){pg.classList.add('on');pg.style.display='flex';}
+      else{pg.classList.remove('on');if(k==='lectures')pg.style.display='none';}
+    }
+    if(nt) nt.classList.toggle('on',k===t);
   });
   if(t==='yt'){renderYTHome();if(typeof window._ytLiveStart==='function')window._ytLiveStart();}
   else{if(typeof window._ytLiveStop==='function')window._ytLiveStop();}
+  if(t==='lectures'){
+    if(!currentUser){openAuthPopup();return;}
+    window.lecLoadAndRender&&window.lecLoadAndRender();
+  }
 }
 
 /* ====== SUBJECT OPEN — FIXED ====== */
@@ -2935,7 +4020,13 @@ function mkFCard(f,delay){
   const div=document.createElement('div');
   div.className='fcard';
   div.style.animationDelay=(delay*0.06)+'s';
+  /* Lock badge for premium/lecture content */
+  const needsLogin = isLectureCat(f.category) && !currentUser;
+  const lockBadge = needsLogin
+    ? `<div style="position:absolute;top:6px;right:6px;background:linear-gradient(135deg,rgba(91,154,255,0.9),rgba(155,109,255,0.9));border-radius:6px;padding:2px 6px;font-size:9px;font-weight:900;color:#fff;letter-spacing:.5px;z-index:2;">🔐 LOGIN</div>`
+    : '';
   div.innerHTML=`
+    ${lockBadge}
     <div class="fthumb">${ti}</div>
     <div class="finfo">
       <div class="fname">${esc(f.name)}</div>
@@ -2944,6 +4035,7 @@ function mkFCard(f,delay){
     <button class="fopen" onclick="event.stopPropagation();openFile('${f.id}')">▶</button>
     ${isAdmin?`<button class="fdel" onclick="event.stopPropagation();delFile('${f.id}')"><img src="https://cdn-icons-png.flaticon.com/512/8258/8258331.png" alt="Delete" style="width:18px;height:18px;object-fit:contain;"></button>`:''}
   `;
+  div.style.position='relative';
   div.addEventListener('click',()=>openFile(f.id));
   return div;
 }
@@ -2952,6 +4044,15 @@ function mkFCard(f,delay){
 function openFile(id){
   const f=getF().find(x=>x.id===id);
   if(!f)return;
+
+  /* ── LECTURE GATE: require login for non-NOTES categories ── */
+  if(isLectureCat(f.category) && !currentUser){
+    _pendingOpenFileId = id;
+    _pendingOpenLectureId = null;
+    openAuthPopup();
+    return;
+  }
+
   const url=fixDrive(f.link);
   curUrl=url;curTitle=f.name;
   document.getElementById('vtitle').textContent=f.name;
@@ -2994,7 +4095,7 @@ function closeSearch(){
 
 /* ADMIN PANEL TAB SWITCHER */
 function apSwitchTab(t){
-  ['files','folders','cats','yt','chat'].forEach(k=>{
+  ['files','folders','cats','yt','chat','lec'].forEach(k=>{
     document.getElementById('apt-'+k)?.classList.toggle('on',k===t);
     document.getElementById('aptp-'+k)?.classList.toggle('on',k===t);
   });
@@ -3002,6 +4103,7 @@ function apSwitchTab(t){
   if(t==='folders')renderAPFolders();
   if(t==='cats')renderAPCats();
   if(t==='yt')renderAPYT();
+  if(t==='lec')window.renderAPLectures&&window.renderAPLectures();
 }
 
 /* ADMIN */
@@ -3987,11 +5089,16 @@ window.updateCatDropdown=updateCatDropdown;
 window.addCategory=addCategory;
 window.deleteCategory=deleteCategory;
 
-/* STUDENT NAME — saved to localStorage */
+/* STUDENT NAME — saved to localStorage (only used when not signed in via Google) */
 function loadStudentName(){
+  if(currentUser){
+    updateProfileUI(currentUser);
+    return;
+  }
   const n=localStorage.getItem('ab_student_name')||'Student';
   document.getElementById('prof-name-display').textContent=n;
-  document.getElementById('prof-ava').textContent=n.charAt(0).toUpperCase();
+  const avaWrap=document.getElementById('prof-ava-wrap');
+  if(avaWrap) avaWrap.innerHTML=`<div class="ava" id="prof-ava">${n.charAt(0).toUpperCase()}</div>`;
 }
 function startEditName(){
   const cur=localStorage.getItem('ab_student_name')||'';
@@ -4013,6 +5120,10 @@ function saveStudentName(){
   toast('✅ Name saved!');
 }
 window.startEditName=startEditName;window.cancelEditName=cancelEditName;window.saveStudentName=saveStudentName;
+/* Trigger initial profile state after DOM is ready */
+setTimeout(()=>{
+  if(!currentUser) updateProfileUI(null);
+}, 100);
 
 /* UTILS */
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -4184,6 +5295,765 @@ loadCategories();
 updateCounts();
 renderYTHome();
 loadStudentName();
+
+/* ═══════════════════════════════════════════
+   LECTURE SYSTEM — Firebase Firestore + HLS.js
+═══════════════════════════════════════════ */
+let lecDB = [];
+let lecCurrentFilter = 'all';
+let lecHlsInstance = null;
+
+/* ── Firestore CRUD ── */
+async function fbAddLecture(data){
+  await addDoc(collection(db,'lectures'),{
+    ...data, createdAt: serverTimestamp()
+  });
+}
+async function fbDeleteLecture(id){
+  await deleteDoc(doc(db,'lectures',id));
+}
+async function fbToggleLecVisibility(id, current){
+  await updateDoc(doc(db,'lectures',id),{visibility: current==='public'?'private':'public'});
+}
+async function fbLoadLectures(){
+  const snap = await getDocs(query(collection(db,'lectures'),orderBy('createdAt','asc')));
+  lecDB = [];
+  snap.forEach(d=>{
+    lecDB.push({id:d.id,...d.data()});
+  });
+}
+
+/* ── Add Lecture (admin) ── */
+window.addLecture = async function(){
+  const title = document.getElementById('lec-title')?.value?.trim();
+  const subj  = document.getElementById('lec-subj')?.value;
+  const vis   = document.getElementById('lec-visibility')?.value;
+  const thumb = document.getElementById('lec-thumb')?.value?.trim();
+  const hls   = document.getElementById('lec-hls')?.value?.trim();
+  const dur   = document.getElementById('lec-dur')?.value?.trim();
+  if(!title||!hls){toast('❌ Title and HLS link are required');return;}
+  try{
+    await fbAddLecture({title,subject:subj,visibility:vis,thumbnail:thumb,hlsUrl:hls,duration:dur||''});
+    toast('✅ Lecture added!');
+    ['lec-title','lec-thumb','lec-hls','lec-dur'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    window.renderAPLectures&&window.renderAPLectures();
+  }catch(e){toast('❌ Error: '+e.message);}
+};
+
+/* ── Update lecture in Firestore ── */
+async function fbUpdateLecture(id, data){
+  await updateDoc(doc(db,'lectures',id), data);
+}
+
+/* ── Delete all ratings for a lecture ── */
+async function fbDeleteAllRatingsForLecture(lecId){
+  const snap = await getDocs(query(collection(db,'lecture_ratings'),where('lectureId','==',lecId)));
+  await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'lecture_ratings',d.id))));
+}
+
+/* ── Render Admin Lecture List ── */
+window.renderAPLectures = async function(){
+  const el = document.getElementById('ap-lec-list');
+  if(!el) return;
+  el.innerHTML = '<div style="color:var(--txt3);font-size:12px;text-align:center;padding:16px;">Loading…</div>';
+  await fbLoadLectures();
+  if(!lecDB.length){el.innerHTML='<div style="color:var(--txt3);font-size:12px;text-align:center;padding:16px;">No lectures yet.</div>';return;}
+
+  el.innerHTML = lecDB.map((l,idx)=>{
+    const isPub = l.visibility==='public';
+    return `
+    <div class="ap-lec-row" id="ap-lec-row-${l.id}" style="animation-delay:${idx*0.05}s">
+      <!-- Thumbnail -->
+      <div class="ap-lec-thumb">
+        ${l.thumbnail
+          ? `<img src="${esc(l.thumbnail)}" onerror="this.parentElement.innerHTML='🎬'">`
+          : '🎬'}
+        <div class="ap-lec-vis-dot ${isPub?'vis-pub':'vis-priv'}"></div>
+      </div>
+      <!-- Info -->
+      <div class="ap-lec-meta">
+        <div class="ap-lec-row-title">${esc(l.title)}</div>
+        <div class="ap-lec-row-sub">
+          ${l.subject==='english'?'🇬🇧':'🇮🇳'} ${l.subject==='english'?'English':'Hindi'}
+          · ${l.duration||'—'}
+          · <span class="${isPub?'ap-vis-pub':'ap-vis-priv'}">${isPub?'🌐 Public':'🔒 Private'}</span>
+        </div>
+      </div>
+      <!-- Action buttons -->
+      <div class="ap-lec-actions">
+        <!-- Visibility toggle -->
+        <button class="ap-lec-btn ap-lec-vis-btn ${isPub?'btn-pub':'btn-priv'}"
+          onclick="window.lecToggleVis('${l.id}','${l.visibility}')"
+          title="${isPub?'Set Private':'Set Public'}">
+          ${isPub?'🌐':'🔒'}
+        </button>
+        <!-- Edit -->
+        <button class="ap-lec-btn ap-lec-edit-btn"
+          onclick="window.lecOpenEdit('${l.id}')"
+          title="Edit lecture">✏️</button>
+        <!-- Delete ratings -->
+        <button class="ap-lec-btn ap-lec-delrat-btn"
+          onclick="window.lecDeleteRatings('${l.id}')"
+          title="Delete all ratings">⭐✕</button>
+        <!-- Delete -->
+        <button class="ap-lec-btn ap-lec-del-btn"
+          onclick="window.lecDelete('${l.id}')"
+          title="Delete lecture">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.lecToggleVis = async function(id, current){
+  const btn = document.querySelector(`#ap-lec-row-${id} .ap-lec-vis-btn`);
+  if(btn){btn.style.opacity='0.4';btn.style.pointerEvents='none';}
+  try{
+    const newVis = current==='public'?'private':'public';
+    await fbToggleLecVisibility(id,current);
+    toast(newVis==='public'?'🌐 Lecture is now Public':'🔒 Lecture is now Private');
+    await window.renderAPLectures();
+    window.lecRenderGrid&&window.lecRenderGrid();
+  }catch(e){toast('❌ '+e.message);}
+};
+
+window.lecDelete = async function(id){
+  if(!confirm('Delete this lecture? This cannot be undone.'))return;
+  try{
+    await fbDeleteLecture(id);
+    await window.renderAPLectures();
+    window.lecRenderGrid&&window.lecRenderGrid();
+    toast('🗑 Lecture deleted');
+  }catch(e){toast('❌ '+e.message);}
+};
+
+window.lecDeleteRatings = async function(id){
+  if(!confirm('Delete ALL ratings for this lecture?'))return;
+  try{
+    await fbDeleteAllRatingsForLecture(id);
+    // Refresh ratings display if open
+    const body = document.getElementById('lec-ratings-body-'+id);
+    if(body && body.style.display!=='none') window.loadAndShowRatings(id);
+    // Remove avg pill
+    const pill = document.getElementById('lec-avg-pill-'+id);
+    if(pill) pill.style.display='none';
+    toast('⭐ All ratings deleted');
+  }catch(e){toast('❌ '+e.message);}
+};
+
+/* ── Edit Lecture Modal ── */
+let _editLecId = null;
+
+window.lecOpenEdit = function(id){
+  const l = lecDB.find(x=>x.id===id);
+  if(!l) return;
+  _editLecId = id;
+  document.getElementById('lec-edit-title').value   = l.title || '';
+  document.getElementById('lec-edit-subj').value    = l.subject || 'english';
+  document.getElementById('lec-edit-vis').value     = l.visibility || 'public';
+  document.getElementById('lec-edit-thumb').value   = l.thumbnail || '';
+  document.getElementById('lec-edit-hls').value     = l.hlsUrl || '';
+  document.getElementById('lec-edit-dur').value     = l.duration || '';
+  document.getElementById('lec-edit-overlay').classList.add('open');
+};
+
+window.lecCloseEdit = function(){
+  document.getElementById('lec-edit-overlay').classList.remove('open');
+  _editLecId = null;
+};
+
+window.lecSaveEdit = async function(){
+  if(!_editLecId) return;
+  const title = document.getElementById('lec-edit-title').value.trim();
+  const subj  = document.getElementById('lec-edit-subj').value;
+  const vis   = document.getElementById('lec-edit-vis').value;
+  const thumb = document.getElementById('lec-edit-thumb').value.trim();
+  const hls   = document.getElementById('lec-edit-hls').value.trim();
+  const dur   = document.getElementById('lec-edit-dur').value.trim();
+  if(!title||!hls){toast('❌ Title and HLS link are required');return;}
+  const saveBtn = document.getElementById('lec-edit-save-btn');
+  saveBtn.disabled=true; saveBtn.textContent='Saving…';
+  try{
+    await fbUpdateLecture(_editLecId,{title,subject:subj,visibility:vis,thumbnail:thumb,hlsUrl:hls,duration:dur});
+    await fbLoadLectures();
+    window.lecCloseEdit();
+    await window.renderAPLectures();
+    window.lecRenderGrid&&window.lecRenderGrid();
+    toast('✅ Lecture updated!');
+  }catch(e){
+    toast('❌ '+e.message);
+  } finally {
+    saveBtn.disabled=false; saveBtn.textContent='✅ Save Changes';
+  }
+};
+
+/* Click outside edit modal to close */
+document.getElementById('lec-edit-overlay').addEventListener('click',function(e){
+  if(e.target===this) window.lecCloseEdit();
+});
+
+/* ── Load & Render Lecture Cards ── */
+window.lecLoadAndRender = async function(){
+  const grid = document.getElementById('lec-grid');
+  if(!grid) return;
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--txt3);">Loading…</div>';
+  try{
+    await fbLoadLectures();
+    window.lecRenderGrid();
+  }catch(e){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--red);">Error loading lectures</div>`;
+  }
+};
+
+window.lecFilter = function(filter, btnEl){
+  lecCurrentFilter = filter;
+  document.querySelectorAll('.lec-filter-btn').forEach(b=>{
+    const isActive = b===btnEl;
+    b.style.background = isActive ? 'linear-gradient(135deg,#a855f7,#6366f1)' : 'var(--sf)';
+    b.style.color = isActive ? '#fff' : 'var(--txt2)';
+    b.style.border = isActive ? 'none' : '1px solid var(--br2)';
+  });
+  window.lecRenderGrid();
+};
+
+window.lecRenderGrid = function(){
+  const grid = document.getElementById('lec-grid');
+  if(!grid) return;
+  let filtered = lecDB.filter(l=>{
+    if(l.visibility==='private' && !isAdmin) return false;
+    if(lecCurrentFilter!=='all' && l.subject!==lecCurrentFilter) return false;
+    return true;
+  });
+  if(!filtered.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--txt3);font-size:13px;">No lectures available yet. Check back soon! 🎬</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(l=>{
+    const isPub = l.visibility==='public';
+    const adminBar = isAdmin ? `
+      <div class="lec-admin-bar">
+        <button class="lab-vis ${isPub?'':'is-priv'}"
+          onclick="event.stopPropagation();window.lecToggleVis('${l.id}','${l.visibility}')">
+          ${isPub?'🌐 Public':'🔒 Private'}
+        </button>
+        <button class="lab-edit"
+          onclick="event.stopPropagation();window.lecOpenEdit('${l.id}')">
+          ✏️ Edit
+        </button>
+        <button class="lab-del"
+          onclick="event.stopPropagation();window.lecDelete('${l.id}')">
+          🗑 Delete
+        </button>
+      </div>` : '';
+
+    return `
+    <div style="
+      background:rgba(10,16,32,0.92);
+      border:1px solid ${isPub?'rgba(168,85,247,0.2)':'rgba(255,107,107,0.3)'};
+      border-radius:18px;overflow:hidden;cursor:pointer;
+      transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),box-shadow .3s,border-color .3s;
+      will-change:transform;
+      animation:pgIn .4s cubic-bezier(0.22,1,0.36,1) both;
+      position:relative;
+    " onclick="window.openLecture('${l.id}')"
+    onmouseenter="this.style.transform='translateY(-4px) scale(1.02)';this.style.boxShadow='0 16px 48px rgba(168,85,247,0.25)';"
+       onmouseleave="this.style.transform='';this.style.boxShadow='';"
+       ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+      ${!isPub?`<div style="position:absolute;top:7px;left:7px;z-index:3;background:rgba(255,107,107,0.88);color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:5px;letter-spacing:.8px;box-shadow:0 2px 8px rgba(255,107,107,0.4);">🔒 PRIVATE</div>`:''}
+      <div style="width:100%;aspect-ratio:16/9;position:relative;background:#0a0a14;overflow:hidden;">
+        ${l.thumbnail
+          ? `<img src="${esc(l.thumbnail)}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2))';">`
+          : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(99,102,241,0.15));">🎬</div>`
+        }
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 60%);"></div>
+        <div style="position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,0.75);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;">${esc(l.duration||'')}</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;" class="lec-play-hover">
+          <div style="width:44px;height:44px;border-radius:50%;background:rgba(168,85,247,0.9);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 0 24px rgba(168,85,247,0.5);">▶</div>
+        </div>
+      </div>
+      <div style="padding:10px 10px ${isAdmin?'8px':'12px'};">
+        <div style="font-size:12px;font-weight:800;line-height:1.3;letter-spacing:-.1px;margin-bottom:5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${esc(l.title)}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:${l.subject==='english'?'rgba(59,130,246,0.15)':'rgba(239,68,68,0.15)'};color:${l.subject==='english'?'#60a5fa':'#f87171'};border:1px solid ${l.subject==='english'?'rgba(59,130,246,0.3)':'rgba(239,68,68,0.3)'};">${l.subject==='english'?'🇬🇧 English':'🇮🇳 Hindi'}</span>
+          <span id="lec-avg-pill-${l.id}" style="font-size:10px;font-weight:800;color:rgba(251,191,36,0.8);background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.18);border-radius:99px;padding:2px 7px;display:none;">⭐ —</span>
+        </div>
+      </div>
+      ${adminBar}
+    </div>`;
+  }).join('');
+
+  // Ratings section below grid (full width)
+  const ratingsWrap = document.getElementById('lec-ratings-wrap') || document.createElement('div');
+  ratingsWrap.id = 'lec-ratings-wrap';
+  ratingsWrap.style.cssText = 'grid-column:1/-1;display:flex;flex-direction:column;gap:18px;';
+  ratingsWrap.innerHTML = filtered.map(l=>`
+    <div style="background:rgba(10,16,32,0.85);border:1px solid rgba(168,85,247,0.12);border-radius:18px;overflow:hidden;">
+      <button onclick="window.toggleRatingsSection('${l.id}')" style="
+        width:100%;display:flex;align-items:center;justify-content:space-between;
+        padding:12px 16px;background:none;border:none;cursor:pointer;
+        font-family:'Nunito',sans-serif;color:rgba(255,255,255,0.7);
+        font-size:12.5px;font-weight:800;text-align:left;
+      ">
+        <span>⭐ Ratings &amp; Reviews — ${esc(l.title)}</span>
+        <span id="ratings-toggle-icon-${l.id}" style="font-size:16px;color:rgba(168,85,247,0.7);transition:transform .3s;">›</span>
+      </button>
+      <div id="lec-ratings-body-${l.id}" style="display:none;padding:0 14px 14px;">
+        <div class="lec-ratings-section" style="margin-top:0;">
+          <div id="lec-ratings-${l.id}"><div class="lec-ratings-empty">Tap to load ratings…</div></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  grid.appendChild(ratingsWrap);
+
+  // Load avg ratings for the pills
+  filtered.forEach(l=>{
+    fbGetLectureRatings(l.id).then(ratings=>{
+      if(!ratings.length) return;
+      const avg = (ratings.reduce((a,r)=>a+r.rating,0)/ratings.length).toFixed(1);
+      const pill = document.getElementById('lec-avg-pill-'+l.id);
+      if(pill){ pill.textContent = `⭐ ${avg}`; pill.style.display = ''; }
+    }).catch(()=>{});
+  });
+};
+
+/* ── Toggle ratings section open/close ── */
+window.toggleRatingsSection = function(lecId){
+  const body = document.getElementById('lec-ratings-body-'+lecId);
+  const icon = document.getElementById('ratings-toggle-icon-'+lecId);
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(icon) icon.style.transform = isOpen ? '' : 'rotate(90deg)';
+  if(!isOpen){
+    window.loadAndShowRatings(lecId);
+  }
+};
+
+/* ── Open Lecture Player ── */
+let _currentLecId = null; // track which lecture is playing for ratings
+window.openLecture = async function(id){
+  if(!currentUser){
+    _pendingOpenLectureId = id;
+    _pendingOpenFileId = null;
+    openAuthPopup();
+    return;
+  }
+  const lec = lecDB.find(l=>l.id===id);
+  if(!lec){toast('❌ Lecture not found');return;}
+  if(lec.visibility==='private' && !isAdmin){toast('🔒 This lecture is private');return;}
+  if(!lec.hlsUrl){toast('❌ No video URL for this lecture');return;}
+  _currentLecId = id; // store for rating popup
+  // Show player
+  const overlay = document.getElementById('lec-player-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('lec-player-title').textContent = lec.title;
+  document.getElementById('lec-player-subj').textContent = lec.subject==='english'?'🇬🇧 English':'🇮🇳 Hindi';
+  // Lock screen orientation (landscape)
+  try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
+  // Start HLS
+  lecInitHLS(lec.hlsUrl);
+  lecStartWatermark();
+  lecControlsAutoHide();
+};
+
+/* ── Close Player ── */
+window.closeLecPlayer = async function(showRating=true){
+  const overlay = document.getElementById('lec-player-overlay');
+  overlay.style.display = 'none';
+  const vid = document.getElementById('lec-video');
+  // Check if video ended (>80% watched) or user closed
+  const watchedEnough = vid.duration > 0 && (vid.currentTime / vid.duration) > 0.8;
+  vid.pause();
+  if(lecHlsInstance){lecHlsInstance.destroy();lecHlsInstance=null;}
+  try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock();}catch(e){}
+  clearTimeout(window._lecHideTimer);
+  clearInterval(window._lecWatermarkTimer);
+  // Show rating popup if user watched enough or video ended
+  if(showRating && _currentLecId && currentUser && (watchedEnough || vid.ended)){
+    setTimeout(()=>window.openRatingPopup(_currentLecId), 400);
+  }
+};
+
+/* ── HLS.js Init ── */
+function lecInitHLS(url){
+  const vid = document.getElementById('lec-video');
+  if(lecHlsInstance){lecHlsInstance.destroy();lecHlsInstance=null;}
+  if(typeof Hls !== 'undefined' && Hls.isSupported()){
+    lecHlsInstance = new Hls({maxBufferLength:30});
+    lecHlsInstance.loadSource(url);
+    lecHlsInstance.attachMedia(vid);
+    lecHlsInstance.on(Hls.Events.MANIFEST_PARSED,(e,data)=>{
+      vid.play().catch(()=>{});
+      // Populate quality selector
+      const sel = document.getElementById('lec-quality-sel');
+      sel.innerHTML = '<option value="-1">Auto</option>';
+      data.levels.forEach((l,i)=>{
+        const label = l.height ? l.height+'p' : ('Level '+(i+1));
+        sel.innerHTML += `<option value="${i}">${label}</option>`;
+      });
+    });
+    lecHlsInstance.on(Hls.Events.LEVEL_SWITCHED,(e,data)=>{
+      // Update quality dropdown to current level
+    });
+  } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
+    vid.src=url;
+    vid.play().catch(()=>{});
+  } else {
+    toast('❌ HLS not supported on this device');
+    return;
+  }
+  vid.addEventListener('timeupdate',lecUpdateTimeline);
+  vid.addEventListener('play',()=>lecSetPlayIcon(true));
+  vid.addEventListener('pause',()=>lecSetPlayIcon(false));
+  vid.addEventListener('click',lecToggleCenterControls);
+}
+
+function lecSetPlayIcon(playing){
+  ['lec-play-pause-btn','lec-play-btn2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = playing?'⏸':'▶';
+  });
+}
+
+function lecUpdateTimeline(){
+  const vid=document.getElementById('lec-video');
+  if(!vid||!vid.duration)return;
+  const pct=(vid.currentTime/vid.duration)*100;
+  const fill=document.getElementById('lec-timeline-fill');
+  if(fill) fill.style.width=pct+'%';
+  document.getElementById('lec-time-cur').textContent=lecFmtTime(vid.currentTime);
+  document.getElementById('lec-time-dur').textContent=lecFmtTime(vid.duration);
+}
+
+function lecFmtTime(s){
+  if(!isFinite(s))return '0:00';
+  const m=Math.floor(s/60), sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+window.lecTogglePlay = function(){
+  const vid=document.getElementById('lec-video');
+  if(vid.paused)vid.play();else vid.pause();
+  lecShowControls();
+};
+
+window.lecSeek = function(secs){
+  const vid=document.getElementById('lec-video');
+  vid.currentTime=Math.max(0,Math.min(vid.duration||0,vid.currentTime+secs));
+  lecShowControls();
+};
+
+window.lecSetSpeed = function(rate){
+  document.getElementById('lec-video').playbackRate=parseFloat(rate);
+};
+
+window.lecSetQuality = function(level){
+  if(lecHlsInstance) lecHlsInstance.currentLevel=parseInt(level);
+};
+
+window.lecTimelineClick = function(e){
+  const wrap=document.getElementById('lec-timeline-wrap');
+  const vid=document.getElementById('lec-video');
+  if(!wrap||!vid||!vid.duration)return;
+  const rect=wrap.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  vid.currentTime=pct*vid.duration;
+};
+
+window.lecToggleFullscreen = function(){
+  const wrap=document.getElementById('lec-player-overlay');
+  if(document.fullscreenElement){document.exitFullscreen&&document.exitFullscreen();}
+  else{wrap.requestFullscreen&&wrap.requestFullscreen();}
+};
+
+/* Center controls tap-to-show */
+let _lecCtrlsVisible=false;
+function lecToggleCenterControls(){
+  _lecCtrlsVisible=!_lecCtrlsVisible;
+  const ctrls=document.getElementById('lec-center-ctrls');
+  const top=document.getElementById('lec-player-topbar');
+  const bot=document.getElementById('lec-player-bottombar');
+  if(ctrls){ctrls.style.opacity=_lecCtrlsVisible?'1':'0';ctrls.style.pointerEvents=_lecCtrlsVisible?'all':'none';}
+  if(top) top.style.opacity=_lecCtrlsVisible?'1':'0';
+  if(bot) bot.style.opacity=_lecCtrlsVisible?'1':'0';
+  clearTimeout(window._lecHideTimer);
+  if(_lecCtrlsVisible){window._lecHideTimer=setTimeout(()=>{_lecCtrlsVisible=false;lecToggleCenterControls();},4000);}
+}
+
+function lecShowControls(){
+  if(!_lecCtrlsVisible){lecToggleCenterControls();}
+  else{clearTimeout(window._lecHideTimer);window._lecHideTimer=setTimeout(()=>{_lecCtrlsVisible=false;lecToggleCenterControls();},4000);}
+}
+
+function lecControlsAutoHide(){
+  const overlay=document.getElementById('lec-player-overlay');
+  overlay.addEventListener('click',lecToggleCenterControls,{once:false});
+  // Show controls initially
+  setTimeout(()=>{_lecCtrlsVisible=false;lecToggleCenterControls();},100);
+}
+
+/* ── Watermark ── */
+const WM_POSITIONS=[
+  {top:'8%',left:'4%'},{top:'8%',left:'60%'},
+  {top:'45%',left:'35%'},
+  {top:'80%',left:'4%'},{top:'80%',left:'60%'},
+  {top:'35%',left:'4%'},{top:'35%',left:'60%'},
+];
+let _wmIdx=0;
+function lecStartWatermark(){
+  clearInterval(window._lecWatermarkTimer);
+  const wm=document.getElementById('lec-watermark');
+  if(!wm)return;
+  function moveWM(){
+    const pos=WM_POSITIONS[_wmIdx%WM_POSITIONS.length];
+    wm.style.top=pos.top;wm.style.left=pos.left;
+    _wmIdx++;
+  }
+  moveWM();
+  window._lecWatermarkTimer=setInterval(moveWM,3000);
+}
+
+/* Expose functions */
+window.lecLoadAndRender=window.lecLoadAndRender;
+window.lecRenderGrid=window.lecRenderGrid;
+window.lecFilter=window.lecFilter;
+
+/* ── Init lectures on startup (load data quietly) ── */
+fbLoadLectures().catch(()=>{});
+
+/* ═══════════════════════════════════════════
+   ⭐ LECTURE RATING SYSTEM
+═══════════════════════════════════════════ */
+
+/* ── Firestore rating helpers ── */
+async function fbAddRating(lectureId, rating){
+  if(!currentUser) return;
+  const ratingData = {
+    lectureId,
+    userId: currentUser.uid,
+    userName: currentUser.displayName || 'Student',
+    userPhoto: currentUser.photoURL || '',
+    rating,
+    timestamp: serverTimestamp()
+  };
+  await setDoc(doc(db, 'lecture_ratings', `${lectureId}_${currentUser.uid}`), ratingData);
+}
+
+async function fbGetUserRating(lectureId){
+  if(!currentUser) return null;
+  try{
+    const d = await getDoc(doc(db,'lecture_ratings',`${lectureId}_${currentUser.uid}`));
+    return d.exists() ? d.data().rating : null;
+  }catch(e){ return null; }
+}
+
+async function fbGetLectureRatings(lectureId){
+  try{
+    const snap = await getDocs(query(
+      collection(db,'lecture_ratings'),
+      where('lectureId','==',lectureId),
+      orderBy('timestamp','desc')
+    ));
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){ return []; }
+}
+
+async function fbDeleteRating(ratingDocId){
+  await deleteDoc(doc(db,'lecture_ratings',ratingDocId));
+}
+
+/* ── Rating state ── */
+let _ratingLecId = null;
+let _ratingSelected = 0;
+let _ratingAlreadyRated = false;
+
+const RATING_LABELS = {0:'Tap a star to rate',1:'Poor 😕',2:'Fair 😐',3:'Good 👍',4:'Great 😊',5:'Excellent 🌟'};
+
+/* ── Open Rating Popup ── */
+window.openRatingPopup = async function(lecId){
+  if(!currentUser) return;
+  _ratingLecId = lecId;
+  _ratingSelected = 0;
+
+  const lec = lecDB.find(l=>l.id===lecId);
+  const lecName = lec ? lec.title : 'this lecture';
+
+  document.getElementById('rating-lec-name').textContent = lecName;
+  document.getElementById('rating-label').textContent = RATING_LABELS[0];
+
+  // Reset stars
+  document.querySelectorAll('.rstar').forEach(s=>{s.classList.remove('lit','hover','burst');});
+  document.getElementById('rating-submit-btn').disabled = true;
+
+  // Check if already rated
+  const existing = await fbGetUserRating(lecId);
+  _ratingAlreadyRated = existing !== null;
+
+  if(_ratingAlreadyRated){
+    document.getElementById('rating-already-msg').style.display = '';
+    document.getElementById('rating-card-title').textContent = 'Already Rated!';
+    document.getElementById('rating-icon').textContent = '✅';
+    // Pre-fill existing rating
+    _ratingSelected = existing;
+    updateRatingStars(existing);
+    document.getElementById('rating-label').textContent = RATING_LABELS[existing] || '';
+    document.getElementById('rating-submit-btn').disabled = true;
+    document.getElementById('rating-submit-btn').textContent = 'Already Submitted';
+  } else {
+    document.getElementById('rating-already-msg').style.display = 'none';
+    document.getElementById('rating-card-title').textContent = 'How was the lecture?';
+    document.getElementById('rating-icon').textContent = '⭐';
+    document.getElementById('rating-submit-btn').textContent = 'Submit Rating';
+    document.getElementById('rating-submit-btn').disabled = true;
+  }
+
+  document.getElementById('lec-rating-overlay').classList.add('open');
+};
+
+window.closeRatingPopup = function(){
+  document.getElementById('lec-rating-overlay').classList.remove('open');
+  _ratingLecId = null;
+  _ratingSelected = 0;
+};
+
+function updateRatingStars(val){
+  document.querySelectorAll('.rstar').forEach((s,i)=>{
+    if(i < val) s.classList.add('lit');
+    else s.classList.remove('lit');
+    s.classList.remove('hover');
+  });
+}
+
+/* ── Star interactions ── */
+document.querySelectorAll('.rstar').forEach(star=>{
+  const val = parseInt(star.dataset.val);
+  star.addEventListener('mouseenter',()=>{
+    if(_ratingAlreadyRated) return;
+    document.querySelectorAll('.rstar').forEach((s,i)=>{
+      s.classList.toggle('hover', i < val);
+      s.classList.remove('lit');
+    });
+    document.getElementById('rating-label').textContent = RATING_LABELS[val] || '';
+  });
+  star.addEventListener('mouseleave',()=>{
+    if(_ratingAlreadyRated) return;
+    document.querySelectorAll('.rstar').forEach((s,i)=>{
+      s.classList.remove('hover');
+      s.classList.toggle('lit', i < _ratingSelected);
+    });
+    document.getElementById('rating-label').textContent = RATING_LABELS[_ratingSelected] || RATING_LABELS[0];
+  });
+  star.addEventListener('click',()=>{
+    if(_ratingAlreadyRated) return;
+    _ratingSelected = val;
+    document.querySelectorAll('.rstar').forEach((s,i)=>{
+      s.classList.toggle('lit', i < val);
+      s.classList.remove('hover');
+      if(i === val-1){ s.classList.add('burst'); setTimeout(()=>s.classList.remove('burst'),500); }
+    });
+    document.getElementById('rating-label').textContent = RATING_LABELS[val];
+    document.getElementById('rating-submit-btn').disabled = false;
+  });
+  // Touch support
+  star.addEventListener('touchend',(e)=>{
+    e.preventDefault();
+    star.click();
+  });
+});
+
+/* ── Submit Rating ── */
+window.submitLecRating = async function(){
+  if(!_ratingLecId || !_ratingSelected || !currentUser) return;
+  const btn = document.getElementById('rating-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  try{
+    await fbAddRating(_ratingLecId, _ratingSelected);
+    // Animate success
+    document.getElementById('rating-icon').textContent = '🎉';
+    document.getElementById('rating-card-title').textContent = 'Thanks for rating!';
+    document.getElementById('rating-label').textContent = RATING_LABELS[_ratingSelected];
+    btn.textContent = '✅ Submitted!';
+    // Refresh ratings display if visible
+    if(window._visibleRatingsLecId === _ratingLecId){
+      setTimeout(()=>window.loadAndShowRatings(_ratingLecId), 400);
+    }
+    // Also refresh lecture grid to show updated avg
+    setTimeout(()=>{
+      window.lecRenderGrid && window.lecRenderGrid();
+      window.closeRatingPopup();
+    }, 1800);
+    toast('⭐ Rating submitted! Thank you!');
+  }catch(e){
+    btn.disabled = false;
+    btn.textContent = 'Submit Rating';
+    toast('❌ Failed to submit: '+(e.message||'try again'));
+  }
+};
+
+/* ── Trigger rating popup when video ends ── */
+document.getElementById('lec-video').addEventListener('ended', ()=>{
+  if(_currentLecId && currentUser){
+    setTimeout(()=>window.openRatingPopup(_currentLecId), 500);
+  }
+});
+
+/* ── Load & display ratings below a lecture card ── */
+window._visibleRatingsLecId = null;
+
+window.loadAndShowRatings = async function(lecId){
+  window._visibleRatingsLecId = lecId;
+  const container = document.getElementById('lec-ratings-'+lecId);
+  if(!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:rgba(255,255,255,0.3);">Loading ratings…</div>';
+  const ratings = await fbGetLectureRatings(lecId);
+  if(!ratings.length){
+    container.innerHTML = '<div class="lec-ratings-empty">No ratings yet. Be the first! ⭐</div>';
+    return;
+  }
+  const avg = (ratings.reduce((a,r)=>a+r.rating,0)/ratings.length).toFixed(1);
+  const stars = n => '⭐'.repeat(Math.round(n));
+  container.innerHTML = `
+    <div class="lec-ratings-header">
+      <div class="lec-ratings-title">Student Ratings</div>
+      <div class="lec-avg-badge">
+        <span class="lec-avg-stars">${avg} ⭐</span>
+        <span class="lec-avg-count">${ratings.length} review${ratings.length!==1?'s':''}</span>
+      </div>
+    </div>
+    ${ratings.map(r=>{
+      const timeStr = r.timestamp?.toDate ? new Date(r.timestamp.toDate()).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : 'Recent';
+      const initials = (r.userName||'S').charAt(0).toUpperCase();
+      const delBtn = isAdmin ? `<button class="lec-rating-del" onclick="window.adminDeleteRating('${r.id}','${lecId}')" title="Delete rating">✕</button>` : '';
+      return `<div class="lec-rating-item">
+        <div class="lec-rating-ava">${r.userPhoto?`<img src="${r.userPhoto}" onerror="this.parentElement.textContent='${initials}'">`:`${initials}`}</div>
+        <div class="lec-rating-info">
+          <div class="lec-rating-name">${esc(r.userName||'Student')}</div>
+          <div class="lec-rating-time">${timeStr}</div>
+        </div>
+        <div class="lec-rating-stars-display">${'⭐'.repeat(r.rating)}</div>
+        ${delBtn}
+      </div>`;
+    }).join('')}
+  `;
+};
+
+/* ── Admin delete rating ── */
+window.adminDeleteRating = async function(ratingDocId, lecId){
+  if(!isAdmin || !confirm('Delete this rating?')) return;
+  try{
+    await fbDeleteRating(ratingDocId);
+    toast('🗑 Rating deleted');
+    window.loadAndShowRatings(lecId);
+    window.lecRenderGrid && window.lecRenderGrid();
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+/* ── Click outside rating overlay to close ── */
+document.getElementById('lec-rating-overlay').addEventListener('click', function(e){
+  if(e.target === this) window.closeRatingPopup();
+});
 </script>
 <!-- ═══════════ DUAL CHAT CSS ═══════════ -->
 <style>
