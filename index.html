@@ -2565,9 +2565,8 @@ import {
   getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, onAuthStateChanged, signOut,
-  browserLocalPersistence, setPersistence
+  getAuth, GoogleAuthProvider, signInWithPopup,
+  onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -2588,65 +2587,56 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
-// Force account picker so stale cached tokens don't silently reuse
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /* ═══════════════════════════════════════════
-   GOOGLE AUTH — REDIRECT LOOP FIX
+   GOOGLE AUTH — POPUP-ONLY, PASSCODE-AWARE
    ─────────────────────────────────────────
-   Root causes of the loop:
-   1. setPersistence was NOT awaited — auth ran
-      before persistence was set, so the session
-      was never written to localStorage.
-   2. onAuthStateChanged fired first (with null)
-      and reset the UI before getRedirectResult
-      could resolve — making the user appear
-      logged out even after a successful redirect.
-   3. _pendingLectureId lived only in memory —
-      wiped on every redirect (page reload).
-   4. openLoginPopup had no gUser guard — reopened
-      even when auth was resolving in the background.
+   WHY THE REDIRECT LOOP HAPPENED:
+   This app has a passcode screen. When signInWithRedirect
+   was used, Firebase took the user to Google, then sent
+   them back — but the page reloaded from the START,
+   hitting the passcode screen first. By the time the
+   user entered the PIN and the app div became visible,
+   onAuthStateChanged had already fired on hidden elements
+   and the UI updates were lost. The loop was:
+     redirect → reload → passcode → app visible →
+     updateProfileUI already ran on hidden DOM → looks
+     logged out → user clicks login again → repeat.
 
-   Fix: await setPersistence FIRST, then resolve
-   getRedirectResult, then let onAuthStateChanged
-   take over as the single source of truth.
-   _pendingLectureId is persisted in sessionStorage
-   so it survives the redirect round-trip.
+   THE FIX:
+   1. Use signInWithPopup ONLY (no redirect, no reload).
+      The popup opens on top of whatever screen is showing,
+      returns to the exact same page state, no reload.
+   2. onAuthStateChanged is the single source of truth.
+      It re-applies the UI every time the app div is shown
+      (hooked into checkPin / tncAgree) so even if it fired
+      before the DOM was visible, the UI is correct on show.
+   3. _pendingLectureId stays in memory (no reload needed).
 ═══════════════════════════════════════════ */
 
 let gUser = null;
-// Flag: true while getRedirectResult hasn't resolved yet.
-// Blocks onAuthStateChanged from resetting UI to "logged out"
-// during the brief window before the redirect result arrives.
-let _redirectPending = false;
-
-// Persist pending lecture across redirect round-trip
-function _savePendingLecture(id){ if(id) sessionStorage.setItem('_pendingLecture', id); }
-function _loadPendingLecture(){ return sessionStorage.getItem('_pendingLecture') || null; }
-function _clearPendingLecture(){ sessionStorage.removeItem('_pendingLecture'); }
-
-function isMobile(){
-  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
-}
+let _pendingLectureId = null;
 
 function authErrMsg(code){
   const MAP = {
     'auth/api-key-not-valid':      '🔑 API key invalid — contact support.',
     'auth/api-key-expired':        '🔑 API key expired — contact support.',
-    'auth/network-request-failed': '🌐 No internet connection.',
-    'auth/popup-blocked':          '🚫 Popup blocked — trying redirect…',
+    'auth/network-request-failed': '🌐 No internet — check your connection.',
+    'auth/popup-blocked':          '🚫 Popup blocked! Allow popups for this site then try again.',
     'auth/popup-closed-by-user':   '',
     'auth/cancelled-popup-request':'',
     'auth/user-cancelled':         '',
-    'auth/unauthorized-domain':    '🚫 Domain not authorised — add it in Firebase Console → Auth → Settings → Authorised domains.',
-    'auth/operation-not-allowed':  '⚠️ Google sign-in not enabled — Firebase Console → Auth → Sign-in methods.',
+    'auth/unauthorized-domain':    '🚫 Domain not authorised. Add it in Firebase Console → Auth → Authorised domains.',
+    'auth/operation-not-allowed':  '⚠️ Google sign-in not enabled in Firebase Console → Auth → Sign-in methods.',
     'auth/internal-error':         '⚠️ Firebase internal error. Please try again.',
   };
   return MAP[code] !== undefined ? MAP[code] : ('❌ Login failed: ' + code);
 }
 
+/* Apply Google user to profile UI — safe to call any time */
 function updateProfileUI(user){
-  console.log('[Auth] updateProfileUI called, user:', user ? user.email : 'null');
+  console.log('[Auth] updateProfileUI →', user ? user.email : 'null');
   const ava      = document.getElementById('prof-ava');
   const nameEl   = document.getElementById('prof-name-display');
   const emailRow = document.getElementById('prof-email-row');
@@ -2662,87 +2652,66 @@ function updateProfileUI(user){
         ava.innerHTML = `<img src="${user.photoURL}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
       } else {
         ava.style.background = '';
-        ava.innerHTML = (user.displayName || 'S').charAt(0).toUpperCase();
+        ava.innerHTML = (user.displayName||'S').charAt(0).toUpperCase();
       }
     }
-    if(nameEl)    nameEl.textContent = user.displayName || 'Student';
+    if(nameEl)    nameEl.textContent  = user.displayName || 'Student';
     if(emailRow)  emailRow.style.display = '';
     if(emailVal)  emailVal.textContent = user.email || '';
-    if(loginBtn)  loginBtn.style.display = 'none';
+    if(loginBtn)  loginBtn.style.display  = 'none';
     if(logoutBtn) logoutBtn.style.display = '';
-    if(editBtn)   editBtn.style.display = 'none';
+    if(editBtn)   editBtn.style.display   = 'none';
   } else {
     if(ava){
       ava.style.background = '';
-      ava.innerHTML = (localStorage.getItem('ab_student_name') || 'S').charAt(0).toUpperCase();
+      ava.innerHTML = (localStorage.getItem('ab_student_name')||'S').charAt(0).toUpperCase();
     }
-    if(nameEl)    nameEl.textContent = localStorage.getItem('ab_student_name') || 'Student';
-    if(emailRow)  emailRow.style.display = 'none';
-    if(loginBtn)  loginBtn.style.display = '';
+    if(nameEl)    nameEl.textContent  = localStorage.getItem('ab_student_name') || 'Student';
+    if(emailRow)  emailRow.style.display  = 'none';
+    if(loginBtn)  loginBtn.style.display  = '';
     if(logoutBtn) logoutBtn.style.display = 'none';
-    if(editBtn)   editBtn.style.display = '';
+    if(editBtn)   editBtn.style.display   = '';
   }
-}
-
-function _onSignInSuccess(user, source){
-  console.log('[Auth] Sign-in success via', source, '| user:', user.email);
-  gUser = user;
-  _redirectPending = false;
-  const spinner = document.getElementById('gauth-spinner');
-  if(spinner) spinner.style.display = 'none';
-  closeLoginPopup();
-  updateProfileUI(user);
-  toast('✅ Logged in successfully');
-  // Restore any lecture that was pending before the redirect
-  const pending = _loadPendingLecture();
-  _clearPendingLecture();
-  if(pending) setTimeout(()=> openFile(pending), 350);
 }
 
 function closeLoginPopup(){
   const pop = document.getElementById('gauth-popup');
-  if(!pop) return;
-  pop.classList.remove('open');
+  if(pop) pop.classList.remove('open');
   const spinner = document.getElementById('gauth-spinner');
   if(spinner) spinner.style.display = 'none';
 }
 
 function openLoginPopup(lectureId){
-  // Guard: never open popup if user is already signed in
-  if(gUser){ if(lectureId) openFile(lectureId); return; }
-  // Save lecture so it survives a redirect round-trip
-  if(lectureId) _savePendingLecture(lectureId);
+  if(gUser){ if(lectureId) openFile(lectureId); return; } // already logged in
+  _pendingLectureId = lectureId || null;
   const pop = document.getElementById('gauth-popup');
   if(pop) pop.classList.add('open');
 }
 
 async function googleSignIn(){
-  // Double-guard: bail if already signed in
-  if(gUser){ closeLoginPopup(); return; }
+  if(gUser){ closeLoginPopup(); return; } // already in
   const spinner = document.getElementById('gauth-spinner');
   if(spinner) spinner.style.display = 'flex';
   try {
-    if(isMobile()){
-      console.log('[Auth] Starting signInWithRedirect (mobile)');
-      _redirectPending = true;
-      await signInWithRedirect(auth, googleProvider);
-      // Page navigates away here — resumes in initAuth() on return
-    } else {
-      console.log('[Auth] Starting signInWithPopup (desktop)');
-      const result = await signInWithPopup(auth, googleProvider);
-      _onSignInSuccess(result.user, 'popup');
+    console.log('[Auth] signInWithPopup start');
+    // Always use popup — no redirect, no page reload, no passcode loop
+    const result = await signInWithPopup(auth, googleProvider);
+    console.log('[Auth] signInWithPopup success:', result.user.email);
+    gUser = result.user;
+    if(spinner) spinner.style.display = 'none';
+    closeLoginPopup();
+    updateProfileUI(gUser);
+    toast('✅ Logged in successfully');
+    if(_pendingLectureId){
+      const id = _pendingLectureId;
+      _pendingLectureId = null;
+      setTimeout(()=> openFile(id), 300);
     }
   } catch(e){
-    _redirectPending = false;
     if(spinner) spinner.style.display = 'none';
-    console.error('[Auth] googleSignIn error:', e.code, e.message);
+    console.error('[Auth] signInWithPopup error:', e.code, e.message);
     const msg = authErrMsg(e.code);
     if(msg) toast(msg);
-    if(e.code === 'auth/popup-blocked'){
-      console.log('[Auth] Popup blocked — falling back to redirect');
-      try { _redirectPending = true; await signInWithRedirect(auth, googleProvider); }
-      catch(re){ _redirectPending = false; console.error('[Auth] Redirect fallback error:', re); }
-    }
   }
 }
 
@@ -2750,7 +2719,7 @@ async function googleSignOut(){
   try {
     await signOut(auth);
     gUser = null;
-    _clearPendingLecture();
+    _pendingLectureId = null;
     updateProfileUI(null);
     toast('👋 Logged out successfully');
     console.log('[Auth] Signed out');
@@ -2766,68 +2735,33 @@ window.closeLoginPopup = closeLoginPopup;
 window.openLoginPopup  = openLoginPopup;
 
 /* ─────────────────────────────────────────
-   AUTH INIT — correct sequence:
-   1. await setPersistence  (must finish first)
-   2. await getRedirectResult  (catch redirect loop)
-   3. onAuthStateChanged  (single source of truth)
+   onAuthStateChanged — fires on load with
+   the persisted user (if any). This is what
+   restores the session after a normal refresh.
+   Since we no longer use redirect, there is
+   no race condition with getRedirectResult.
 ───────────────────────────────────────── */
-async function initAuth(){
-  console.log('[Auth] initAuth() start');
+onAuthStateChanged(auth, user => {
+  console.log('[Auth] onAuthStateChanged → user:', user ? user.email : 'null');
+  gUser = user || null;
+  // Always update UI — if the app div isn't visible yet, the DOM
+  // elements still get the correct values so they're right on show.
+  updateProfileUI(gUser);
+  if(gUser) closeLoginPopup();
+}, e => {
+  console.error('[Auth] onAuthStateChanged error:', e);
+});
 
-  // STEP 1 — set persistence BEFORE any auth operation
-  try {
-    await setPersistence(auth, browserLocalPersistence);
-    console.log('[Auth] Persistence set to LOCAL');
-  } catch(e){
-    console.warn('[Auth] setPersistence failed:', e);
-  }
-
-  // STEP 2 — resolve any pending redirect result
-  // This is the key fix: we await this BEFORE attaching onAuthStateChanged,
-  // so we know whether a redirect just completed before the listener fires.
-  try {
-    console.log('[Auth] Checking getRedirectResult…');
-    const result = await getRedirectResult(auth);
-    if(result && result.user){
-      // Redirect login completed — handle it here, don't let
-      // onAuthStateChanged treat it as a normal "already logged in"
-      console.log('[Auth] getRedirectResult — user found:', result.user.email);
-      _onSignInSuccess(result.user, 'redirect');
-    } else {
-      console.log('[Auth] getRedirectResult — no pending redirect');
-    }
-  } catch(e){
-    _redirectPending = false;
-    const spinner = document.getElementById('gauth-spinner');
-    if(spinner) spinner.style.display = 'none';
-    if(e.code && e.code !== 'auth/no-current-user'){
-      console.error('[Auth] getRedirectResult error:', e.code, e.message);
-      const msg = authErrMsg(e.code);
-      if(msg) toast(msg);
-    }
-  }
-
-  // STEP 3 — attach persistent auth state listener
-  // By the time this runs, getRedirectResult has already resolved,
-  // so the "null then user" flicker that caused the loop is gone.
-  onAuthStateChanged(auth, user => {
-    console.log('[Auth] onAuthStateChanged fired | user:', user ? user.email : 'null');
-    gUser = user || null;
-    // Only update UI here for normal page loads / session restores.
-    // If _onSignInSuccess() already ran (popup or redirect), the UI
-    // is already correct — we just keep gUser in sync.
-    updateProfileUI(gUser);
-    // Safety: if popup was somehow open while user is already in, close it
-    if(gUser) closeLoginPopup();
-  }, e => {
-    console.error('[Auth] onAuthStateChanged error:', e);
-  });
-
-  console.log('[Auth] initAuth() complete');
-}
-
-// Boot auth immediately — before window.load so UI is ready when data arrives
-initAuth();
+/* ─────────────────────────────────────────
+   Re-apply auth UI every time the app becomes
+   visible (after passcode + after T&C agree).
+   This is the safety net: even if onAuthStateChanged
+   fired before the DOM was rendered, the profile
+   will show correctly the moment the app is shown.
+───────────────────────────────────────── */
+window._authReapply = function(){
+  if(gUser) updateProfileUI(gUser);
+};
 
 /* ═══════════════════════════════════════════
    APP CONSTANTS & STATE
@@ -3131,6 +3065,7 @@ function checkPin(){
       if(localStorage.getItem('ab_tnc')==='agreed'){
         document.getElementById('app').classList.add('vis');
         updateCounts();startClock();animPbars();tcStart();
+        if(typeof window._authReapply==='function') window._authReapply();
       } else {
         showTNC();
       }
@@ -3864,6 +3799,7 @@ function tncAgree(){
   document.getElementById('tncoverlay').classList.remove('open');
   document.getElementById('app').classList.add('vis');
   updateCounts();startClock();animPbars();renderYTHome();tcStart();
+  if(typeof window._authReapply==='function') window._authReapply();
 }
 function tncExit(){
   document.getElementById('tncoverlay').classList.remove('open');
