@@ -1715,102 +1715,6 @@ button,
 }
 
 /* ── PWA INSTALL POPUP ── */
-#pwa-install-overlay{
-  position:fixed;inset:0;z-index:9000;
-  background:rgba(2,6,18,0.75);
-  backdrop-filter:blur(22px) saturate(1.5);
-  -webkit-backdrop-filter:blur(22px) saturate(1.5);
-  display:flex;align-items:flex-end;justify-content:center;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  opacity:0;pointer-events:none;
-  transition:opacity .35s cubic-bezier(0.4,0,0.2,1);
-}
-#pwa-install-overlay.open{
-  opacity:1;pointer-events:all;
-}
-#pwa-install-card{
-  width:100%;max-width:480px;
-  background:linear-gradient(160deg,rgba(10,18,42,0.97) 0%,rgba(6,12,28,0.99) 100%);
-  border:1px solid rgba(91,154,255,0.22);
-  border-bottom:none;
-  border-radius:30px 30px 0 0;
-  padding:10px 24px 32px;
-  box-shadow:0 -4px 60px rgba(91,154,255,0.12),0 0 0 1px rgba(91,154,255,0.08),inset 0 1px 0 rgba(255,255,255,0.06);
-  position:relative;overflow:hidden;
-  transform:translateY(110%);
-  transition:transform .45s cubic-bezier(0.22,1,0.36,1);
-}
-#pwa-install-overlay.open #pwa-install-card{
-  transform:translateY(0);
-}
-#pwa-install-card::before{
-  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(91,154,255,0.65),rgba(155,109,255,0.5),transparent);
-  border-radius:99px;
-}
-.pwa-handle{
-  width:40px;height:4px;border-radius:99px;
-  background:rgba(255,255,255,0.13);
-  margin:0 auto 20px;
-}
-.pwa-app-row{
-  display:flex;align-items:center;gap:14px;
-  margin-bottom:18px;
-}
-.pwa-app-icon{
-  width:60px;height:60px;border-radius:18px;overflow:hidden;flex-shrink:0;
-  box-shadow:0 6px 24px rgba(91,154,255,0.3);
-  background:linear-gradient(135deg,#5b9aff,#9b6dff);
-}
-.pwa-app-icon img{width:100%;height:100%;object-fit:cover;display:block;}
-.pwa-app-name{
-  font-size:17px;font-weight:900;letter-spacing:-.3px;
-  background:linear-gradient(135deg,#e8eeff,#a0bcff);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  margin-bottom:3px;
-}
-.pwa-app-sub{font-size:12px;color:rgba(168,190,230,0.6);font-weight:600;}
-.pwa-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
-.pwa-pill{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;
-  background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);
-  color:rgba(140,180,255,0.9);
-}
-.pwa-desc{
-  font-size:13px;color:rgba(168,190,230,0.65);
-  line-height:1.6;font-weight:600;margin-bottom:22px;
-}
-.pwa-install-btn{
-  width:100%;padding:16px 20px;
-  background:linear-gradient(135deg,#5b9aff 0%,#9b6dff 100%);
-  border:none;border-radius:18px;
-  color:#fff;font-family:'Nunito',sans-serif;
-  font-size:15px;font-weight:900;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  box-shadow:0 0 28px rgba(91,154,255,0.45),0 8px 24px rgba(91,154,255,0.25);
-  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s,opacity .2s;
-  will-change:transform;position:relative;overflow:hidden;
-  margin-bottom:12px;
-}
-.pwa-install-btn::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,0.14),transparent);
-  border-radius:18px;pointer-events:none;
-}
-.pwa-install-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 0 44px rgba(91,154,255,0.6),0 12px 32px rgba(91,154,255,0.3);
-}
-.pwa-install-btn:active{transform:scale(0.95);opacity:0.9;}
-.pwa-later-btn{
-  width:100%;padding:12px;background:none;border:none;
-  color:rgba(168,190,230,0.45);font-family:'Nunito',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;
-  border-radius:14px;
-  transition:color .2s,background .2s;
-}
-.pwa-later-btn:hover{color:rgba(168,190,230,0.8);background:rgba(255,255,255,0.04);}
 @keyframes pwaRipple{
   0%{transform:scale(0);opacity:.5;}
   100%{transform:scale(4);opacity:0;}
@@ -1904,31 +1808,6 @@ button,
 <body>
 
 <!-- PWA Install Popup -->
-<div id="pwa-install-overlay" role="dialog" aria-modal="true" aria-label="Install App">
-  <div id="pwa-install-card">
-    <div class="pwa-handle"></div>
-    <div class="pwa-app-row">
-      <div class="pwa-app-icon">
-        <img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NextToppers-Feed" onerror="this.parentElement.style.background='linear-gradient(135deg,#5b9aff,#9b6dff)'">
-      </div>
-      <div>
-        <div class="pwa-app-name">Next Toppers - Feed</div>
-        <div class="pwa-app-sub">nexttoppers.com · Education</div>
-      </div>
-    </div>
-    <div class="pwa-pills">
-      <span class="pwa-pill">📲 Install App</span>
-      <span class="pwa-pill">⚡ Faster Loading</span>
-      <span class="pwa-pill">📴 Works Offline</span>
-    </div>
-    <p class="pwa-desc">Add NextToppers-Feed to your home screen for instant access to lectures, notes and chat — just like a native app.</p>
-    <button class="pwa-install-btn" id="pwa-do-install" onclick="pwaDoInstall(event)">
-      <span style="font-size:18px;">📲</span>
-      Install App
-    </button>
-    <button class="pwa-later-btn" onclick="pwaDismiss()">Maybe Later</button>
-  </div>
-</div>
 <!-- PWA Success Toast -->
 <div id="pwa-success-toast">✅ App installed! Launch from your home screen.</div>
 
@@ -6926,51 +6805,11 @@ if('serviceWorker' in navigator){
 
 /* ── Install Prompt Logic ── */
 let _pwaPrompt=null;
-const _PWA_KEY='nt_pwa_dismissed';
-const _PWA_TTL=3*24*60*60*1000;
 
 function _pwaIsInstalled(){
   return window.matchMedia('(display-mode: standalone)').matches
     ||window.navigator.standalone===true
     ||document.referrer.includes('android-app://');
-}
-function _pwaDismissedRecently(){
-  const ts=parseInt(localStorage.getItem(_PWA_KEY)||'0',10);
-  return ts&&(Date.now()-ts<_PWA_TTL);
-}
-function pwaShowPopup(){
-  if(_pwaIsInstalled())return;
-  if(_pwaDismissedRecently())return;
-  const el=document.getElementById('pwa-install-overlay');
-  if(el)el.classList.add('open');
-}
-function pwaDismiss(){
-  localStorage.setItem(_PWA_KEY,Date.now().toString());
-  const el=document.getElementById('pwa-install-overlay');
-  if(el)el.classList.remove('open');
-}
-function pwaDoInstall(e){
-  if(e){
-    const btn=document.getElementById('pwa-do-install');
-    const r=document.createElement('span');
-    r.className='pwa-ripple';
-    const rect=btn.getBoundingClientRect();
-    r.style.left=(e.clientX-rect.left-30)+'px';
-    r.style.top=(e.clientY-rect.top-30)+'px';
-    btn.appendChild(r);
-    setTimeout(()=>r.remove(),600);
-  }
-  if(_pwaPrompt){
-    _pwaPrompt.prompt();
-    _pwaPrompt.userChoice.then(c=>{
-      if(c.outcome==='accepted')_pwaShowSuccessToast();
-      _pwaPrompt=null;
-      pwaDismiss();
-    });
-  }else{
-    pwaDismiss();
-    _pwaShowSuccessToast();
-  }
 }
 function _pwaShowSuccessToast(){
   const t=document.getElementById('pwa-success-toast');
@@ -6981,25 +6820,18 @@ function _pwaShowSuccessToast(){
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
   _pwaPrompt=e;
-  /* Show topbar install button immediately */
+  /* Show topbar install button */
   const btn=document.getElementById('pwa-topbar-btn');
   if(btn)btn.classList.add('ready');
-  /* Show bottom popup after delay */
-  setTimeout(pwaShowPopup,3500);
 });
 window.addEventListener('appinstalled',()=>{
   _pwaPrompt=null;
-  const el=document.getElementById('pwa-install-overlay');
-  if(el)el.classList.remove('open');
-  /* Hide topbar button once installed */
   const btn=document.getElementById('pwa-topbar-btn');
   if(btn)btn.classList.remove('ready');
   _pwaShowSuccessToast();
 });
 window.matchMedia('(display-mode: standalone)').addEventListener('change',e=>{
   if(e.matches){
-    const el=document.getElementById('pwa-install-overlay');
-    if(el)el.classList.remove('open');
     const btn=document.getElementById('pwa-topbar-btn');
     if(btn)btn.classList.remove('ready');
   }
