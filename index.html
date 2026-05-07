@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NextToppers">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="NextToppers">
+<meta name="msapplication-TileColor" content="#0f172a">
+<meta name="msapplication-navbutton-color" content="#0f172a">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
+<link rel="apple-touch-icon" sizes="152x152" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
+<link rel="apple-touch-icon" sizes="167x167" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
+<link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
+<link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
+<link rel="icon" type="image/png" sizes="512x512" href="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg">
 <title>Aarambh Batch 2026–27 | NextToppers</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -1697,9 +1713,161 @@ button,
   font-size:12px;font-weight:700;color:var(--txt);
   line-height:1.4;
 }
+
+/* ── PWA INSTALL POPUP ── */
+#pwa-install-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(2,6,18,0.75);
+  backdrop-filter:blur(22px) saturate(1.5);
+  -webkit-backdrop-filter:blur(22px) saturate(1.5);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  opacity:0;pointer-events:none;
+  transition:opacity .35s cubic-bezier(0.4,0,0.2,1);
+}
+#pwa-install-overlay.open{
+  opacity:1;pointer-events:all;
+}
+#pwa-install-card{
+  width:100%;max-width:480px;
+  background:linear-gradient(160deg,rgba(10,18,42,0.97) 0%,rgba(6,12,28,0.99) 100%);
+  border:1px solid rgba(91,154,255,0.22);
+  border-bottom:none;
+  border-radius:30px 30px 0 0;
+  padding:10px 24px 32px;
+  box-shadow:0 -4px 60px rgba(91,154,255,0.12),0 0 0 1px rgba(91,154,255,0.08),inset 0 1px 0 rgba(255,255,255,0.06);
+  position:relative;overflow:hidden;
+  transform:translateY(110%);
+  transition:transform .45s cubic-bezier(0.22,1,0.36,1);
+}
+#pwa-install-overlay.open #pwa-install-card{
+  transform:translateY(0);
+}
+#pwa-install-card::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(91,154,255,0.65),rgba(155,109,255,0.5),transparent);
+  border-radius:99px;
+}
+.pwa-handle{
+  width:40px;height:4px;border-radius:99px;
+  background:rgba(255,255,255,0.13);
+  margin:0 auto 20px;
+}
+.pwa-app-row{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:18px;
+}
+.pwa-app-icon{
+  width:60px;height:60px;border-radius:18px;overflow:hidden;flex-shrink:0;
+  box-shadow:0 6px 24px rgba(91,154,255,0.3);
+  background:linear-gradient(135deg,#5b9aff,#9b6dff);
+}
+.pwa-app-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.pwa-app-name{
+  font-size:17px;font-weight:900;letter-spacing:-.3px;
+  background:linear-gradient(135deg,#e8eeff,#a0bcff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:3px;
+}
+.pwa-app-sub{font-size:12px;color:rgba(168,190,230,0.6);font-weight:600;}
+.pwa-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.pwa-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;
+  background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);
+  color:rgba(140,180,255,0.9);
+}
+.pwa-desc{
+  font-size:13px;color:rgba(168,190,230,0.65);
+  line-height:1.6;font-weight:600;margin-bottom:22px;
+}
+.pwa-install-btn{
+  width:100%;padding:16px 20px;
+  background:linear-gradient(135deg,#5b9aff 0%,#9b6dff 100%);
+  border:none;border-radius:18px;
+  color:#fff;font-family:'Nunito',sans-serif;
+  font-size:15px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 28px rgba(91,154,255,0.45),0 8px 24px rgba(91,154,255,0.25);
+  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s,opacity .2s;
+  will-change:transform;position:relative;overflow:hidden;
+  margin-bottom:12px;
+}
+.pwa-install-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.14),transparent);
+  border-radius:18px;pointer-events:none;
+}
+.pwa-install-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 44px rgba(91,154,255,0.6),0 12px 32px rgba(91,154,255,0.3);
+}
+.pwa-install-btn:active{transform:scale(0.95);opacity:0.9;}
+.pwa-later-btn{
+  width:100%;padding:12px;background:none;border:none;
+  color:rgba(168,190,230,0.45);font-family:'Nunito',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;
+  border-radius:14px;
+  transition:color .2s,background .2s;
+}
+.pwa-later-btn:hover{color:rgba(168,190,230,0.8);background:rgba(255,255,255,0.04);}
+@keyframes pwaRipple{
+  0%{transform:scale(0);opacity:.5;}
+  100%{transform:scale(4);opacity:0;}
+}
+.pwa-ripple{
+  position:absolute;border-radius:50%;
+  width:60px;height:60px;
+  background:rgba(255,255,255,0.25);
+  animation:pwaRipple .55s ease-out forwards;
+  pointer-events:none;
+  transform-origin:center;
+}
+#pwa-success-toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:9100;background:rgba(47,232,160,0.15);
+  border:1px solid rgba(47,232,160,0.35);
+  border-radius:99px;padding:10px 20px;
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:800;color:#2fe8a0;
+  backdrop-filter:blur(16px);
+  opacity:0;pointer-events:none;
+  transition:opacity .35s,transform .35s cubic-bezier(0.22,1,0.36,1);
+  white-space:nowrap;
+}
+#pwa-success-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
+
+<!-- PWA Install Popup -->
+<div id="pwa-install-overlay" role="dialog" aria-modal="true" aria-label="Install App">
+  <div id="pwa-install-card">
+    <div class="pwa-handle"></div>
+    <div class="pwa-app-row">
+      <div class="pwa-app-icon">
+        <img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NextToppers" onerror="this.parentElement.style.background='linear-gradient(135deg,#5b9aff,#9b6dff)'">
+      </div>
+      <div>
+        <div class="pwa-app-name">Next Toppers - Feed</div>
+        <div class="pwa-app-sub">nexttoppers.com · Education</div>
+      </div>
+    </div>
+    <div class="pwa-pills">
+      <span class="pwa-pill">📲 Install App</span>
+      <span class="pwa-pill">⚡ Faster Loading</span>
+      <span class="pwa-pill">📴 Works Offline</span>
+    </div>
+    <p class="pwa-desc">Add NextToppers to your home screen for instant access to lectures, notes and chat — just like a native app.</p>
+    <button class="pwa-install-btn" id="pwa-do-install" onclick="pwaDoInstall(event)">
+      <span style="font-size:18px;">📲</span>
+      Install App
+    </button>
+    <button class="pwa-later-btn" onclick="pwaDismiss()">Maybe Later</button>
+  </div>
+</div>
+<!-- PWA Success Toast -->
+<div id="pwa-success-toast">✅ App installed! Launch from your home screen.</div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -6668,6 +6836,99 @@ window.wcStartFresh=function(){
   <div class="gauth-spin-ring"></div>
   <p>Signing you in…</p>
 </div>
+
+<!-- ══════════ PWA — Service Worker + Install Logic ══════════ -->
+<script>
+/* ── Service Worker Registration ── */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/service-worker.js',{scope:'/'})
+      .then(reg=>{
+        reg.addEventListener('updatefound',()=>{
+          const nw=reg.installing;
+          nw&&nw.addEventListener('statechange',()=>{
+            if(nw.state==='installed'&&navigator.serviceWorker.controller){
+              nw.postMessage({type:'SKIP_WAITING'});
+            }
+          });
+        });
+      })
+      .catch(err=>console.warn('[SW] Registration failed:',err));
+  });
+}
+
+/* ── Install Prompt Logic ── */
+let _pwaPrompt=null;
+const _PWA_KEY='nt_pwa_dismissed';
+const _PWA_TTL=3*24*60*60*1000;
+
+function _pwaIsInstalled(){
+  return window.matchMedia('(display-mode: standalone)').matches
+    ||window.navigator.standalone===true
+    ||document.referrer.includes('android-app://');
+}
+function _pwaDismissedRecently(){
+  const ts=parseInt(localStorage.getItem(_PWA_KEY)||'0',10);
+  return ts&&(Date.now()-ts<_PWA_TTL);
+}
+function pwaShowPopup(){
+  if(_pwaIsInstalled())return;
+  if(_pwaDismissedRecently())return;
+  const el=document.getElementById('pwa-install-overlay');
+  if(el)el.classList.add('open');
+}
+function pwaDismiss(){
+  localStorage.setItem(_PWA_KEY,Date.now().toString());
+  const el=document.getElementById('pwa-install-overlay');
+  if(el)el.classList.remove('open');
+}
+function pwaDoInstall(e){
+  if(e){
+    const btn=document.getElementById('pwa-do-install');
+    const r=document.createElement('span');
+    r.className='pwa-ripple';
+    const rect=btn.getBoundingClientRect();
+    r.style.left=(e.clientX-rect.left-30)+'px';
+    r.style.top=(e.clientY-rect.top-30)+'px';
+    btn.appendChild(r);
+    setTimeout(()=>r.remove(),600);
+  }
+  if(_pwaPrompt){
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(c=>{
+      if(c.outcome==='accepted')_pwaShowSuccessToast();
+      _pwaPrompt=null;
+      pwaDismiss();
+    });
+  }else{
+    pwaDismiss();
+    _pwaShowSuccessToast();
+  }
+}
+function _pwaShowSuccessToast(){
+  const t=document.getElementById('pwa-success-toast');
+  if(!t)return;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4500);
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _pwaPrompt=e;
+  setTimeout(pwaShowPopup,3500);
+});
+window.addEventListener('appinstalled',()=>{
+  _pwaPrompt=null;
+  const el=document.getElementById('pwa-install-overlay');
+  if(el)el.classList.remove('open');
+  _pwaShowSuccessToast();
+});
+window.matchMedia('(display-mode: standalone)').addEventListener('change',e=>{
+  if(e.matches){
+    const el=document.getElementById('pwa-install-overlay');
+    if(el)el.classList.remove('open');
+  }
+});
+</script>
 
 </body>
 </html>

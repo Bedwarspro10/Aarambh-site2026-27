@@ -1,0 +1,29 @@
+{
+  "name": "Next Toppers - Feed",
+  "short_name": "NextToppers",
+  "description": "Aarambh Batch 2026–27 | NextToppers Fanpage — Study materials, lectures & more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/Nf9JrVzk/1000049837.jpg",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/Nf9JrVzk/1000049837.jpg",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
