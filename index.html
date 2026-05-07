@@ -2566,11 +2566,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, onAuthStateChanged, signOut
+  getRedirectResult, onAuthStateChanged, signOut,
+  browserLocalPersistence, setPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDCXzf4ns32LSHbXBHYgkfUy81IGdh2Z2E",
+  apiKey: "AIzaSyBdTbN0nNiR5nm2IIDl4xgS36e3AbKBmGs",
   authDomain: "aarambh26-27.firebaseapp.com",
   projectId: "aarambh26-27",
   storageBucket: "aarambh26-27.firebasestorage.app",
@@ -2583,7 +2584,17 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+
+// Explicitly clear any stale cached config and force local persistence
+// so auth survives page refreshes and hard reloads
+setPersistence(auth, browserLocalPersistence).catch(e => console.warn('[Auth persist]', e));
+
 const googleProvider = new GoogleAuthProvider();
+// Request profile + email scopes explicitly
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
+// Force account picker every time so stale tokens don't silently reuse
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /* ═══════════════════════════════════════════
    GOOGLE AUTH STATE
@@ -2595,25 +2606,43 @@ function isMobile(){
   return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
 }
 
+// Human-readable messages for every auth error code
+function authErrMsg(code){
+  const MAP = {
+    'auth/api-key-not-valid': '🔑 API key invalid — contact support.',
+    'auth/api-key-expired':   '🔑 API key expired — contact support.',
+    'auth/network-request-failed': '🌐 No internet connection.',
+    'auth/popup-blocked':          '🚫 Popup blocked — trying redirect…',
+    'auth/popup-closed-by-user':   '', // silent — user dismissed
+    'auth/cancelled-popup-request':'', // silent — duplicate click
+    'auth/user-cancelled':         '', // silent
+    'auth/unauthorized-domain':    '🚫 This domain is not authorised in Firebase Console → Auth → Settings → Authorised domains.',
+    'auth/operation-not-allowed':  '⚠️ Google sign-in is not enabled in Firebase Console → Auth → Sign-in methods.',
+    'auth/internal-error':         '⚠️ Firebase internal error. Please try again.',
+  };
+  return MAP[code] || ('❌ Login failed: ' + code);
+}
+
 async function googleSignIn(){
   const spinner = document.getElementById('gauth-spinner');
   if(spinner) spinner.style.display = 'flex';
   try {
     if(isMobile()){
+      // On mobile, redirect flow avoids popup restrictions entirely
       await signInWithRedirect(auth, googleProvider);
+      // execution stops here on mobile — continues in getRedirectResult below
     } else {
       const result = await signInWithPopup(auth, googleProvider);
       onGoogleSignInSuccess(result.user);
     }
   } catch(e){
     if(spinner) spinner.style.display = 'none';
-    console.error('[Auth]', e);
-    const msg = e.code === 'auth/popup-blocked'
-      ? '🚫 Popup blocked — trying redirect…'
-      : (e.code === 'auth/cancelled-popup-request' ? '' : '❌ Login failed: ' + e.message);
+    console.error('[Auth error]', e.code, e.message);
+    const msg = authErrMsg(e.code);
     if(msg) toast(msg);
+    // Fallback: if popup was blocked, silently switch to redirect
     if(e.code === 'auth/popup-blocked'){
-      await signInWithRedirect(auth, googleProvider);
+      try { await signInWithRedirect(auth, googleProvider); } catch(re){ console.error('[Auth redirect fallback]', re); }
     }
   }
 }
@@ -2636,7 +2665,7 @@ function onGoogleSignInSuccess(user){
   closeLoginPopup();
   updateProfileUI(user);
   toast('✅ Logged in successfully');
-  // If a lecture was pending, open it now
+  // Auto-open the lecture the user was trying to access
   if(_pendingLectureId){
     const id = _pendingLectureId;
     _pendingLectureId = null;
@@ -2700,19 +2729,28 @@ window.googleSignOut = googleSignOut;
 window.closeLoginPopup = closeLoginPopup;
 window.openLoginPopup = openLoginPopup;
 
-// Handle redirect result (for mobile)
+// Handle redirect result (for mobile — runs on every page load after redirect)
 getRedirectResult(auth).then(result => {
   if(result && result.user){
     onGoogleSignInSuccess(result.user);
   }
 }).catch(e => {
-  if(e.code && e.code !== 'auth/no-current-user') console.error('[Auth redirect]', e);
+  // Ignore "no redirect pending" — that's normal on fresh loads
+  if(!e.code || e.code === 'auth/no-current-user') return;
+  console.error('[Auth redirect result]', e.code, e.message);
+  const msg = authErrMsg(e.code);
+  if(msg) toast(msg);
+  const spinner = document.getElementById('gauth-spinner');
+  if(spinner) spinner.style.display = 'none';
 });
 
-// Persist auth state across refreshes
+// Persist auth state across refreshes — fires immediately with cached user
 onAuthStateChanged(auth, user => {
   gUser = user || null;
   updateProfileUI(gUser);
+}, e => {
+  // onAuthStateChanged error (rare — e.g. network failure at init)
+  console.error('[Auth state]', e);
 });
 
 /* ═══════════════════════════════════════════
