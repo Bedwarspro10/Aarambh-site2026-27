@@ -1,7 +1,7 @@
 {
   "name": "Next Toppers - Feed",
-  "short_name": "NextToppers",
-  "description": "Aarambh Batch 2026–27 | NextToppers Fanpage — Study materials, lectures & more.",
+  "short_name": "NextToppers-Feed",
+  "description": "Aarambh Batch 2026–27 | NextToppers-Feed — Study materials, lectures & more.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
