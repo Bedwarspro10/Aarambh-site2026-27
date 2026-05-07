@@ -1,53 +1,68 @@
 /* ═══════════════════════════════════════════════════
    Next Toppers - Feed | Service Worker
-   Version: 1.0.0
+   Version: 2.0.0 — Secure / Safe-Browsing compliant
 ═══════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'nt-feed-v1';
-const STATIC_CACHE = 'nt-static-v1';
-const DYNAMIC_CACHE = 'nt-dynamic-v1';
+const STATIC_CACHE = 'nt-static-v2';
+const DYNAMIC_CACHE = 'nt-dynamic-v2';
+const ALL_CACHES = [STATIC_CACHE, DYNAMIC_CACHE];
 
-/* Assets to pre-cache on install */
+/* Local assets to pre-cache on install */
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
-/* External origins we should NEVER cache (Firebase, Google APIs) */
-const BYPASS_ORIGINS = [
+/*
+ * External origins that must NEVER be intercepted.
+ * This prevents breaking Firebase auth, Google APIs,
+ * YouTube embeds, and CDN fonts/icons.
+ */
+const BYPASS_HOSTNAMES = [
   'firebaseapp.com',
   'firebasestorage.googleapis.com',
   'googleapis.com',
   'gstatic.com',
   'identitytoolkit.googleapis.com',
   'securetoken.googleapis.com',
-  'postimg.cc',
+  'accounts.google.com',
   'youtube.com',
+  'www.youtube.com',
   'ytimg.com',
-  'flaticon.com',
+  'i.ytimg.com',
   'fonts.googleapis.com',
   'fonts.gstatic.com',
+  'postimg.cc',
+  'flaticon.com',
 ];
+
+/** Returns true if this request should be passed straight to the network */
+function shouldBypass(url) {
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return true;
+  return BYPASS_HOSTNAMES.some(h => url.hostname === h || url.hostname.endsWith('.' + h));
+}
 
 /* ── INSTALL ── */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(cache => {
-      return cache.addAll(PRECACHE_ASSETS).catch(() => {
-        /* Silently fail if offline at install time */
-      });
-    })
+    caches.open(STATIC_CACHE).then(cache =>
+      cache.addAll(PRECACHE_ASSETS).catch(() => {
+        /* Silently ignore if offline at install time */
+      })
+    )
   );
 });
 
-/* ── ACTIVATE ── */
+/* ── ACTIVATE ── clean up old caches ── */
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => k !== STATIC_CACHE && k !== DYNAMIC_CACHE)
+          .filter(k => !ALL_CACHES.includes(k))
           .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -57,20 +72,32 @@ self.addEventListener('activate', event => {
 /* ── FETCH ── */
 self.addEventListener('fetch', event => {
   const { request } = event;
-  const url = new URL(request.url);
 
-  /* Always bypass non-GET and Firebase/Google auth requests */
+  // Only handle GET requests
   if (request.method !== 'GET') return;
-  if (BYPASS_ORIGINS.some(origin => url.hostname.includes(origin))) return;
-  if (url.protocol === 'chrome-extension:') return;
 
-  /* Navigation requests → Network first, fall back to cached index.html */
+  let url;
+  try {
+    url = new URL(request.url);
+  } catch {
+    return;
+  }
+
+  // Pass through all external / non-local origins without touching them
+  if (shouldBypass(url)) return;
+
+  // Only intercept same-origin requests from here on
+  if (url.origin !== self.location.origin) return;
+
+  /* Navigation (page load) → Network first, fall back to cached index.html */
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then(response => {
-          const clone = response.clone();
-          caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
+          }
           return response;
         })
         .catch(() =>
@@ -81,33 +108,35 @@ self.addEventListener('fetch', event => {
   }
 
   /* Same-origin static assets → Cache first, then network */
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
-          if (!response || response.status !== 200 || response.type === 'opaque') {
-            return response;
-          }
+  event.respondWith(
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+      return fetch(request).then(response => {
+        // Only cache valid, non-opaque same-origin responses
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === 'basic'
+        ) {
           const clone = response.clone();
           caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  /* Everything else → Network only (live data) */
-  event.respondWith(fetch(request));
+        }
+        return response;
+      }).catch(() => {
+        // No fallback for non-navigation assets — just fail gracefully
+        return new Response('', { status: 408, statusText: 'Offline' });
+      });
+    })
+  );
 });
 
-/* ── MESSAGE HANDLER (for manual cache busting) ── */
+/* ── MESSAGE HANDLER ── */
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return;
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
+  if (event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
     );
