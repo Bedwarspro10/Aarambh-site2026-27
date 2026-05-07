@@ -3,22 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
-<meta name="msapplication-TileColor" content="#0f172a">
-<meta name="msapplication-navbutton-color" content="#0f172a">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="NextToppers-Feed">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NextToppers-Feed">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-<link rel="apple-touch-icon" href="/icon-192.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png">
+
 <title>Aarambh Batch 2026–27 | NextToppers-Feed</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -1714,102 +1699,10 @@ button,
   line-height:1.4;
 }
 
-/* ── PWA INSTALL POPUP ── */
-@keyframes pwaRipple{
-  0%{transform:scale(0);opacity:.5;}
-  100%{transform:scale(4);opacity:0;}
-}
-.pwa-ripple{
-  position:absolute;border-radius:50%;
-  width:60px;height:60px;
-  background:rgba(255,255,255,0.25);
-  animation:pwaRipple .55s ease-out forwards;
-  pointer-events:none;
-  transform-origin:center;
-}
-#pwa-success-toast{
-  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
-  z-index:9100;background:rgba(47,232,160,0.15);
-  border:1px solid rgba(47,232,160,0.35);
-  border-radius:99px;padding:10px 20px;
-  display:flex;align-items:center;gap:8px;
-  font-size:13px;font-weight:800;color:#2fe8a0;
-  backdrop-filter:blur(16px);
-  opacity:0;pointer-events:none;
-  transition:opacity .35s,transform .35s cubic-bezier(0.22,1,0.36,1);
-  white-space:nowrap;
-}
-#pwa-success-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── PWA TOP INSTALL BUTTON ── */
-#pwa-topbar-btn{
-  display:none; /* shown only when prompt is ready */
-  align-items:center;gap:6px;
-  padding:6px 13px 6px 9px;
-  border:none;border-radius:99px;
-  font-family:'Nunito',sans-serif;font-size:12px;font-weight:900;
-  color:#fff;cursor:pointer;
-  position:relative;overflow:hidden;
-  white-space:nowrap;flex-shrink:0;
-  background:linear-gradient(135deg,#5b9aff 0%,#9b6dff 55%,#ff6bdf 100%);
-  background-size:200% 200%;
-  box-shadow:0 0 0 0 rgba(91,154,255,0.7),0 4px 18px rgba(91,154,255,0.45);
-  animation:pwaTopBtnGradient 3s ease infinite,pwaTopBtnPulse 1.8s ease-in-out infinite;
-  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
-  will-change:transform,box-shadow;
-  -webkit-tap-highlight-color:transparent;
-}
-#pwa-topbar-btn.ready{display:inline-flex;}
-#pwa-topbar-btn:hover{
-  transform:scale(1.07) translateY(-1px);
-  box-shadow:0 0 0 0 transparent,0 8px 28px rgba(91,154,255,0.6);
-  animation:pwaTopBtnGradient 3s ease infinite; /* keep gradient, pause pulse on hover */
-}
-#pwa-topbar-btn:active{transform:scale(0.93);}
-
-/* Shimmer sweep */
-#pwa-topbar-btn::before{
-  content:'';
-  position:absolute;top:0;left:-75%;width:50%;height:100%;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);
-  animation:pwaTopBtnShimmer 2.2s ease-in-out infinite;
-  pointer-events:none;border-radius:99px;
-}
-/* Outer ring ping */
-#pwa-topbar-btn::after{
-  content:'';
-  position:absolute;inset:-3px;border-radius:99px;
-  border:2px solid rgba(155,109,255,0.6);
-  animation:pwaTopBtnRing 1.8s ease-out infinite;
-  pointer-events:none;
-}
-
-.pwa-topbar-icon{font-size:15px;line-height:1;flex-shrink:0;}
-.pwa-topbar-label{letter-spacing:.1px;}
-
-@keyframes pwaTopBtnGradient{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-@keyframes pwaTopBtnPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(91,154,255,0.65),0 4px 18px rgba(91,154,255,0.4);}
-  50%{box-shadow:0 0 0 7px rgba(91,154,255,0),0 4px 22px rgba(155,109,255,0.55);}
-}
-@keyframes pwaTopBtnShimmer{
-  0%{left:-75%;}60%,100%{left:130%;}
-}
-@keyframes pwaTopBtnRing{
-  0%{opacity:.9;inset:-3px;}
-  70%,100%{opacity:0;inset:-10px;}
-}
 </style>
 </head>
 <body>
-
-<!-- PWA Install Popup -->
-<!-- PWA Success Toast -->
-<div id="pwa-success-toast">✅ App installed! Launch from your home screen.</div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -1860,10 +1753,6 @@ button,
         <span style="font-size:11px;font-weight:900;color:#ff6b6b;">⚡ ADMIN</span>
         <button style="background:none;border:none;color:#ff6b6b;font-size:11px;font-weight:800;cursor:pointer;padding:0 2px;" onclick="event.stopPropagation();adminOut()">✕ Logout</button>
       </div>
-      <button id="pwa-topbar-btn" onclick="pwaTopBarInstall(event)" aria-label="Install Next Toppers - Feed">
-        <span class="pwa-topbar-icon">📲</span>
-        <span class="pwa-topbar-label">Install Next Toppers - Feed</span>
-      </button>
       <button class="ib" id="themeib" onclick="toggleTheme()">🌙</button>
       <button class="ib" id="admin-gear-btn" onclick="openAL()" style="display:none;">⚙️</button>
     </div>
@@ -6783,85 +6672,7 @@ window.wcStartFresh=function(){
   <p>Signing you in…</p>
 </div>
 
-<!-- ══════════ PWA — Service Worker + Install Logic ══════════ -->
-<script>
-/* ── Service Worker Registration ── */
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/service-worker.js',{scope:'/'})
-      .then(reg=>{
-        reg.addEventListener('updatefound',()=>{
-          const nw=reg.installing;
-          nw&&nw.addEventListener('statechange',()=>{
-            if(nw.state==='installed'&&navigator.serviceWorker.controller){
-              nw.postMessage({type:'SKIP_WAITING'});
-            }
-          });
-        });
-      })
-      .catch(err=>console.warn('[SW] Registration failed:',err));
-  });
-}
 
-/* ── Install Prompt Logic ── */
-let _pwaPrompt=null;
-
-function _pwaIsInstalled(){
-  return window.matchMedia('(display-mode: standalone)').matches
-    ||window.navigator.standalone===true
-    ||document.referrer.includes('android-app://');
-}
-function _pwaShowSuccessToast(){
-  const t=document.getElementById('pwa-success-toast');
-  if(!t)return;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),4500);
-}
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  _pwaPrompt=e;
-  /* Show topbar install button */
-  const btn=document.getElementById('pwa-topbar-btn');
-  if(btn)btn.classList.add('ready');
-});
-window.addEventListener('appinstalled',()=>{
-  _pwaPrompt=null;
-  const btn=document.getElementById('pwa-topbar-btn');
-  if(btn)btn.classList.remove('ready');
-  _pwaShowSuccessToast();
-});
-window.matchMedia('(display-mode: standalone)').addEventListener('change',e=>{
-  if(e.matches){
-    const btn=document.getElementById('pwa-topbar-btn');
-    if(btn)btn.classList.remove('ready');
-  }
-});
-
-/* Topbar button handler */
-function pwaTopBarInstall(e){
-  /* Ripple on button */
-  if(e){
-    const btn=document.getElementById('pwa-topbar-btn');
-    const r=document.createElement('span');
-    r.className='pwa-ripple';
-    const rect=btn.getBoundingClientRect();
-    r.style.cssText='position:absolute;border-radius:50%;width:60px;height:60px;background:rgba(255,255,255,0.3);pointer-events:none;transform:scale(0);animation:pwaRipple .55s ease-out forwards;left:'+(e.clientX-rect.left-30)+'px;top:'+(e.clientY-rect.top-30)+'px;';
-    btn.appendChild(r);
-    setTimeout(()=>r.remove(),600);
-  }
-  if(_pwaPrompt){
-    _pwaPrompt.prompt();
-    _pwaPrompt.userChoice.then(c=>{
-      if(c.outcome==='accepted'){
-        const btn=document.getElementById('pwa-topbar-btn');
-        if(btn)btn.classList.remove('ready');
-        _pwaShowSuccessToast();
-      }
-      _pwaPrompt=null;
-    });
-  }
-}
-</script>
 
 </body>
 </html>
