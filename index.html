@@ -1751,7 +1751,7 @@ button,
         <button style="background:none;border:none;color:#ff6b6b;font-size:11px;font-weight:800;cursor:pointer;padding:0 2px;" onclick="event.stopPropagation();adminOut()">✕ Logout</button>
       </div>
       <button class="ib" id="themeib" onclick="toggleTheme()">🌙</button>
-      <button class="ib" onclick="openAL()">⚙️</button>
+      <button class="ib" id="admin-gear-btn" onclick="openAL()" style="display:none;">⚙️</button>
     </div>
   </div>
   <div class="clkbar"><img id="clk-cal-img" class="clkbar-img" src="" alt=""><strong id="clock">—</strong></div>
@@ -1768,7 +1768,7 @@ button,
       <div class="hello-banner" style="position:relative;background:linear-gradient(135deg,rgba(15,25,60,0.95) 0%,rgba(20,12,50,0.95) 100%);border:1px solid rgba(91,154,255,0.2);border-radius:22px;padding:18px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;margin-top:12px;">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 60% 50%,rgba(91,154,255,0.06) 0%,transparent 70%);pointer-events:none;"></div>
         <div>
-          <div style="font-size:18px;font-weight:900;letter-spacing:-.3px;">Hello, NextTopper! 👋</div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:-.3px;">Hello, <span id="home-hello-name">NextTopper</span>! 👋</div>
           <div style="font-size:12px;color:var(--txt2);margin-top:3px;font-weight:600;">Keep learning, keep growing.</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
@@ -2208,7 +2208,7 @@ button,
           <span style="font-size:22px;" id="more-theme-ico">🌙</span>
           <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Toggle Theme</div><div style="font-size:11px;color:var(--txt2);">Switch dark / light mode</div></div>
         </div>
-        <div onclick="openAL()" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);">
+        <div id="more-admin-btn" onclick="openAL()" style="display:none;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);">
           <span style="font-size:22px;">⚙️</span>
           <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Admin Panel</div><div style="font-size:11px;color:var(--txt2);">Upload &amp; manage files</div></div>
         </div>
@@ -2589,6 +2589,9 @@ googleProvider.addScope('profile');
 googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
+// Only this Google UID can see the admin panel button
+const ADMIN_UID = 'renXVa7BMpbfpoWvenincbDDZ6W2';
+
 /* ═══════════════════════════════════════════
    GOOGLE AUTH — POPUP-ONLY, PASSCODE-AWARE
    ─────────────────────────────────────────
@@ -2644,8 +2647,12 @@ function updateProfileUI(user){
   const loginBtn = document.getElementById('prof-login-btn');
   const logoutBtn= document.getElementById('prof-logout-btn');
   const editBtn  = document.getElementById('prof-edit-btn');
+  const helloName= document.getElementById('home-hello-name');
+  const gearBtn  = document.getElementById('admin-gear-btn');
+  const moreAdminBtn = document.getElementById('more-admin-btn');
 
   if(user){
+    // Profile card
     if(ava){
       if(user.photoURL){
         ava.style.background = 'none';
@@ -2661,6 +2668,14 @@ function updateProfileUI(user){
     if(loginBtn)  loginBtn.style.display  = 'none';
     if(logoutBtn) logoutBtn.style.display = '';
     if(editBtn)   editBtn.style.display   = 'none';
+    // Home screen greeting — show first name only for neatness
+    if(helloName){
+      const firstName = (user.displayName || 'NextTopper').split(' ')[0];
+      helloName.textContent = firstName;
+    }
+    // Admin gear — only visible for the designated admin UID
+    if(gearBtn) gearBtn.style.display = (user.uid === ADMIN_UID) ? '' : 'none';
+    if(moreAdminBtn) moreAdminBtn.style.display = (user.uid === ADMIN_UID) ? 'flex' : 'none';
   } else {
     if(ava){
       ava.style.background = '';
@@ -2671,6 +2686,11 @@ function updateProfileUI(user){
     if(loginBtn)  loginBtn.style.display  = '';
     if(logoutBtn) logoutBtn.style.display = 'none';
     if(editBtn)   editBtn.style.display   = '';
+    // Reset hello name
+    if(helloName) helloName.textContent = 'NextTopper';
+    // Hide admin gear for logged-out users
+    if(gearBtn) gearBtn.style.display = 'none';
+    if(moreAdminBtn) moreAdminBtn.style.display = 'none';
   }
 }
 
