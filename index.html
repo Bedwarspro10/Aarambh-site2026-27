@@ -1763,39 +1763,114 @@ button,
       <input class="sfield" id="sf" type="text" placeholder="Search subjects, files…" oninput="doSearch(this.value)" autocomplete="off">
     </div>
     <div class="scroll" id="home-sc" style="padding:0 14px 90px;">
-      <div class="bhdr" style="position:relative;">
-        <div style="position:absolute;right:-6px;top:-8px;font-size:72px;opacity:0.5;animation:floatPlanet 4s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 0 20px rgba(91,154,255,0.4));">🪐</div>
-        <h1>Aarambh Batch <em><span class="rocket-em">🚀</span></em></h1>
-        <p>Class 10 · 2026–27 · NextToppers</p>
-      </div>
-      <div class="cg" id="cardgrid">
-        <div class="scard" id="sc-maths" onclick="openSubj('maths',this)" style="background:linear-gradient(145deg,rgba(10,30,80,0.9),rgba(8,16,40,0.95));border-color:rgba(91,154,255,0.25);">
-          <span class="sci">📐</span>
-          <div class="scn">Maths</div>
-          <div class="ptr"><div class="pfill" data-w="20%" style="width:0%;background:var(--grd-maths);"></div></div>
-          <div class="ppct" style="color:var(--blue);">20%</div>
+
+      <!-- HELLO BANNER -->
+      <div class="hello-banner" style="position:relative;background:linear-gradient(135deg,rgba(15,25,60,0.95) 0%,rgba(20,12,50,0.95) 100%);border:1px solid rgba(91,154,255,0.2);border-radius:22px;padding:18px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;margin-top:12px;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 60% 50%,rgba(91,154,255,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+        <div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:-.3px;">Hello, NextTopper! 👋</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:3px;font-weight:600;">Keep learning, keep growing.</div>
         </div>
-        <div class="scard" id="sc-science" onclick="openSubj('science',this)" style="background:linear-gradient(145deg,rgba(0,40,30,0.9),rgba(0,20,16,0.95));border-color:rgba(47,232,160,0.22);">
-          <span class="sci">🔬</span>
-          <div class="scn">Science</div>
-          <div class="ptr"><div class="pfill" data-w="30%" style="width:0%;background:var(--grd-sci);"></div></div>
-          <div class="ppct" style="color:var(--green);">30%</div>
-        </div>
-        <div class="cspan">
-          <div class="scard" id="sc-sst" onclick="openSubj('sst',this)" style="background:linear-gradient(145deg,rgba(40,10,80,0.9),rgba(20,8,50,0.95));border-color:rgba(155,109,255,0.22);">
-            <span class="sci">🌏</span>
-            <div class="sbody">
-              <div class="scn">Social Studies</div>
-              <div class="ptr"><div class="pfill" data-w="20%" style="width:0%;background:var(--grd-sst);"></div></div>
-              <div class="ppct" style="color:var(--purple);">20%</div>
-            </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <div style="font-size:40px;opacity:0.85;animation:floatPlanet 4s ease-in-out infinite;filter:drop-shadow(0 0 14px rgba(91,154,255,0.4));">🪐</div>
+          <div style="background:rgba(255,100,50,0.12);border:1px solid rgba(255,100,50,0.3);border-radius:14px;padding:8px 12px;text-align:center;min-width:60px;">
+            <div style="font-size:20px;">🔥</div>
+            <div id="streak-num" style="font-size:16px;font-weight:900;color:#ff6b35;line-height:1;">7</div>
+            <div style="font-size:9px;color:var(--txt2);font-weight:700;letter-spacing:.3px;">Day Streak</div>
           </div>
         </div>
       </div>
-      <div class="srow">
-        <div class="scell"><div class="snum" style="color:var(--blue)" id="sf-count">0</div><div class="slbl">Files</div></div>
-        <div class="scell"><div class="snum" style="color:var(--purple)">3</div><div class="slbl">Subjects</div></div>
-        <div class="scell"><div class="snum" style="color:var(--green)">10</div><div class="slbl">Class</div></div>
+
+      <!-- ALL SUBJECTS HEADER -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:17px;font-weight:900;letter-spacing:-.3px;">All Subjects</div>
+        <button onclick="switchTab('courses')" style="background:none;border:none;color:var(--blue);font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;">View All ›</button>
+      </div>
+
+      <!-- 3-COL SUBJECTS GRID (Maths, Science, SST) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;" id="cardgrid">
+        <div class="scard" id="sc-maths" onclick="openSubj('maths',this)" style="background:linear-gradient(145deg,rgba(10,30,80,0.9),rgba(8,16,40,0.95));border-color:rgba(91,154,255,0.25);padding:14px 10px 12px;">
+          <span class="sci" style="font-size:30px;margin-bottom:8px;">📐</span>
+          <div class="scn" style="font-size:13px;margin-bottom:6px;">Maths</div>
+          <div style="font-size:9px;color:var(--txt2);font-weight:600;margin-bottom:8px;">PDF Only</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);font-weight:700;"><span style="font-size:12px;">📄</span><span id="maths-count">0</span><span>Notes (PDF)</span></div>
+        </div>
+        <div class="scard" id="sc-science" onclick="openSubj('science',this)" style="background:linear-gradient(145deg,rgba(0,40,30,0.9),rgba(0,20,16,0.95));border-color:rgba(47,232,160,0.22);padding:14px 10px 12px;">
+          <span class="sci" style="font-size:30px;margin-bottom:8px;">🔬</span>
+          <div class="scn" style="font-size:13px;margin-bottom:6px;">Science</div>
+          <div style="font-size:9px;color:var(--txt2);font-weight:600;margin-bottom:8px;">PDF Only</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);font-weight:700;"><span style="font-size:12px;">📄</span><span id="science-count">0</span><span>Notes (PDF)</span></div>
+        </div>
+        <div class="scard" id="sc-sst" onclick="openSubj('sst',this)" style="background:linear-gradient(145deg,rgba(40,10,80,0.9),rgba(20,8,50,0.95));border-color:rgba(155,109,255,0.22);padding:14px 10px 12px;">
+          <span class="sci" style="font-size:30px;margin-bottom:8px;">🌏</span>
+          <div class="scn" style="font-size:13px;margin-bottom:6px;">Social Studies</div>
+          <div style="font-size:9px;color:var(--txt2);font-weight:600;margin-bottom:8px;">PDF Only</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);font-weight:700;"><span style="font-size:12px;">📄</span><span id="sst-count">0</span><span>Notes (PDF)</span></div>
+        </div>
+      </div>
+
+      <!-- 2-COL SUBJECTS (English, Hindi) with Notes & Lectures -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="scard" onclick="openSubj('english',this)" style="background:linear-gradient(145deg,rgba(10,30,80,0.9),rgba(8,16,40,0.95));border-color:rgba(91,154,255,0.25);padding:14px 12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#5b9aff);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0;">EN</div>
+            <div>
+              <div style="font-size:14px;font-weight:900;">English</div>
+              <div style="font-size:9px;color:var(--txt2);font-weight:600;">Notes &amp; Lectures</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;font-size:10px;color:var(--txt2);font-weight:700;">
+            <div style="display:flex;align-items:center;gap:3px;"><span>📄</span><span id="eng-pdf-count">0</span><span>Notes</span></div>
+            <div style="display:flex;align-items:center;gap:3px;"><span>▶</span><span id="eng-lec-count">0</span><span>Lectures</span></div>
+          </div>
+        </div>
+        <div class="scard" onclick="openSubj('hindi',this)" style="background:linear-gradient(145deg,rgba(60,30,5,0.9),rgba(30,15,0,0.95));border-color:rgba(255,160,50,0.22);padding:14px 12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">हि</div>
+            <div>
+              <div style="font-size:14px;font-weight:900;">Hindi</div>
+              <div style="font-size:9px;color:var(--txt2);font-weight:600;">Notes &amp; Lectures</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;font-size:10px;color:var(--txt2);font-weight:700;">
+            <div style="display:flex;align-items:center;gap:3px;"><span>📄</span><span id="hin-pdf-count">0</span><span>Notes</span></div>
+            <div style="display:flex;align-items:center;gap:3px;"><span>▶</span><span id="hin-lec-count">0</span><span>Lectures</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:12px 8px;">
+        <div style="text-align:center;">
+          <div style="font-size:18px;margin-bottom:2px;">📄</div>
+          <div class="snum" style="color:var(--blue);font-size:18px;" id="sf-count">0</div>
+          <div class="slbl" style="font-size:9px;">Total Files</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid var(--br);">
+          <div style="font-size:18px;margin-bottom:2px;">🎓</div>
+          <div class="snum" style="color:var(--purple);font-size:18px;">5</div>
+          <div class="slbl" style="font-size:9px;">Subjects</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid var(--br);">
+          <div style="font-size:18px;margin-bottom:2px;">👥</div>
+          <div class="snum" style="color:var(--green);font-size:18px;">10</div>
+          <div class="slbl" style="font-size:9px;">Class</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid var(--br);">
+          <div style="font-size:18px;margin-bottom:2px;">⭐</div>
+          <div class="snum" style="color:var(--yellow);font-size:18px;" id="syllabus-pct">92%</div>
+          <div class="slbl" style="font-size:9px;">Syllabus</div>
+        </div>
+      </div>
+
+      <!-- RECENTLY ADDED -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:16px;font-weight:900;letter-spacing:-.2px;display:flex;align-items:center;gap:6px;"><span>🕐</span> Recently Added</div>
+        <button onclick="switchTab('courses')" style="background:none;border:none;color:var(--blue);font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">View All ›</button>
+      </div>
+      <div id="recently-added-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <!-- Filled by JS -->
+        <div style="text-align:center;padding:20px;color:var(--txt2);font-size:13px;">Loading…</div>
       </div>
 
       <!-- TEACHER CAROUSEL -->
@@ -1873,6 +1948,22 @@ button,
         <span class="tag tg">NOTES</span>
         <div style="position:absolute;right:20px;bottom:22px;width:36px;height:36px;border-radius:50%;background:var(--sf2);border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--txt);">→</div>
       </div>
+      <div class="bigcc" onclick="openSubj('english',null)" style="background:linear-gradient(145deg,rgba(10,30,80,0.92),rgba(6,11,23,0.96));border-color:rgba(91,154,255,0.3);padding-right:60px;">
+        <div style="position:absolute;top:0;right:14px;background:var(--blue);width:26px;height:34px;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,100% 0,100% 80%,50% 100%,0 80%);padding-top:4px;font-size:12px;">⭐</div>
+        <span class="bci">🇬🇧</span>
+        <h3>English</h3>
+        <p>Notes, Lectures &amp; Grammar for Class 10</p>
+        <span class="tag tb">NOTES</span><span class="tag tp">LECTURE</span><span class="tag tg">GRAMMAR</span>
+        <div style="position:absolute;right:20px;bottom:22px;width:36px;height:36px;border-radius:50%;background:var(--sf2);border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--txt);">→</div>
+      </div>
+      <div class="bigcc" onclick="openSubj('hindi',null)" style="background:linear-gradient(145deg,rgba(50,25,5,0.92),rgba(6,11,23,0.96));border-color:rgba(245,158,11,0.3);padding-right:60px;">
+        <div style="position:absolute;top:0;right:14px;background:#d97706;width:26px;height:34px;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,100% 0,100% 80%,50% 100%,0 80%);padding-top:4px;font-size:12px;">⭐</div>
+        <span class="bci">📖</span>
+        <h3>Hindi</h3>
+        <p>Notes, Lectures &amp; Vyakaran for Class 10</p>
+        <span class="tag tb">NOTES</span><span class="tag tp">LECTURE</span><span class="tag tg" style="background:rgba(245,158,11,0.12);color:#f59e0b;border-color:rgba(245,158,11,0.3);">VYAKARAN</span>
+        <div style="position:absolute;right:20px;bottom:22px;width:36px;height:36px;border-radius:50%;background:var(--sf2);border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--txt);">→</div>
+      </div>
       <!-- Stats bar -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:14px 8px;">
         <div style="text-align:center;border-right:1px solid var(--br);">
@@ -1915,6 +2006,9 @@ button,
           </div>
         </div>
         <button id="prof-edit-btn" onclick="startEditName()" style="margin-top:10px;background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.3);color:var(--blue);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:6px 16px;border-radius:99px;cursor:pointer;transition:background .2s;">✏️ Edit Name</button>
+        <!-- Google Login/Logout -->
+        <button id="prof-login-btn" onclick="openLoginPopup()" style="margin-top:12px;display:flex;align-items:center;gap:8px;margin-left:auto;margin-right:auto;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.18);color:var(--txt);font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:9px 20px;border-radius:99px;cursor:pointer;transition:background .2s,box-shadow .2s;"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;">Login with Google</button>
+        <button id="prof-logout-btn" onclick="googleSignOut()" style="display:none;margin-top:12px;margin-left:auto;margin-right:auto;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);color:var(--red);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;padding:7px 18px;border-radius:99px;cursor:pointer;transition:background .2s;">🚪 Logout</button>
         <div class="pstats">
           <div class="pst"><div class="pstn" id="pf-cnt">0</div><div class="pstl">Files</div></div>
           <div class="pst"><div class="pstn" style="color:var(--purple)">3</div><div class="pstl">Subjects</div></div>
@@ -1922,6 +2016,7 @@ button,
         </div>
       </div>
       <div class="ihead"><img src="https://cdn-icons-png.flaticon.com/512/9355/9355524.png" alt="Copy" style="width:18px;height:18px;object-fit:contain;"> Details</div>
+      <div class="irow" id="prof-email-row" style="display:none;"><span class="il">📧 Email</span><span class="iv" id="prof-email-val" style="font-size:12px;color:var(--blue);word-break:break-all;"></span></div>
       <div class="irow"><span class="il">🎓 Batch</span><span class="iv">Aarambh 2026–27</span></div>
       <div class="irow"><span class="il">📱 Platform</span><span class="iv">NextToppers</span></div>
       <div class="irow"><span class="il">🏫 Class</span><span class="iv">Class 10</span></div>
@@ -2049,14 +2144,102 @@ button,
     </div>
   </div>
 
+  <!-- PAGE MORE -->
+  <div id="pg-more" class="pg">
+    <div class="cpg-scroll" style="padding:16px 14px 90px;">
+      <div class="cptitle" style="font-size:20px;font-weight:900;margin-bottom:4px;">More</div>
+      <div class="cpsub" style="margin-bottom:20px;">All features &amp; tools</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <button onclick="openWeChat()" style="background:linear-gradient(135deg,rgba(91,154,255,0.15),rgba(155,109,255,0.12));border:1px solid rgba(91,154,255,0.25);border-radius:18px;padding:16px;text-align:left;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;">
+          <div style="font-size:28px;margin-bottom:8px;">💬</div>
+          <div style="font-size:14px;font-weight:900;">Live Chat</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:2px;font-weight:600;">Ask doubts in real-time</div>
+        </button>
+        <button onclick="switchTab('yt')" style="background:linear-gradient(135deg,rgba(255,60,60,0.12),rgba(200,0,0,0.08));border:1px solid rgba(255,60,60,0.2);border-radius:18px;padding:16px;text-align:left;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;">
+          <div style="font-size:28px;margin-bottom:8px;">▶️</div>
+          <div style="font-size:14px;font-weight:900;">YouTube</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:2px;font-weight:600;">Watch lectures &amp; shorts</div>
+        </button>
+        <button onclick="switchTab('courses')" style="background:linear-gradient(135deg,rgba(47,232,160,0.1),rgba(0,180,100,0.08));border:1px solid rgba(47,232,160,0.2);border-radius:18px;padding:16px;text-align:left;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;">
+          <div style="font-size:28px;margin-bottom:8px;">📚</div>
+          <div style="font-size:14px;font-weight:900;">All Subjects</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:2px;font-weight:600;">Browse all study material</div>
+        </button>
+        <button onclick="switchTab('profile')" style="background:linear-gradient(135deg,rgba(255,202,44,0.1),rgba(200,140,0,0.08));border:1px solid rgba(255,202,44,0.2);border-radius:18px;padding:16px;text-align:left;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;">
+          <div style="font-size:28px;margin-bottom:8px;">👤</div>
+          <div style="font-size:14px;font-weight:900;">My Profile</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:2px;font-weight:600;">View &amp; edit your profile</div>
+        </button>
+      </div>
+
+      <div style="font-size:11px;font-weight:900;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Quick Subject Access</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+        <button onclick="openSubj('maths',null)" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;width:100%;text-align:left;">
+          <span style="font-size:24px;">📐</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Mathematics</div><div style="font-size:11px;color:var(--txt2);">DPP, Modules &amp; Notes</div></div>
+          <span style="color:var(--txt3);font-size:18px;">›</span>
+        </button>
+        <button onclick="openSubj('science',null)" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;width:100%;text-align:left;">
+          <span style="font-size:24px;">🔬</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Science</div><div style="font-size:11px;color:var(--txt2);">ACP sheets &amp; Notes</div></div>
+          <span style="color:var(--txt3);font-size:18px;">›</span>
+        </button>
+        <button onclick="openSubj('sst',null)" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;width:100%;text-align:left;">
+          <span style="font-size:24px;">🌏</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Social Studies</div><div style="font-size:11px;color:var(--txt2);">Comprehensive Notes</div></div>
+          <span style="color:var(--txt3);font-size:18px;">›</span>
+        </button>
+        <button onclick="openSubj('english',null)" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;width:100%;text-align:left;">
+          <span style="font-size:24px;">🇬🇧</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">English</div><div style="font-size:11px;color:var(--txt2);">Notes, Lectures &amp; Grammar</div></div>
+          <span style="color:var(--txt3);font-size:18px;">›</span>
+        </button>
+        <button onclick="openSubj('hindi',null)" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);font-family:'Nunito',sans-serif;width:100%;text-align:left;">
+          <span style="font-size:24px;">📖</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Hindi</div><div style="font-size:11px;color:var(--txt2);">Notes, Lectures &amp; Vyakaran</div></div>
+          <span style="color:var(--txt3);font-size:18px;">›</span>
+        </button>
+      </div>
+
+      <div style="font-size:11px;font-weight:900;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Settings</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+        <div onclick="toggleTheme()" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);">
+          <span style="font-size:22px;" id="more-theme-ico">🌙</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Toggle Theme</div><div style="font-size:11px;color:var(--txt2);">Switch dark / light mode</div></div>
+        </div>
+        <div onclick="openAL()" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);">
+          <span style="font-size:22px;">⚙️</span>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:800;">Admin Panel</div><div style="font-size:11px;color:var(--txt2);">Upload &amp; manage files</div></div>
+        </div>
+      </div>
+
+      <div class="notice">
+        <div class="ntitle">⚠️ Important Notice</div>
+        <div class="nbody">We do not promote any pirated or copied content of NextToppers. This is only a fan page. For lectures, please purchase <b>Aarambh Batch Class 10 (2026–27)</b> from the official NextToppers website/app <b>(₹3,499)</b>.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bnav">
-    <button class="ntab on" id="nt-home" onclick="switchTab('home')"><img class="ni-img" src="https://images.rawpixel.com/image_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTExL3YxMTgxLXR1LWVsZW1lbnQtMjUwLmpwZw.jpg" alt="Home"><span class="nl">Home</span></button>
-    <button class="ntab" id="nt-courses" onclick="switchTab('courses')"><img class="ni-img" src="https://thumbs.dreamstime.com/b/education-vector-logo-open-book-dictionary-textbook-notebook-graduation-hat-icon-modern-emblem-idea-concept-design-156632927.jpg" alt="Courses"><span class="nl">Courses</span></button>
-    <button class="ncenter" onclick="openSubj('maths',null)">AB</button>
-    <button class="ntab" id="nt-profile" onclick="switchTab('profile')"><img class="ni-img" src="https://img.magnific.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Profile"><span class="nl">Profile</span></button>
-    <button class="ntab" id="nt-yt" onclick="switchTab('yt')"><img class="ni-img" src="https://img.magnific.com/premium-vector/youtube-app-round-icon-social-media-logo-vector-illustration_277909-797.jpg?semt=ais_hybrid&w=740&q=80" alt="YouTube"><span class="nl">YouTube</span></button>
-    <button class="ntab" id="nt-chat" onclick="openWeChat()"><img class="ni-img ni-gif" src="https://cdn-icons-gif.flaticon.com/16275/16275695.gif" alt="Chat"><span class="nl">Chat</span><span id="chat-badge"></span></button>
+    <button class="ntab on" id="nt-home" onclick="switchTab('home')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="nl">Home</span>
+    </button>
+    <button class="ntab" id="nt-courses" onclick="switchTab('courses')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 3L1 9l4 2.18V17l7 4 7-4v-5.82L23 9zm0 2.28L20.55 9 12 13.28 3.45 9zM19 14.76l-7 4-7-4v-2.5l7 3.82 7-3.82z"/></svg>
+      <span class="nl">Courses</span>
+    </button>
+    <button class="ncenter" id="nt-center-btn" onclick="openSubj('maths',null)" style="font-size:16px;font-weight:900;letter-spacing:-.5px;">AB</button>
+    <button class="ntab" id="nt-profile" onclick="switchTab('profile')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      <span class="nl">Profile</span>
+    </button>
+    <button class="ntab" id="nt-more" onclick="switchTab('more')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      <span class="nl">More</span>
+    </button>
   </div>
 </div>
 
@@ -2143,6 +2326,8 @@ button,
               <option value="maths">Maths</option>
               <option value="science">Science</option>
               <option value="sst">Social Studies</option>
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
             </select>
           </div>
           <div class="fg" style="flex:1"><label class="fl">Category</label>
@@ -2201,6 +2386,8 @@ button,
               <option value="maths">Maths</option>
               <option value="science">Science</option>
               <option value="sst">Social Studies</option>
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
             </select>
           </div>
           <div class="fg" style="flex:2"><label class="fl">Folder Name</label>
@@ -2228,6 +2415,8 @@ button,
             <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-maths" value="maths" checked> 📘 Maths</label>
             <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-science" value="science"> 🔬 Science</label>
             <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-sst" value="sst"> 🌏 SST</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-english" value="english"> 🇬🇧 English</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--txt2);cursor:pointer;"><input type="checkbox" id="cat-subj-hindi" value="hindi"> 📖 Hindi</label>
           </div>
         </div>
         <button class="btnm" onclick="addCategory()">🏷 Add Category</button>
@@ -2375,6 +2564,10 @@ import {
 import {
   getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDCXzf4ns32LSHbXBHYgkfUy81IGdh2Z2E",
@@ -2389,6 +2582,138 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+/* ═══════════════════════════════════════════
+   GOOGLE AUTH STATE
+═══════════════════════════════════════════ */
+let gUser = null; // currently signed-in Google user
+let _pendingLectureId = null; // lecture to open after login
+
+function isMobile(){
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+}
+
+async function googleSignIn(){
+  const spinner = document.getElementById('gauth-spinner');
+  if(spinner) spinner.style.display = 'flex';
+  try {
+    if(isMobile()){
+      await signInWithRedirect(auth, googleProvider);
+    } else {
+      const result = await signInWithPopup(auth, googleProvider);
+      onGoogleSignInSuccess(result.user);
+    }
+  } catch(e){
+    if(spinner) spinner.style.display = 'none';
+    console.error('[Auth]', e);
+    const msg = e.code === 'auth/popup-blocked'
+      ? '🚫 Popup blocked — trying redirect…'
+      : (e.code === 'auth/cancelled-popup-request' ? '' : '❌ Login failed: ' + e.message);
+    if(msg) toast(msg);
+    if(e.code === 'auth/popup-blocked'){
+      await signInWithRedirect(auth, googleProvider);
+    }
+  }
+}
+
+async function googleSignOut(){
+  try {
+    await signOut(auth);
+    gUser = null;
+    updateProfileUI(null);
+    toast('👋 Logged out successfully');
+  } catch(e){
+    toast('❌ Logout failed: ' + e.message);
+  }
+}
+
+function onGoogleSignInSuccess(user){
+  gUser = user;
+  const spinner = document.getElementById('gauth-spinner');
+  if(spinner) spinner.style.display = 'none';
+  closeLoginPopup();
+  updateProfileUI(user);
+  toast('✅ Logged in successfully');
+  // If a lecture was pending, open it now
+  if(_pendingLectureId){
+    const id = _pendingLectureId;
+    _pendingLectureId = null;
+    setTimeout(()=>openFile(id), 300);
+  }
+}
+
+function updateProfileUI(user){
+  const ava = document.getElementById('prof-ava');
+  const nameEl = document.getElementById('prof-name-display');
+  const emailRow = document.getElementById('prof-email-row');
+  const loginBtn = document.getElementById('prof-login-btn');
+  const logoutBtn = document.getElementById('prof-logout-btn');
+  const editBtn = document.getElementById('prof-edit-btn');
+
+  if(user){
+    // Show Google photo
+    if(ava){
+      if(user.photoURL){
+        ava.style.background = 'none';
+        ava.innerHTML = `<img src="${user.photoURL}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      } else {
+        ava.style.background = '';
+        ava.innerHTML = (user.displayName||'S').charAt(0).toUpperCase();
+      }
+    }
+    if(nameEl) nameEl.textContent = user.displayName || 'Student';
+    if(emailRow) emailRow.style.display = '';
+    const emailVal = document.getElementById('prof-email-val');
+    if(emailVal) emailVal.textContent = user.email || '';
+    if(loginBtn) loginBtn.style.display = 'none';
+    if(logoutBtn) logoutBtn.style.display = '';
+    if(editBtn) editBtn.style.display = 'none';
+  } else {
+    if(ava){
+      ava.style.background = '';
+      const n = localStorage.getItem('ab_student_name') || 'Student';
+      ava.innerHTML = n.charAt(0).toUpperCase();
+    }
+    if(nameEl) nameEl.textContent = localStorage.getItem('ab_student_name') || 'Student';
+    if(emailRow) emailRow.style.display = 'none';
+    if(loginBtn) loginBtn.style.display = '';
+    if(logoutBtn) logoutBtn.style.display = 'none';
+    if(editBtn) editBtn.style.display = '';
+  }
+}
+
+function closeLoginPopup(){
+  const pop = document.getElementById('gauth-popup');
+  if(pop){ pop.classList.remove('open'); document.getElementById('gauth-spinner').style.display='none'; }
+}
+
+function openLoginPopup(lectureId){
+  _pendingLectureId = lectureId || null;
+  const pop = document.getElementById('gauth-popup');
+  if(pop) pop.classList.add('open');
+}
+
+window.googleSignIn = googleSignIn;
+window.googleSignOut = googleSignOut;
+window.closeLoginPopup = closeLoginPopup;
+window.openLoginPopup = openLoginPopup;
+
+// Handle redirect result (for mobile)
+getRedirectResult(auth).then(result => {
+  if(result && result.user){
+    onGoogleSignInSuccess(result.user);
+  }
+}).catch(e => {
+  if(e.code && e.code !== 'auth/no-current-user') console.error('[Auth redirect]', e);
+});
+
+// Persist auth state across refreshes
+onAuthStateChanged(auth, user => {
+  gUser = user || null;
+  updateProfileUI(gUser);
+});
 
 /* ═══════════════════════════════════════════
    APP CONSTANTS & STATE
@@ -2398,11 +2723,13 @@ const SUBJ={
   maths:{name:'Mathematics',icon:'📘',cats:['DPP','MODULE','NOTES']},
   science:{name:'Science',icon:'🔬',cats:['ACP','NOTES']},
   sst:{name:'Social Studies',icon:'🌏',cats:['WPP','NOTES']},
+  english:{name:'English',icon:'🇬🇧',cats:['NOTES','LECTURE','GRAMMAR']},
+  hindi:{name:'Hindi',icon:'📖',cats:['NOTES','LECTURE','VYAKARAN']},
 };
 let pin='',isAdmin=false,dark=true,curSubj=null,curUrl='',curTitle='';
 
 /* In-memory DB (populated from Firestore) */
-let DB = { maths:[], science:[], sst:[] };
+let DB = { maths:[], science:[], sst:[], english:[], hindi:[] };
 /* In-memory YT channels */
 let YT_DB = [];
 
@@ -2469,7 +2796,7 @@ async function fbUpdateFileOrder(id, order) {
 
 async function fbLoadFiles() {
   const snapshot = await getDocs(collection(db, 'files'));
-  DB = { maths:[], science:[], sst:[] };
+  DB = { maths:[], science:[], sst:[], english:[], hindi:[] };
   snapshot.forEach(docSnap => {
     const d = docSnap.data();
     const subj = d.subject;
@@ -2493,7 +2820,7 @@ async function fbLoadFiles() {
 /* ═══════════════════════════════════════════
    FIRESTORE — FOLDERS
 ═══════════════════════════════════════════ */
-let FOLDERS_DB = { maths:[], science:[], sst:[] };
+let FOLDERS_DB = { maths:[], science:[], sst:[], english:[], hindi:[] };
 
 async function fbAddFolder(subject, name) {
   await addDoc(collection(db, 'folders'), { subject, name });
@@ -2505,7 +2832,7 @@ async function fbDeleteFolder(id) {
 
 async function fbLoadFolders() {
   const snapshot = await getDocs(collection(db, 'folders'));
-  FOLDERS_DB = { maths:[], science:[], sst:[] };
+  FOLDERS_DB = { maths:[], science:[], sst:[], english:[], hindi:[] };
   snapshot.forEach(docSnap => {
     const d = docSnap.data();
     if (FOLDERS_DB[d.subject]) {
@@ -2552,13 +2879,67 @@ function uploadWithProgress(file, path, onProgress) {
 
 function getF() {
   // Flatten all subjects into one array with subject field
-  return [...DB.maths, ...DB.science, ...DB.sst];
+  return [...DB.maths, ...DB.science, ...DB.sst, ...DB.english, ...DB.hindi];
 }
 
 function updateCounts() {
   const n = getF().length;
-  document.getElementById('sf-count').textContent = n;
-  document.getElementById('pf-cnt').textContent = n;
+  const mathsN = DB.maths.length;
+  const sciN = DB.science.length;
+  const sstN = DB.sst.length;
+  const engN = DB.english.length;
+  const hinN = DB.hindi.length;
+
+  const el=id=>document.getElementById(id);
+  if(el('sf-count')) el('sf-count').textContent = n;
+  if(el('pf-cnt')) el('pf-cnt').textContent = n;
+  if(el('maths-count')) el('maths-count').textContent = mathsN;
+  if(el('science-count')) el('science-count').textContent = sciN;
+  if(el('sst-count')) el('sst-count').textContent = sstN;
+  if(el('eng-pdf-count')) el('eng-pdf-count').textContent = engN;
+  if(el('eng-lec-count')) el('eng-lec-count').textContent = DB.english.filter(f=>f.category==='LECTURE').length;
+  if(el('hin-pdf-count')) el('hin-pdf-count').textContent = hinN;
+  if(el('hin-lec-count')) el('hin-lec-count').textContent = DB.hindi.filter(f=>f.category==='LECTURE').length;
+
+  renderRecentlyAdded();
+}
+
+function renderRecentlyAdded() {
+  const list = document.getElementById('recently-added-list');
+  if (!list) return;
+
+  // Get all files, sorted by order (descending = most recently added)
+  const allFiles = getF();
+  // Take the last 5 files added (highest order number = most recent)
+  const recent = [...allFiles].sort((a, b) => b.order - a.order).slice(0, 5);
+
+  if (!recent.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txt2);font-size:13px;">No files yet.</div>';
+    return;
+  }
+
+  const subjColor = { maths:'var(--blue)', science:'var(--green)', sst:'var(--purple)' };
+  const subjLabel = { maths:'Maths', science:'Science', sst:'SST' };
+
+  list.innerHTML = recent.map(f => {
+    const isEmoji = f.thumb && /\p{Emoji}/u.test(f.thumb) && f.thumb.length <= 4;
+    const thumb = isEmoji ? f.thumb : '📄';
+    const dateStr = 'Recently added';
+    const color = subjColor[f.subject] || 'var(--blue)';
+    const subLabel = subjLabel[f.subject] || f.subject;
+    return `
+      <div onclick="openFile('${f.id}')" style="display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 14px;cursor:pointer;transition:transform .2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+        <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,80,60,0.15);border:1px solid rgba(255,80,60,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${thumb}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f.name)}</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:2px;font-weight:600;">${subLabel} · <span style="color:${color}">${f.category}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+          <div style="font-size:10px;color:var(--txt2);">${dateStr}</div>
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--sf2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:14px;">⬇</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 /* ═══════════════════════════════════════════
@@ -2716,16 +3097,22 @@ function toggleTheme(){
   dark=!dark;
   document.body.classList.toggle('lm',!dark);
   document.getElementById('themeib').textContent=dark?'🌙':'☀️';
+  const moreIco=document.getElementById('more-theme-ico');
+  if(moreIco)moreIco.textContent=dark?'🌙':'☀️';
 }
 
 /* TABS */
 function switchTab(t){
-  ['home','courses','profile','yt'].forEach(k=>{
-    document.getElementById('pg-'+k).classList.toggle('on',k===t);
+  ['home','courses','profile','yt','more'].forEach(k=>{
+    document.getElementById('pg-'+k)?.classList.toggle('on',k===t);
     document.getElementById('nt-'+k)?.classList.toggle('on',k===t);
   });
   if(t==='yt'){renderYTHome();if(typeof window._ytLiveStart==='function')window._ytLiveStart();}
   else{if(typeof window._ytLiveStop==='function')window._ytLiveStop();}
+  if(t==='more'){
+    const ico=document.getElementById('more-theme-ico');
+    if(ico)ico.textContent=dark?'🌙':'☀️';
+  }
 }
 
 /* ====== SUBJECT OPEN — FIXED ====== */
@@ -2949,6 +3336,11 @@ function mkFCard(f,delay){
 function openFile(id){
   const f=getF().find(x=>x.id===id);
   if(!f)return;
+  // Gate LECTURE category behind Google login
+  if(f.category==='LECTURE' && !gUser){
+    openLoginPopup(id);
+    return;
+  }
   const url=fixDrive(f.link);
   curUrl=url;curTitle=f.name;
   document.getElementById('vtitle').textContent=f.name;
@@ -3056,7 +3448,7 @@ function renderAF(){
   if(!files.length){list.innerHTML='<div class="ecatxt">No files yet.</div>';renderAPYT();updateAPFolderSelect();return;}
 
   // Group by subject
-  ['maths','science','sst'].forEach(subj=>{
+  ['maths','science','sst','english','hindi'].forEach(subj=>{
     const subFiles = DB[subj];
     if(!subFiles||!subFiles.length) return;
     const sg = document.createElement('div');
@@ -6063,6 +6455,149 @@ window.wcStartFresh=function(){
 </script>
 
 
+
+<!-- ══════════ GOOGLE AUTH POPUP ══════════ -->
+<style>
+/* Auth popup backdrop */
+#gauth-popup{
+  position:fixed;inset:0;z-index:1100;
+  background:rgba(4,8,20,0.72);
+  backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s cubic-bezier(0.4,0,0.2,1);
+}
+#gauth-popup.open{opacity:1;pointer-events:all;}
+
+/* Card */
+#gauth-popup .gauth-card{
+  background:linear-gradient(145deg,rgba(10,18,38,0.97),rgba(8,14,30,0.99));
+  border:1px solid rgba(91,154,255,0.25);
+  border-radius:28px;
+  padding:34px 26px 26px;
+  width:100%;max-width:340px;
+  text-align:center;
+  box-shadow:0 0 0 1px rgba(91,154,255,0.1),0 32px 80px rgba(0,0,0,0.6),0 0 60px rgba(91,154,255,0.08);
+  transform:translateY(28px) scale(0.93);
+  transition:transform .42s cubic-bezier(0.22,1,0.36,1),opacity .35s;
+  opacity:0;
+  position:relative;overflow:hidden;
+}
+#gauth-popup.open .gauth-card{transform:translateY(0) scale(1);opacity:1;}
+
+/* Neon top glow */
+#gauth-popup .gauth-card::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(91,154,255,0.7),rgba(155,109,255,0.5),transparent);
+  border-radius:99px;
+}
+
+/* Lock icon */
+#gauth-popup .gauth-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(91,154,255,0.2),rgba(155,109,255,0.15));
+  border:1.5px solid rgba(91,154,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;margin:0 auto 18px;
+  box-shadow:0 0 28px rgba(91,154,255,0.2),0 4px 20px rgba(0,0,0,0.3);
+}
+
+#gauth-popup h3{
+  font-size:20px;font-weight:900;letter-spacing:-.3px;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,#e8eeff,#a0bcff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+#gauth-popup p{
+  font-size:13px;color:rgba(168,190,230,0.7);
+  margin-bottom:24px;line-height:1.55;font-weight:600;
+}
+
+/* Google sign-in button */
+#gauth-popup .gauth-btn{
+  width:100%;padding:14px 20px;
+  background:linear-gradient(135deg,#5b9aff,#9b6dff);
+  border:none;border-radius:16px;
+  color:#fff;font-family:'Nunito',sans-serif;
+  font-size:15px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 24px rgba(91,154,255,0.4),0 6px 20px rgba(91,154,255,0.3);
+  transition:transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
+  will-change:transform;position:relative;overflow:hidden;
+}
+#gauth-popup .gauth-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent);
+  border-radius:16px;pointer-events:none;
+}
+#gauth-popup .gauth-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 36px rgba(91,154,255,0.55),0 10px 28px rgba(91,154,255,0.35);
+}
+#gauth-popup .gauth-btn:active{transform:scale(0.95);}
+#gauth-popup .gauth-btn img{width:20px;height:20px;border-radius:50%;background:#fff;padding:2px;}
+
+/* Cancel */
+#gauth-popup .gauth-cancel{
+  margin-top:14px;background:none;border:none;
+  color:rgba(168,190,230,0.5);font-family:'Nunito',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;
+  transition:color .2s;width:100%;padding:8px;border-radius:10px;
+}
+#gauth-popup .gauth-cancel:hover{color:rgba(168,190,230,0.85);background:rgba(255,255,255,0.04);}
+
+/* Tags */
+#gauth-popup .gauth-tags{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+#gauth-popup .gauth-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:99px;
+  font-size:11px;font-weight:800;
+  background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);
+  color:rgba(140,180,255,0.9);
+}
+
+/* Full-screen spinner overlay (shown during login) */
+#gauth-spinner{
+  position:fixed;inset:0;z-index:1200;
+  background:rgba(4,8,20,0.8);backdrop-filter:blur(12px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+.gauth-spin-ring{
+  width:54px;height:54px;border-radius:50%;
+  border:3px solid rgba(91,154,255,0.15);
+  border-top-color:#5b9aff;
+  animation:gauthSpin .85s linear infinite;
+}
+@keyframes gauthSpin{to{transform:rotate(360deg);}}
+#gauth-spinner p{font-size:14px;font-weight:700;color:rgba(168,190,230,0.75);}
+</style>
+
+<!-- Login Popup -->
+<div id="gauth-popup" onclick="if(event.target===this)closeLoginPopup()">
+  <div class="gauth-card">
+    <div class="gauth-icon">🔒</div>
+    <h3>Login Required</h3>
+    <p>Lectures are exclusive to logged-in students. Sign in with your Google account to continue.</p>
+    <div class="gauth-tags">
+      <span class="gauth-tag">🎓 Free Access</span>
+      <span class="gauth-tag">🔐 Secure</span>
+      <span class="gauth-tag">⚡ Instant</span>
+    </div>
+    <button class="gauth-btn" onclick="googleSignIn()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      Continue with Google
+    </button>
+    <button class="gauth-cancel" onclick="closeLoginPopup()">Maybe later</button>
+  </div>
+</div>
+
+<!-- Login Spinner -->
+<div id="gauth-spinner">
+  <div class="gauth-spin-ring"></div>
+  <p>Signing you in…</p>
+</div>
 
 </body>
 </html>
