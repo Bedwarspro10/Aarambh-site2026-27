@@ -3287,7 +3287,9 @@ window.addEventListener('load', async () => {
 
   // Firebase load
   try {
-    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders(), fbLoadLectures()]);
+    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
+    // Load lectures separately — don't block startup if collection is missing/empty
+    try { await fbLoadLectures(); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
     // One-time cleanup: fix any existing docs with missing/empty category
     await fixMissingCategories();
     firebaseReady = true;
