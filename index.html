@@ -3009,9 +3009,12 @@ function updateCounts() {
   if(el('science-count')) el('science-count').textContent = sciN;
   if(el('sst-count')) el('sst-count').textContent = sstN;
   if(el('eng-pdf-count')) el('eng-pdf-count').textContent = engN;
-  if(el('eng-lec-count')) el('eng-lec-count').textContent = DB.english.filter(f=>f.category==='LECTURE').length;
+  // Lecture counts come from LECTURES_DB (the dedicated lectures collection)
+  const engLecN = (LECTURES_DB.english||[]).filter(l => l.isPublic || isAdmin).length;
+  const hinLecN = (LECTURES_DB.hindi||[]).filter(l => l.isPublic || isAdmin).length;
+  if(el('eng-lec-count')) el('eng-lec-count').textContent = engLecN;
   if(el('hin-pdf-count')) el('hin-pdf-count').textContent = hinN;
-  if(el('hin-lec-count')) el('hin-lec-count').textContent = DB.hindi.filter(f=>f.category==='LECTURE').length;
+  if(el('hin-lec-count')) el('hin-lec-count').textContent = hinLecN;
 
   renderRecentlyAdded();
 }
@@ -3085,7 +3088,7 @@ window.addEventListener('load', async () => {
 
   // Firebase load
   try {
-    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
+    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders(), fbLoadLectures()]);
     // One-time cleanup: fix any existing docs with missing/empty category
     await fixMissingCategories();
     firebaseReady = true;
@@ -3897,13 +3900,21 @@ let LECTURES_DB = { english:[], hindi:[] };
 let _lecVisMode = 'public'; // 'public' | 'private'
 let _lecEditId  = null;     // ID of lecture being edited
 let _lecDragSrc = null;     // drag-reorder state
+let _lecEditVis = 'public'; // visibility state for edit modal
 let _hlsInstance = null;    // active hls.js instance
 
-/* ── Visibility toggle ── */
+/* ── Visibility toggle (add form) ── */
 window.setLecVis = function(mode){
   _lecVisMode = mode;
   document.getElementById('lec-vis-pub')?.classList.toggle('active', mode==='public');
   document.getElementById('lec-vis-prv')?.classList.toggle('active', mode==='private');
+};
+
+/* ── Visibility toggle (edit form) ── */
+window.setLecEditVis = function(mode){
+  _lecEditVis = mode;
+  document.getElementById('lec-edit-vis-pub')?.classList.toggle('active', mode==='public');
+  document.getElementById('lec-edit-vis-prv')?.classList.toggle('active', mode==='private');
 };
 
 /* ── Firestore CRUD ── */
@@ -3970,6 +3981,7 @@ window.addLecture = async function(){
     await fbAddLecture(title, subject, cat, thumb, hls, _lecVisMode==='public');
     await fbLoadLectures();
     renderAPLectures();
+    updateCounts();
     // Reset form
     document.getElementById('lec-title').value = '';
     document.getElementById('lec-thumb').value = '';
@@ -3993,6 +4005,7 @@ window.delLecture = async function(id, fromAP){
     await fbLoadLectures();
     if(fromAP) renderAPLectures();
     if(curSubj === 'english' || curSubj === 'hindi') renderFiles(curSubj);
+    updateCounts();
     toast('🗑 Lecture deleted');
   } catch(e){
     toast('❌ ' + e.message);
@@ -4089,6 +4102,9 @@ window.openLecEdit = function(id){
   document.getElementById('lec-edit-cat').value   = lec.category;
   document.getElementById('lec-edit-thumb').value = lec.thumbnail;
   document.getElementById('lec-edit-hls').value   = lec.hlsUrl;
+  // Set visibility toggle
+  _lecEditVis = lec.isPublic ? 'public' : 'private';
+  setLecEditVis(_lecEditVis);
   document.getElementById('lec-edit-modal').classList.add('open');
 };
 window.closeLecEdit = function(){
@@ -4102,11 +4118,13 @@ window.saveLecEdit = async function(){
   const cat   = document.getElementById('lec-edit-cat').value;
   const thumb = document.getElementById('lec-edit-thumb').value.trim();
   const hls   = document.getElementById('lec-edit-hls').value.trim();
+  const isPublic = _lecEditVis === 'public';
   if(!title){ toast('⚠️ Title required'); return; }
   try{
-    await fbUpdateLecture(_lecEditId, { title, subject:subj, category:cat, thumbnail:thumb, hlsUrl:hls });
+    await fbUpdateLecture(_lecEditId, { title, subject:subj, category:cat, thumbnail:thumb, hlsUrl:hls, isPublic });
     await fbLoadLectures();
     renderAPLectures();
+    updateCounts();
     closeLecEdit();
     toast('✅ Lecture updated!');
   } catch(e){ toast('❌ '+e.message); }
@@ -7262,13 +7280,23 @@ window.wcStartFresh=function(){
 #lv-buf-spin{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   z-index:9;pointer-events:none;
-  width:48px;height:48px;border-radius:50%;
-  border:3px solid rgba(91,154,255,0.15);
-  border-top-color:#5b9aff;
-  animation:lvSpin .8s linear infinite;
-  opacity:0;transition:opacity .3s;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;transition:opacity .25s;
 }
 #lv-buf-spin.show{opacity:1;}
+#lv-buf-spin::before{
+  content:'';display:block;
+  width:52px;height:52px;border-radius:50%;
+  border:3px solid rgba(255,255,255,0.15);
+  border-top-color:rgba(91,154,255,0.95);
+  animation:lvSpin .75s linear infinite;
+}
+#lv-buf-spin::after{
+  content:'Buffering…';
+  font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);
+  letter-spacing:.3px;font-family:'Nunito',sans-serif;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+}
 
 /* ── CSS-transform landscape fallback (iOS Safari / browsers that block orientation lock) ──
    When Screen Orientation API is unavailable or blocked, we rotate the viewer element itself.
@@ -7470,6 +7498,13 @@ window.wcStartFresh=function(){
     </div>
     <div class="fg"><label class="fl">Thumbnail URL</label><input class="fi" id="lec-edit-thumb" placeholder="https://…"></div>
     <div class="fg"><label class="fl">HLS URL (.m3u8)</label><input class="fi" id="lec-edit-hls" placeholder="https://…"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:800;color:var(--txt2);">Visibility</label>
+      <div style="display:flex;gap:8px;">
+        <button class="umode-btn active" id="lec-edit-vis-pub" onclick="setLecEditVis('public')">🌐 Public</button>
+        <button class="umode-btn" id="lec-edit-vis-prv" onclick="setLecEditVis('private')">🔒 Private</button>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
       <button class="fo-modal-save" onclick="saveLecEdit()" style="flex:1;">✅ Save Changes</button>
       <button class="fo-modal-cancel" onclick="closeLecEdit()">Cancel</button>
@@ -7882,6 +7917,7 @@ function attachPlayerEvents(){
   vid.addEventListener('pause',()=>{ syncPlayIcon(); clearTimeout(_controlsTimer); showControls(); });
   vid.addEventListener('ended',()=>{ syncPlayIcon(); showControls(); });
   vid.addEventListener('waiting',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
+  vid.addEventListener('stalled',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
   vid.addEventListener('canplay',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
   vid.addEventListener('playing',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); resetHideTimer(); });
 
@@ -8029,8 +8065,19 @@ function _initHLSLoad(url){
     _hls = new window.Hls({
       enableWorker:true,
       lowLatencyMode:false,
-      maxBufferLength:60,
+      maxBufferLength:90,
+      maxMaxBufferLength:180,
+      maxBufferSize:60*1000*1000,
       startLevel:-1,
+      // Retry settings for slow/broken connections
+      manifestLoadingMaxRetry:5,
+      manifestLoadingRetryDelay:1000,
+      manifestLoadingMaxRetryTimeout:30000,
+      levelLoadingMaxRetry:5,
+      levelLoadingRetryDelay:1000,
+      fragLoadingMaxRetry:8,
+      fragLoadingRetryDelay:500,
+      fragLoadingMaxRetryTimeout:30000,
     });
     _hls.loadSource(url);
     _hls.attachMedia(vid);
@@ -8040,7 +8087,20 @@ function _initHLSLoad(url){
       buildQualityMenu();
       vid.play().catch(()=>{});
     });
-    _hls.on(window.Hls.Events.ERROR, (e,data)=>{ if(data.fatal) showErr(); });
+    _hls.on(window.Hls.Events.ERROR, (e,data)=>{
+      if(data.fatal){
+        if(data.type===window.Hls.ErrorTypes.NETWORK_ERROR){
+          // Network dropped — show buffering spinner and attempt recovery
+          el('lv-buf-spin').classList.add('show');
+          _hls.startLoad();
+        } else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
+          el('lv-buf-spin').classList.add('show');
+          _hls.recoverMediaError();
+        } else {
+          showErr();
+        }
+      }
+    });
   } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
     _isSafariHLS = true;
     vid.src = url;
