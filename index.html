@@ -4112,16 +4112,17 @@ window.openLecture = function(id){
 
 /* ── Close lecture viewer ── */
 window.closeLecViewer = function(){
-  document.getElementById('lec-viewer').classList.remove('open');
+  const viewer = document.getElementById('lec-viewer');
+  if(viewer) viewer.classList.remove('open');
   document.body.style.overflow = '';
   const video = document.getElementById('lec-video');
-  video.pause(); video.src = '';
-  if(document.fullscreenElement||document.webkitFullscreenElement){
-    (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
-  }
-  // Cleanup via IIFE scope — signal stop
-  const wm = document.getElementById('lv-watermark');
-  if(wm) wm.style.opacity='0';
+  if(video){ video.pause(); video.src = ''; }
+  // Exit fullscreen if active
+  try{
+    if(document.fullscreenElement||document.webkitFullscreenElement){
+      (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+    }
+  }catch(e){}
 };
 
 /* ── Render lectures inside subject detail panel ── */
@@ -6978,10 +6979,13 @@ window.wcStartFresh=function(){
   pointer-events:none;
 }
 #lv-controls-overlay.hidden{opacity:0;}
-#lv-controls-overlay.hidden .lv-top-bar,
-#lv-controls-overlay.hidden .lv-bottom-controls{pointer-events:none;}
+#lv-controls-overlay.hidden *{pointer-events:none !important;}
 #lv-controls-overlay:not(.hidden) .lv-top-bar,
 #lv-controls-overlay:not(.hidden) .lv-bottom-controls{pointer-events:all;}
+#lv-controls-overlay:not(.hidden) button,
+#lv-controls-overlay:not(.hidden) .lv-pill-btn,
+#lv-controls-overlay:not(.hidden) .lv-dd-item,
+#lv-controls-overlay:not(.hidden) .lv-seek-wrap{pointer-events:all;}
 
 /* gradient shades */
 .lv-top-gradient{
@@ -7546,10 +7550,9 @@ let _currentLecUrl = '';
 let _controlsTimer = null;
 let _controlsVisible = true;
 let _seeking = false;
-let _isSafariHLS = false;
 let _watermarkTimer = null;
 
-/* ── Element refs (lazy) ── */
+/* ── Element refs ── */
 function el(id){ return document.getElementById(id); }
 
 /* ── Format seconds → m:ss ── */
@@ -7561,24 +7564,22 @@ function fmtTime(s){
 
 /* ══ WATERMARK ══ */
 function startWatermark(){
+  stopWatermark();
   const wm = el('lv-watermark');
   if(!wm) return;
   function moveWM(){
     const stage = el('lv-stage');
     if(!stage) return;
-    const sw = stage.clientWidth||320, sh = stage.clientHeight||180;
-    const tx = Math.random()*(sw-180);
-    const ty = Math.random()*(sh-40);
-    wm.style.left = Math.max(8,tx)+'px';
-    wm.style.top  = Math.max(8,Math.min(sh-40,ty))+'px';
-    wm.style.opacity = (Math.random()*0.12+0.07).toFixed(2);
+    const sw=stage.clientWidth||320, sh=stage.clientHeight||180;
+    wm.style.left = Math.max(8,Math.random()*(sw-200))+'px';
+    wm.style.top  = Math.max(8,Math.min(sh-40,Math.random()*(sh-60)))+'px';
+    wm.style.opacity = (Math.random()*0.10+0.07).toFixed(2);
   }
   moveWM();
   _watermarkTimer = setInterval(moveWM, 4000);
 }
 function stopWatermark(){
-  clearInterval(_watermarkTimer);
-  _watermarkTimer = null;
+  if(_watermarkTimer){ clearInterval(_watermarkTimer); _watermarkTimer=null; }
 }
 
 /* ══ CONTROLS AUTO-HIDE ══ */
@@ -7590,6 +7591,8 @@ function showControls(){
   resetHideTimer();
 }
 function hideControls(){
+  /* Never hide if a dropdown menu is open */
+  if(document.querySelector('.lv-dropdown.open')) return;
   const ov = el('lv-controls-overlay');
   if(!ov) return;
   ov.classList.add('hidden');
@@ -7600,11 +7603,7 @@ function resetHideTimer(){
   _controlsTimer = setTimeout(()=>{
     const vid = el('lec-video');
     if(vid && !vid.paused) hideControls();
-  }, 2500);
-}
-function toggleControls(){
-  if(_controlsVisible) hideControls();
-  else showControls();
+  }, 3000);
 }
 
 /* ══ PLAY / PAUSE icon sync ══ */
@@ -7612,281 +7611,260 @@ function syncPlayIcon(){
   const vid = el('lec-video');
   const ico = el('lv-play-ico');
   if(!vid||!ico) return;
-  if(vid.paused){
-    ico.innerHTML='<polygon points="5,3 19,12 5,21"/>';
-  } else {
-    ico.innerHTML='<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
-  }
+  ico.innerHTML = vid.paused
+    ? '<polygon points="5,3 19,12 5,21"/>'
+    : '<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
 }
 
-/* ══ SEEK BAR UPDATE ══ */
+/* ══ SEEK BAR ══ */
 function updateSeekBar(){
   const vid = el('lec-video');
   if(!vid||_seeking) return;
-  const dur = vid.duration||0, cur = vid.currentTime||0;
+  const dur=vid.duration||0, cur=vid.currentTime||0;
   const pct = dur>0?(cur/dur*100):0;
-  const fill = el('lv-seek-fill');
-  const thumb = el('lv-seek-thumb');
-  if(fill) fill.style.width = pct+'%';
-  if(thumb) thumb.style.left = pct+'%';
-  el('lv-cur-time').textContent = fmtTime(cur);
-  el('lv-dur-time').textContent = fmtTime(dur);
-
-  // Buffer
+  const fill=el('lv-seek-fill'), thumb=el('lv-seek-thumb');
+  if(fill) fill.style.width=pct+'%';
+  if(thumb) thumb.style.left=pct+'%';
+  const ct=el('lv-cur-time'), dt=el('lv-dur-time');
+  if(ct) ct.textContent=fmtTime(cur);
+  if(dt) dt.textContent=fmtTime(dur);
   if(vid.buffered.length>0){
-    const bufPct = (vid.buffered.end(vid.buffered.length-1)/dur*100);
-    const buf = el('lv-seek-buf');
-    if(buf) buf.style.width = Math.min(bufPct,100)+'%';
+    const bp=(vid.buffered.end(vid.buffered.length-1)/dur*100);
+    const buf=el('lv-seek-buf');
+    if(buf) buf.style.width=Math.min(bp,100)+'%';
   }
 }
-
-/* ══ SEEK BAR INTERACTION ══ */
 function seekTo(e, wrapEl){
-  const vid = el('lec-video');
-  if(!vid) return;
-  const rect = wrapEl.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const pct = Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
-  const newTime = pct*(vid.duration||0);
-  vid.currentTime = newTime;
-  // immediate visual update
-  const fill = el('lv-seek-fill');
-  const thumb = el('lv-seek-thumb');
-  if(fill) fill.style.width = (pct*100)+'%';
-  if(thumb) thumb.style.left = (pct*100)+'%';
-  el('lv-cur-time').textContent = fmtTime(newTime);
+  const vid=el('lec-video');
+  if(!vid||!isFinite(vid.duration)||vid.duration===0) return;
+  const rect=wrapEl.getBoundingClientRect();
+  const clientX=e.touches?e.touches[0].clientX:e.clientX;
+  const pct=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+  const newTime=pct*vid.duration;
+  vid.currentTime=newTime;
+  const fill=el('lv-seek-fill'), thumb=el('lv-seek-thumb');
+  if(fill) fill.style.width=(pct*100)+'%';
+  if(thumb) thumb.style.left=(pct*100)+'%';
+  const ct=el('lv-cur-time');
+  if(ct) ct.textContent=fmtTime(newTime);
 }
 
-/* ══ SKIP ANIMATION ══ */
+/* ══ FLASH ANIMATIONS ══ */
 function flashSkip(dir){
-  const id = dir==='back'?'lv-skip-back':'lv-skip-fwd';
-  const el2 = el(id);
-  if(!el2) return;
-  el2.classList.add('pop');
-  setTimeout(()=>el2.classList.remove('pop'),700);
+  const e2=el(dir==='back'?'lv-skip-back':'lv-skip-fwd');
+  if(!e2) return;
+  e2.classList.remove('pop');
+  void e2.offsetWidth;
+  e2.classList.add('pop');
+  setTimeout(()=>e2.classList.remove('pop'),700);
 }
-function flashTap(paused){
-  const ind = el('lv-tap-indicator');
+function flashTapIco(icon){
+  const ind=el('lv-tap-indicator');
   if(!ind) return;
-  ind.textContent = paused?'▶':'⏸';
+  ind.textContent=icon;
+  ind.classList.remove('pop');
+  void ind.offsetWidth;
   ind.classList.add('pop');
   setTimeout(()=>ind.classList.remove('pop'),500);
 }
 
-/* ══ QUALITY LEVELS ══ */
+/* ══ QUALITY MENU ══ */
 function buildQualityMenu(){
   if(!_hls||!_hlsLevels.length) return;
-  const menu = el('lv-qual-menu');
+  const menu=el('lv-qual-menu');
   if(!menu) return;
-
-  // Remove old level items (keep auto + static ones)
-  const existing = menu.querySelectorAll('[data-level]');
-  existing.forEach(e=>e.remove());
-
-  // Re-add auto
-  const autoItem = document.createElement('div');
-  autoItem.className = 'lv-dd-item selected';
-  autoItem.dataset.level = '-1';
-  autoItem.innerHTML = '<div class="lv-dd-dot"></div>Auto <span style="font-size:10px;color:rgba(91,154,255,0.7);margin-left:4px;">Recommended</span>';
+  menu.querySelectorAll('[data-level]').forEach(e=>e.remove());
+  const autoItem=document.createElement('div');
+  autoItem.className='lv-dd-item selected';
+  autoItem.dataset.level='-1';
+  autoItem.innerHTML='<div class="lv-dd-dot"></div>Auto <span style="font-size:10px;color:rgba(91,154,255,0.7);margin-left:4px;">Recommended</span>';
+  autoItem.onclick=()=>setQualityLevel(-1);
   menu.appendChild(autoItem);
-
-  // Map levels to named quality
-  const heightLabels = {720:'720p',480:'480p',360:'360p',240:'240p'};
+  const labels={720:'720p',480:'480p',360:'360p',240:'240p'};
   _hlsLevels.forEach((lvl,idx)=>{
-    const h = lvl.height||0;
-    // find closest label
-    let label = h+'p';
-    const known = Object.keys(heightLabels).map(Number).sort((a,b)=>Math.abs(a-h)-Math.abs(b-h));
-    if(known.length&&Math.abs(known[0]-h)<60) label = heightLabels[known[0]];
-    const item = document.createElement('div');
-    item.className = 'lv-dd-item';
-    item.dataset.level = idx;
-    item.dataset.height = h;
-    item.innerHTML = `<div class="lv-dd-dot"></div>${label}`;
+    const h=lvl.height||0;
+    const keys=Object.keys(labels).map(Number).sort((a,b)=>Math.abs(a-h)-Math.abs(b-h));
+    const label=(keys.length&&Math.abs(keys[0]-h)<80)?labels[keys[0]]:(h+'p');
+    const item=document.createElement('div');
+    item.className='lv-dd-item';
+    item.dataset.level=idx;
+    item.innerHTML=`<div class="lv-dd-dot"></div>${label}`;
+    item.onclick=()=>setQualityLevel(idx);
     menu.appendChild(item);
   });
-  attachQualityEvents();
 }
-
 function setQualityLevel(level){
   if(!_hls) return;
-  if(level===-1){
-    _hls.currentLevel = -1;
-    el('lv-qual-lbl').textContent = 'Auto';
-    el('lv-qual-btn').classList.remove('active-glow');
-  } else {
-    _hls.currentLevel = parseInt(level);
-    const lbl = el(`[data-level="${level}"]`)?.textContent?.trim()||level+'p';
-    el('lv-qual-lbl').textContent = lbl.split(' ')[0];
-    el('lv-qual-btn').classList.add('active-glow');
-  }
-  // update selection UI
+  _hls.currentLevel=(level===-1)?-1:parseInt(level);
+  const lbl=el('lv-qual-lbl');
+  if(lbl) lbl.textContent=(level===-1)?'Auto':(el('lv-qual-menu').querySelector(`[data-level="${level}"]`)?.textContent?.trim().split(' ')[0]||'?');
+  const btn=el('lv-qual-btn');
+  if(btn) btn.classList.toggle('active-glow',level!==-1);
   el('lv-qual-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.classList.toggle('selected', it.dataset.level==level);
+    it.classList.toggle('selected',it.dataset.level==level);
   });
   closeAllMenus();
 }
 
-function attachQualityEvents(){
-  el('lv-qual-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.onclick = ()=> setQualityLevel(parseInt(it.dataset.level));
-  });
-}
-
-/* ══ DROPDOWN TOGGLE ══ */
+/* ══ DROPDOWNS ══ */
 function closeAllMenus(){
-  document.querySelectorAll('.lv-dropdown').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('#lec-viewer .lv-dropdown').forEach(d=>d.classList.remove('open'));
 }
-function toggleMenu(id){
-  const menu = el(id);
+function toggleMenu(menuId){
+  const menu=el(menuId);
   if(!menu) return;
-  const wasOpen = menu.classList.contains('open');
+  const wasOpen=menu.classList.contains('open');
   closeAllMenus();
-  if(!wasOpen) menu.classList.add('open');
+  if(!wasOpen){ menu.classList.add('open'); showControls(); }
 }
 
 /* ══ FULLSCREEN ══ */
 function toggleFullscreen(){
-  const viewer = el('lec-viewer');
+  const viewer=el('lec-viewer');
   if(!viewer) return;
-  if(document.fullscreenElement||document.webkitFullscreenElement){
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  if(isFs){
     (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
   } else {
-    if(viewer.requestFullscreen) viewer.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
-    else if(viewer.webkitRequestFullscreen) viewer.webkitRequestFullscreen();
+    (viewer.requestFullscreen||viewer.webkitRequestFullscreen||function(){}).call(viewer,{navigationUI:'hide'});
   }
 }
 function syncFsIcon(){
-  const ico = el('lv-fs-ico');
+  const ico=el('lv-fs-ico');
   if(!ico) return;
-  const isFs = !!(document.fullscreenElement||document.webkitFullscreenElement);
-  ico.innerHTML = isFs
-    ? '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="3" y2="13"/><line x1="14" y1="4" x2="21" y2="11"/>'
-    : '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  ico.innerHTML=isFs
+    ?'<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="3" y2="13"/><line x1="14" y1="4" x2="21" y2="11"/>'
+    :'<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
 }
 
-/* ══ INIT PLAYER EVENTS (once) ══ */
-let _eventsAttached = false;
+/* ══ ATTACH EVENTS (once) ══ */
+let _eventsAttached=false;
 function attachPlayerEvents(){
   if(_eventsAttached) return;
-  _eventsAttached = true;
+  _eventsAttached=true;
 
-  const vid = el('lec-video');
-  const stage = el('lv-stage');
-  const seekWrap = el('lv-seek-wrap');
+  const vid=el('lec-video');
+  const stage=el('lv-stage');
+  const seekWrap=el('lv-seek-wrap');
 
-  /* --- Video events --- */
-  vid.addEventListener('timeupdate', updateSeekBar);
-  vid.addEventListener('progress', updateSeekBar);
-  vid.addEventListener('durationchange', updateSeekBar);
+  /* Video state events */
+  vid.addEventListener('timeupdate',updateSeekBar);
+  vid.addEventListener('progress',updateSeekBar);
+  vid.addEventListener('durationchange',updateSeekBar);
   vid.addEventListener('play',()=>{ syncPlayIcon(); resetHideTimer(); });
-  vid.addEventListener('pause',()=>{ syncPlayIcon(); showControls(); clearTimeout(_controlsTimer); });
-  vid.addEventListener('waiting',()=>{ el('lv-buf-spin').classList.add('show'); });
-  vid.addEventListener('canplay',()=>{ el('lv-buf-spin').classList.remove('show'); });
-  vid.addEventListener('playing',()=>{ el('lv-buf-spin').classList.remove('show'); resetHideTimer(); });
+  vid.addEventListener('pause',()=>{ syncPlayIcon(); clearTimeout(_controlsTimer); showControls(); });
   vid.addEventListener('ended',()=>{ syncPlayIcon(); showControls(); });
+  vid.addEventListener('waiting',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
+  vid.addEventListener('canplay',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
+  vid.addEventListener('playing',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); resetHideTimer(); });
 
-  /* --- Stage tap for show/hide controls --- */
-  let _tapTimer = null;
-  stage.addEventListener('click', e=>{
-    // Don't hide if tapping a button
-    if(e.target.closest('button,.lv-pill-btn,.lv-dropdown,.lv-seek-wrap')) return;
-    if(_seeking) return;
-    toggleControls();
+  /* ── Stage click: ONLY toggle controls if tap is on bare video area ──
+     CRITICAL: do NOT call stopPropagation on any child button
+     The stage click handler must not interfere with buttons */
+  stage.addEventListener('click', function(e){
+    /* If click came FROM any interactive control — ignore */
+    if(e.target.closest('#lv-controls-overlay button') ||
+       e.target.closest('.lv-pill-btn') ||
+       e.target.closest('.lv-dd-item') ||
+       e.target.closest('.lv-seek-wrap') ||
+       e.target.closest('.lv-dropdown')){
+      return;
+    }
+    /* Bare video tap: toggle controls */
+    if(_controlsVisible){
+      closeAllMenus();
+      hideControls();
+    } else {
+      showControls();
+    }
   });
 
-  /* --- Play/Pause button --- */
-  el('lv-play-btn').addEventListener('click', e=>{
+  /* Play/Pause */
+  el('lv-play-btn').addEventListener('click', function(e){
     e.stopPropagation();
-    const paused = vid.paused;
-    paused ? vid.play().catch(()=>{}) : vid.pause();
-    flashTap(paused);
+    if(vid.paused){ vid.play().catch(()=>{}); flashTapIco('▶'); }
+    else { vid.pause(); flashTapIco('⏸'); }
     showControls();
   });
 
-  /* --- Skip buttons --- */
-  el('lv-skip-back-btn').addEventListener('click', e=>{
+  /* Skip back */
+  el('lv-skip-back-btn').addEventListener('click', function(e){
     e.stopPropagation();
-    vid.currentTime = Math.max(0, vid.currentTime-10);
+    vid.currentTime=Math.max(0,vid.currentTime-10);
     flashSkip('back');
     showControls();
   });
-  el('lv-skip-fwd-btn').addEventListener('click', e=>{
+
+  /* Skip forward */
+  el('lv-skip-fwd-btn').addEventListener('click', function(e){
     e.stopPropagation();
-    vid.currentTime = Math.min(vid.duration||0, vid.currentTime+10);
+    vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);
     flashSkip('fwd');
     showControls();
   });
 
-  /* --- Double-tap skip (left/right zones) --- */
-  let _dblTapTimer = null, _dblTapCount = 0, _dblTapSide = null;
-  stage.addEventListener('touchend', e=>{
-    if(e.target.closest('button,.lv-pill-btn,.lv-dropdown,.lv-seek-wrap')) return;
-    const x = e.changedTouches[0].clientX;
-    const sw = stage.clientWidth;
-    const side = x < sw*0.35 ? 'left' : x > sw*0.65 ? 'right' : 'center';
-    if(side==='center'){ return; }
-    _dblTapCount++;
-    _dblTapSide = side;
-    clearTimeout(_dblTapTimer);
-    _dblTapTimer = setTimeout(()=>{
-      if(_dblTapCount>=2){
-        if(side==='left'){ vid.currentTime=Math.max(0,vid.currentTime-10); flashSkip('back'); }
+  /* Double-tap zones */
+  let _dtCount=0, _dtSide=null, _dtTimer=null;
+  stage.addEventListener('touchend', function(e){
+    if(e.target.closest('#lv-controls-overlay button,.lv-pill-btn,.lv-dd-item,.lv-seek-wrap,.lv-dropdown')) return;
+    const x=e.changedTouches[0].clientX;
+    const sw=stage.clientWidth;
+    const side=x<sw*0.33?'left':x>sw*0.67?'right':null;
+    if(!side) return;
+    _dtCount++;
+    _dtSide=side;
+    clearTimeout(_dtTimer);
+    _dtTimer=setTimeout(()=>{
+      if(_dtCount>=2){
+        if(_dtSide==='left'){ vid.currentTime=Math.max(0,vid.currentTime-10); flashSkip('back'); }
         else { vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10); flashSkip('fwd'); }
         showControls();
       }
-      _dblTapCount=0; _dblTapSide=null;
-    },300);
+      _dtCount=0; _dtSide=null;
+    },280);
   });
 
-  /* --- Seek bar (mouse) --- */
-  seekWrap.addEventListener('mousedown', e=>{
-    _seeking=true;
-    seekTo(e,seekWrap);
-    showControls();
-    const onMove = ev=>{ seekTo(ev,seekWrap); };
-    const onUp = ()=>{ _seeking=false; document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); };
+  /* Seek — mouse */
+  seekWrap.addEventListener('mousedown', function(e){
+    e.stopPropagation();
+    _seeking=true; seekTo(e,seekWrap); showControls();
+    function onMove(ev){ seekTo(ev,seekWrap); }
+    function onUp(){ _seeking=false; document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
     document.addEventListener('mousemove',onMove);
     document.addEventListener('mouseup',onUp);
   });
 
-  /* --- Seek bar (touch) --- */
-  seekWrap.addEventListener('touchstart', e=>{ _seeking=true; e.preventDefault(); seekTo(e,seekWrap); showControls(); },{passive:false});
-  seekWrap.addEventListener('touchmove', e=>{ e.preventDefault(); seekTo(e,seekWrap); },{passive:false});
-  seekWrap.addEventListener('touchend', ()=>{ setTimeout(()=>_seeking=false,100); });
+  /* Seek — touch */
+  seekWrap.addEventListener('touchstart', function(e){ e.stopPropagation(); _seeking=true; e.preventDefault(); seekTo(e,seekWrap); showControls(); },{passive:false});
+  seekWrap.addEventListener('touchmove', function(e){ e.preventDefault(); seekTo(e,seekWrap); },{passive:false});
+  seekWrap.addEventListener('touchend', function(){ setTimeout(()=>{ _seeking=false; },80); });
 
-  /* --- Speed menu --- */
-  el('lv-speed-btn').addEventListener('click', e=>{ e.stopPropagation(); toggleMenu('lv-speed-menu'); showControls(); });
+  /* Speed */
+  el('lv-speed-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleMenu('lv-speed-menu'); });
   el('lv-speed-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.addEventListener('click', ()=>{
-      const spd = parseFloat(it.dataset.speed);
-      vid.playbackRate = spd;
-      el('lv-speed-lbl').textContent = spd===1?'1×':spd+'×';
-      el('lv-speed-btn').classList.toggle('active-glow', spd!==1);
+    it.addEventListener('click', function(e){
+      e.stopPropagation();
+      const spd=parseFloat(it.dataset.speed);
+      vid.playbackRate=spd;
+      const lbl=el('lv-speed-lbl'); if(lbl) lbl.textContent=spd===1?'1×':spd+'×';
+      const btn=el('lv-speed-btn'); if(btn) btn.classList.toggle('active-glow',spd!==1);
       el('lv-speed-menu').querySelectorAll('.lv-dd-item').forEach(i=>i.classList.toggle('selected',i.dataset.speed==spd));
       closeAllMenus();
     });
   });
 
-  /* --- Quality menu btn --- */
-  el('lv-qual-btn').addEventListener('click', e=>{ e.stopPropagation(); toggleMenu('lv-qual-menu'); showControls(); });
-  attachQualityEvents();
+  /* Quality */
+  el('lv-qual-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleMenu('lv-qual-menu'); });
 
-  /* --- Fullscreen --- */
-  el('lv-fs-btn').addEventListener('click', e=>{ e.stopPropagation(); toggleFullscreen(); showControls(); });
+  /* Fullscreen */
+  el('lv-fs-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleFullscreen(); showControls(); });
   document.addEventListener('fullscreenchange', syncFsIcon);
   document.addEventListener('webkitfullscreenchange', syncFsIcon);
 
-  /* --- Click on stage dismisses open menus --- */
-  stage.addEventListener('click', e=>{
-    if(!e.target.closest('.lv-dd-wrap')) closeAllMenus();
-  });
-
-  /* --- Back button --- */
-  el('lv-back-btn').addEventListener('click', e=>{ e.stopPropagation(); });
-
-  /* --- Retry btn --- */
-  el('lv-err-retry').addEventListener('click', ()=>{
+  /* Retry */
+  el('lv-err-retry').addEventListener('click', function(e){
+    e.stopPropagation();
     if(_currentLecUrl) _initHLSLoad(_currentLecUrl);
   });
 }
