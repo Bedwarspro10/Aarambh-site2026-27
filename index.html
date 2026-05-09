@@ -542,18 +542,21 @@ body::before{
 
 /* BIG lecture card */
 .lhub-card{
-  background:var(--card-bg);border:1px solid var(--card-border);
-  border-radius:20px;overflow:hidden;cursor:pointer;
-  margin-bottom:14px;
-  transition:transform .3s var(--bounce),box-shadow .3s,border-color .25s;
-  will-change:transform;
+  background:linear-gradient(145deg,rgba(10,18,38,0.92),rgba(8,14,30,0.96));
+  border:1px solid var(--card-border);
+  border-radius:22px;overflow:hidden;cursor:pointer;
+  margin-bottom:16px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 4px 24px rgba(0,0,0,0.28),0 0 0 0 rgba(91,154,255,0);
+  transition:transform .32s var(--bounce),box-shadow .32s var(--smooth),border-color .25s;
+  will-change:transform,box-shadow;
   animation:fcIn .35s var(--spring) both;
 }
-.lhub-card:active{transform:scale(0.96)!important;box-shadow:none!important;}
+.lhub-card:active{transform:scale(0.96)!important;box-shadow:0 2px 8px rgba(0,0,0,0.2)!important;}
 .lhub-card:hover{
-  transform:translateY(-3px);
-  box-shadow:0 12px 36px rgba(0,0,0,0.35);
-  border-color:var(--br2);
+  transform:translateY(-4px) scale(1.005);
+  box-shadow:0 16px 48px rgba(0,0,0,0.4),0 0 0 1px rgba(91,154,255,0.22),0 0 32px rgba(91,154,255,0.08);
+  border-color:rgba(91,154,255,0.3);
 }
 /* Private card — admin only, red tint */
 .lhub-card.lhub-private{
@@ -614,15 +617,15 @@ body::before{
 }
 
 /* Card body */
-.lhub-info{padding:13px 14px 14px;}
+.lhub-info{padding:13px 14px 15px;}
 .lhub-title{
-  font-size:15px;font-weight:900;letter-spacing:-.25px;
-  line-height:1.3;margin-bottom:6px;
+  font-size:15.5px;font-weight:900;letter-spacing:-.25px;
+  line-height:1.35;margin-bottom:8px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .lhub-meta{
   display:flex;align-items:center;gap:8px;
-  font-size:11px;color:var(--txt2);font-weight:600;flex-wrap:wrap;
+  font-size:11px;color:var(--txt2);font-weight:700;flex-wrap:wrap;
 }
 .lhub-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--txt3);}
 
@@ -1901,69 +1904,8 @@ button,
     <button class="kb kb-zero" onclick="kp('0')">0</button>
     <button class="kb" onclick="kdel()">⌫</button>
   </div>
-  <div class="pclink" onclick="if(typeof toast==='function')toast('Default PIN: 2113');else alert('Default PIN: 2113')">Emergency ›</div>
+  <div class="pclink" onclick="toast('Default PIN: 2113')">Emergency ›</div>
 </div>
-
-<script>
-/* Inline fallback — ensures kp/kdel work even before the ES module finishes loading.
-   The module will overwrite these with the real implementations. */
-(function(){
-  var _buf = '';
-  if(typeof window.kp !== 'function'){
-    window.kp = function(n){
-      if(_buf.length >= 4) return;
-      _buf += n;
-      for(var i=0;i<4;i++){
-        var d=document.getElementById('pd'+i);
-        if(d){ d.classList.toggle('on', i<_buf.length); d.classList.remove('err','ok'); }
-      }
-      if(_buf.length === 4){
-        setTimeout(function(){
-          /* If module loaded by now, hand off */
-          if(window._modulePin !== undefined){ window._modulePin = _buf; }
-          /* Check pin directly */
-          var PIN_VAL = '2113';
-          if(_buf === PIN_VAL){
-            for(var j=0;j<4;j++){ var dd=document.getElementById('pd'+j); if(dd) dd.classList.add('ok'); }
-            setTimeout(function(){
-              var ps=document.getElementById('passcode');
-              if(ps){ ps.classList.add('out'); ps.classList.remove('vis'); }
-              setTimeout(function(){
-                if(ps){ ps.style.display='none'; ps.style.pointerEvents='none'; }
-                if(localStorage.getItem('ab_tnc')==='agreed'){
-                  var app=document.getElementById('app');
-                  if(app) app.classList.add('vis');
-                } else {
-                  var tnc=document.getElementById('tnc-screen');
-                  if(tnc) tnc.classList.add('vis');
-                }
-              }, 520);
-            }, 420);
-          } else {
-            for(var k=0;k<4;k++){ var dk=document.getElementById('pd'+k); if(dk) dk.classList.add('err'); }
-            var dots=document.getElementById('pcdots');
-            if(dots){ dots.classList.add('shake'); }
-            setTimeout(function(){
-              _buf='';
-              if(dots) dots.classList.remove('shake');
-              for(var m=0;m<4;m++){ var dm=document.getElementById('pd'+m); if(dm){ dm.classList.remove('err','ok','on'); } }
-            }, 540);
-          }
-        }, 220);
-      }
-    };
-  }
-  if(typeof window.kdel !== 'function'){
-    window.kdel = function(){
-      if(_buf.length > 0) _buf = _buf.slice(0,-1);
-      for(var i=0;i<4;i++){
-        var d=document.getElementById('pd'+i);
-        if(d){ d.classList.toggle('on', i<_buf.length); d.classList.remove('err','ok'); }
-      }
-    };
-  }
-})();
-</script>
 
 <!-- APP -->
 <div id="app">
@@ -2459,11 +2401,11 @@ button,
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 3L1 9l4 2.18V17l7 4 7-4v-5.82L23 9zm0 2.28L20.55 9 12 13.28 3.45 9zM19 14.76l-7 4-7-4v-2.5l7 3.82 7-3.82z"/></svg>
       <span class="nl">Courses</span>
     </button>
-    <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;">
+    <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;background:var(--grd-blue);">
       <img src="https://raw.githubusercontent.com/ujjawal-04/nexttopper-feed/main/icon-192.png" 
            alt="NT" 
-           style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
-           onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-size:20px;\'>🎬</span>';">
+           style="width:100%;height:100%;object-fit:contain;border-radius:50%;display:block;"
+           onerror="this.style.display='none';this.parentElement.textContent='🎬';">
     </button>
     <button class="ntab" id="nt-profile" onclick="switchTab('profile')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
@@ -3061,9 +3003,8 @@ window.openLoginPopup  = openLoginPopup;
    onAuthStateChanged — fires on load with
    the persisted user (if any). This is what
    restores the session after a normal refresh.
-   NOTE: Initial auth resolution now happens inside
-   the startup block with a timeout. This listener
-   handles subsequent changes (login/logout).
+   Since we no longer use redirect, there is
+   no race condition with getRedirectResult.
 ───────────────────────────────────────── */
 onAuthStateChanged(auth, user => {
   console.log('[Auth] onAuthStateChanged → user:', user ? user.email : 'null');
@@ -3332,151 +3273,38 @@ function fixDrive(u){
 }
 
 /* ═══════════════════════════════════════════
-   RESILIENT STARTUP — failsafe loader bypass
-   • 5 s hard timeout hides loader no matter what
-   • Every Firebase call has its own 10 s timeout
-   • Auth has its own 8 s timeout
-   • Global error handlers catch everything else
+   LOADER — waits for Firebase data
 ═══════════════════════════════════════════ */
-
-/* ── Utility: wrap any promise with a timeout ── */
-function withTimeout(promise, ms, label) {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => {
-      console.warn('[Timeout]', label, 'timed out after', ms, 'ms');
-      resolve(null); // resolve (not reject) so callers keep going
-    }, ms);
-    promise.then(v => { clearTimeout(t); resolve(v); })
-           .catch(e => { clearTimeout(t); reject(e); });
-  });
-}
-
-/* ── Hide loader and show passcode — idempotent ── */
-let _appStarted = false;
-function hideLoaderAndStart(reason) {
-  if (_appStarted) return;
-  _appStarted = true;
-  console.log('[App] hideLoaderAndStart — reason:', reason);
-  const ld = document.getElementById('loader');
-  if (ld) {
-    ld.classList.add('out');
-    setTimeout(() => {
-      ld.style.display = 'none';
-      // showPC is defined later in this same script block — always available here
-      // but guard anyway in case of extreme edge cases
-      if (typeof showPC === 'function') {
-        showPC();
-      } else {
-        // fallback: directly show passcode element
-        const pc = document.getElementById('passcode');
-        if (pc) { pc.classList.add('vis'); }
-      }
-    }, 650);
-  } else {
-    if (typeof showPC === 'function') {
-      showPC();
-    } else {
-      const pc = document.getElementById('passcode');
-      if (pc) { pc.classList.add('vis'); }
-    }
-  }
-}
-
-/* ── GLOBAL ERROR HANDLERS ── */
-window.addEventListener('error', function(e) {
-  // Ignore broken image/resource errors — these are harmless
-  if(e.target && e.target !== window && e.target.tagName) return;
-  console.error('[GlobalError]', e.message, 'at', e.filename, ':', e.lineno);
-  hideLoaderAndStart('global-error');
-});
-window.addEventListener('unhandledrejection', function(e) {
-  console.error('[UnhandledPromise]', e.reason);
-  // Only force-start if loader is still visible (i.e. we're still in startup)
-  const ld = document.getElementById('loader');
-  if(ld && !ld.classList.contains('out') && ld.style.display !== 'none') {
-    hideLoaderAndStart('unhandled-promise');
-  }
-  e.preventDefault();
-});
-
-/* ── HARD FAILSAFE: 5 s after load, force-show app ── */
-const _failsafeTimer = setTimeout(() => {
-  if (!_appStarted) {
-    console.warn('[Failsafe] 5 s timeout fired — forcing loader hide');
-    try { toast('⚠️ Some content failed to load'); } catch(e) {}
-    hideLoaderAndStart('failsafe-timeout');
-  }
-}, 5000);
-
 window.addEventListener('load', async () => {
-  console.log('[App] Window load fired — starting init');
-
+  // Start loading Firebase data in background during loader animation
   let firebaseReady = false;
-  let loaderDone    = false;
+  let loaderDone = false;
 
   const proceed = () => {
     if (firebaseReady && loaderDone) {
-      clearTimeout(_failsafeTimer); // cancel failsafe — we made it in time
-      hideLoaderAndStart('normal');
+      const ld = document.getElementById('loader');
+      ld.classList.add('out');
+      setTimeout(() => { ld.style.display = 'none'; showPC(); }, 650);
     }
   };
 
-  /* ── Auth init with timeout (8 s) ── */
-  const authReady = new Promise(resolve => {
-    try {
-      const unsub = onAuthStateChanged(auth, user => {
-        console.log('[Auth] Initial state resolved —', user ? user.email : 'no user');
-        unsub();
-        resolve(user);
-      }, err => {
-        console.error('[Auth] onAuthStateChanged error:', err);
-        resolve(null);
-      });
-    } catch(e) {
-      console.error('[Auth] setup error:', e);
-      resolve(null);
-    }
-  });
-  // Don't block UI on auth — fire & forget with timeout
-  withTimeout(authReady, 8000, 'auth-init').then(user => {
-    gUser = user || null;
-    updateProfileUI(gUser);
-    if (gUser) closeLoginPopup();
-    console.log('[Auth] Auth loaded ✓');
-  }).catch(() => {});
-
-  /* ── Firebase data load (each capped at 10 s) ── */
-  console.log('[Firebase] Starting data load…');
+  // Firebase load
   try {
-    await Promise.all([
-      withTimeout(fbLoadFiles(),   10000, 'fbLoadFiles').catch(e   => console.warn('[Firebase] files error:',   e)),
-      withTimeout(fbLoadYT(),      10000, 'fbLoadYT').catch(e      => console.warn('[Firebase] YT error:',      e)),
-      withTimeout(fbLoadFolders(), 10000, 'fbLoadFolders').catch(e => console.warn('[Firebase] folders error:', e)),
-    ]);
-    console.log('[Firestore] Files/YT/Folders loaded ✓');
-
-    // Lectures — non-blocking
-    withTimeout(fbLoadLectures(), 10000, 'fbLoadLectures')
-      .then(() => { console.log('[Firestore] Lectures loaded ✓'); })
-      .catch(e => console.warn('[Lectures] Load skipped:', e));
-
-    // Category cleanup — non-blocking, fire & forget
-    fixMissingCategories().catch(e => console.warn('[fixCategories]', e));
-
+    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
+    // Load lectures separately — don't block startup if collection is missing/empty
+    try { await fbLoadLectures(); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
+    // One-time cleanup: fix any existing docs with missing/empty category
+    await fixMissingCategories();
     firebaseReady = true;
-    console.log('[Firebase] Init complete ✓');
   } catch(e) {
-    console.error('[Firebase] Load error:', e);
-    try { toast('⚠️ Some content failed to load'); } catch(_) {}
-    firebaseReady = true; // always proceed
+    console.error('Firebase load error:', e);
+    toast('⚠️ Could not load data. Check connection.');
+    firebaseReady = true; // proceed anyway
   }
-
   proceed();
 
-  // Minimum loader display time for animation (1800 ms)
+  // Minimum loader display time (1800ms for animation)
   setTimeout(() => { loaderDone = true; proceed(); }, 1800);
-
-  console.log('[App] Startup sequence dispatched ✓');
 });
 
 /* ═══════════════════════════════════════════
@@ -3487,14 +3315,13 @@ function kp(n){
   if(pin.length>=4)return;
   pin+=n;
   syncDots();
-  if(typeof ripple==='function') ripple(document.querySelector(`.kb[data-n="${n}"]`));
+  ripple(document.querySelector(`.kb[data-n="${n}"]`));
   if(pin.length===4)setTimeout(checkPin,220);
 }
 function kdel(){pin=pin.slice(0,-1);syncDots();}
 function syncDots(){
   for(let i=0;i<4;i++){
     const d=document.getElementById('pd'+i);
-    if(!d) continue;
     d.classList.toggle('on',i<pin.length);
     d.classList.remove('err','ok');
   }
@@ -3505,11 +3332,13 @@ function checkPin(){
     setTimeout(()=>{
       const ps=document.getElementById('passcode');
       ps.classList.add('out');ps.classList.remove('vis');
+      // Fully remove passcode from interaction after its exit transition (500ms)
       setTimeout(()=>{
         ps.style.display='none';
         ps.style.pointerEvents='none';
         ps.style.visibility='hidden';
       },520);
+      // Check if user already agreed to T&C
       if(localStorage.getItem('ab_tnc')==='agreed'){
         document.getElementById('app').classList.add('vis');
         updateCounts();startClock();animPbars();renderYTHome();tcStart();
@@ -3525,11 +3354,6 @@ function checkPin(){
     setTimeout(()=>{dots.classList.remove('shake');pin='';syncDots();},540);
   }
 }
-
-/* ── Export passcode functions IMMEDIATELY so onclick handlers work
-   even if the rest of the module is still loading ── */
-window.kp    = kp;
-window.kdel  = kdel;
 function animPbars(){
   requestAnimationFrame(()=>{
     document.querySelectorAll('.pfill').forEach(el=>{
@@ -5405,7 +5229,6 @@ window.startEditName=startEditName;window.cancelEditName=cancelEditName;window.s
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* EXPOSE GLOBALS for inline onclick handlers */
-window.toast=toast;
 window.kp=kp;window.kdel=kdel;window.switchTab=switchTab;
 window.openSubj=openSubj;window.closeSubj=closeSubj;
 window.openFile=openFile;window.closeViewer=closeViewer;window.frameOk=frameOk;window.openExt=openExt;
@@ -8681,31 +8504,13 @@ window._openLecViewer = function(lec){
   // Load HLS
   _currentLecUrl = lec.hlsUrl;
 
-  // HLS load with timeout protection
-  const _hlsLoadTimeout = setTimeout(() => {
-    console.warn('[HLS] Load timed out after 15s');
-    try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(e){}
-  }, 15000);
-
-  const _doHlsInit = (url) => {
-    clearTimeout(_hlsLoadTimeout);
-    try { _initHLSLoad(url); } catch(e) {
-      console.error('[HLS] _initHLSLoad error:', e);
-      try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(_){}
-    }
-  };
-
   if(window.Hls){
-    _doHlsInit(lec.hlsUrl);
+    _initHLSLoad(lec.hlsUrl);
   } else {
     const s=document.createElement('script');
     s.src='https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
-    s.onload=()=>_doHlsInit(lec.hlsUrl);
-    s.onerror=()=>{
-      clearTimeout(_hlsLoadTimeout);
-      console.error('[HLS] Script load failed');
-      try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(_){}
-    };
+    s.onload=()=>_initHLSLoad(lec.hlsUrl);
+    s.onerror=()=>{ el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); };
     document.head.appendChild(s);
   }
 };
@@ -8856,73 +8661,7 @@ window._openLecViewer = function(lec){
   <p>Signing you in…</p>
 </div>
 
-<script>
-/* ══════════════════════════════════════════════════
-   CRASH RECOVERY & MOBILE PERFORMANCE HARDENING
-   Runs as plain (non-module) script so it executes
-   even if the ES-module script above throws.
-══════════════════════════════════════════════════ */
-(function(){
-  'use strict';
 
-  /* ── 1. Absolute last-resort failsafe (10 s) ──
-     If the module script never ran (Firebase SDK
-     import failed etc.), this still hides the loader. */
-  var _lastResort = setTimeout(function(){
-    var ld = document.getElementById('loader');
-    if(ld && getComputedStyle(ld).opacity !== '0' && ld.style.display !== 'none'){
-      console.warn('[LastResort] Forcing loader hide at 10 s');
-      ld.style.transition   = 'opacity .5s';
-      ld.style.opacity      = '0';
-      ld.style.pointerEvents= 'none';
-      ld.style.visibility   = 'hidden';
-      setTimeout(function(){
-        ld.style.display = 'none';
-        // Show passcode screen (the step after loader)
-        var pc = document.getElementById('passcode');
-        if(pc) { pc.classList.add('vis'); }
-        try { if(typeof toast === 'function') toast('\u26a0\ufe0f Some content failed to load'); } catch(e){}
-      }, 500);
-    }
-  }, 10000);
-
-  /* ── 2. Image error suppression ──
-     Broken images must never freeze layout. */
-  document.addEventListener('error', function(e){
-    if(e.target && e.target.tagName === 'IMG'){
-      e.target.style.visibility = 'hidden';
-      e.stopPropagation();
-    }
-  }, true);
-
-  /* ── 3. Reduce motion on low-end Android ── */
-  var cores = navigator.hardwareConcurrency || 4;
-  if(cores <= 2){
-    try {
-      var style = document.createElement('style');
-      style.textContent =
-        '@keyframes loaderPulse{0%,100%{transform:scale(1);box-shadow:0 8px 32px rgba(91,154,255,0.35);}}'
-        + '.lorb{animation-duration:3.5s!important;}'
-        + '.lfill{animation-duration:2.5s!important;}'
-        + '@keyframes centerPulse{0%,100%{box-shadow:0 6px 28px var(--gb);}}';
-      document.head.appendChild(style);
-      console.log('[Perf] Reduced animations — hardware cores:', cores);
-    } catch(e){}
-  }
-
-  /* ── 4. Cancel last-resort if module script already handled it ── */
-  window.addEventListener('load', function(){
-    setTimeout(function(){
-      var ld = document.getElementById('loader');
-      if(!ld || ld.style.display === 'none' || ld.classList.contains('out')){
-        clearTimeout(_lastResort);
-      }
-    }, 600);
-  });
-
-  console.log('[App] Crash-recovery guard active ✓');
-})();
-</script>
 
 </body>
 </html>
