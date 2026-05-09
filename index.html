@@ -61,12 +61,6 @@ body::before{
   transition:opacity .7s var(--smooth);
 }
 #loader.out{opacity:0;pointer-events:none;visibility:hidden;}
-/* Failsafe: force-hide loader after 8s even if JS hangs */
-@keyframes loaderFailsafe{
-  0%,99%{opacity:1;pointer-events:auto;visibility:visible;}
-  100%{opacity:0;pointer-events:none;visibility:hidden;}
-}
-#loader:not(.out){animation:loaderFailsafe 8s linear 1 forwards;}
 .lorb{
   width:90px;height:90px;border-radius:26px;
   background:var(--grd-blue);
@@ -1907,8 +1901,69 @@ button,
     <button class="kb kb-zero" onclick="kp('0')">0</button>
     <button class="kb" onclick="kdel()">⌫</button>
   </div>
-  <div class="pclink" onclick="toast('Default PIN: 2113')">Emergency ›</div>
+  <div class="pclink" onclick="if(typeof toast==='function')toast('Default PIN: 2113');else alert('Default PIN: 2113')">Emergency ›</div>
 </div>
+
+<script>
+/* Inline fallback — ensures kp/kdel work even before the ES module finishes loading.
+   The module will overwrite these with the real implementations. */
+(function(){
+  var _buf = '';
+  if(typeof window.kp !== 'function'){
+    window.kp = function(n){
+      if(_buf.length >= 4) return;
+      _buf += n;
+      for(var i=0;i<4;i++){
+        var d=document.getElementById('pd'+i);
+        if(d){ d.classList.toggle('on', i<_buf.length); d.classList.remove('err','ok'); }
+      }
+      if(_buf.length === 4){
+        setTimeout(function(){
+          /* If module loaded by now, hand off */
+          if(window._modulePin !== undefined){ window._modulePin = _buf; }
+          /* Check pin directly */
+          var PIN_VAL = '2113';
+          if(_buf === PIN_VAL){
+            for(var j=0;j<4;j++){ var dd=document.getElementById('pd'+j); if(dd) dd.classList.add('ok'); }
+            setTimeout(function(){
+              var ps=document.getElementById('passcode');
+              if(ps){ ps.classList.add('out'); ps.classList.remove('vis'); }
+              setTimeout(function(){
+                if(ps){ ps.style.display='none'; ps.style.pointerEvents='none'; }
+                if(localStorage.getItem('ab_tnc')==='agreed'){
+                  var app=document.getElementById('app');
+                  if(app) app.classList.add('vis');
+                } else {
+                  var tnc=document.getElementById('tnc-screen');
+                  if(tnc) tnc.classList.add('vis');
+                }
+              }, 520);
+            }, 420);
+          } else {
+            for(var k=0;k<4;k++){ var dk=document.getElementById('pd'+k); if(dk) dk.classList.add('err'); }
+            var dots=document.getElementById('pcdots');
+            if(dots){ dots.classList.add('shake'); }
+            setTimeout(function(){
+              _buf='';
+              if(dots) dots.classList.remove('shake');
+              for(var m=0;m<4;m++){ var dm=document.getElementById('pd'+m); if(dm){ dm.classList.remove('err','ok','on'); } }
+            }, 540);
+          }
+        }, 220);
+      }
+    };
+  }
+  if(typeof window.kdel !== 'function'){
+    window.kdel = function(){
+      if(_buf.length > 0) _buf = _buf.slice(0,-1);
+      for(var i=0;i<4;i++){
+        var d=document.getElementById('pd'+i);
+        if(d){ d.classList.toggle('on', i<_buf.length); d.classList.remove('err','ok'); }
+      }
+    };
+  }
+})();
+</script>
 
 <!-- APP -->
 <div id="app">
@@ -3307,22 +3362,40 @@ function hideLoaderAndStart(reason) {
     ld.classList.add('out');
     setTimeout(() => {
       ld.style.display = 'none';
-      try { showPC(); } catch(e) { console.error('[App] showPC error:', e); }
+      // showPC is defined later in this same script block — always available here
+      // but guard anyway in case of extreme edge cases
+      if (typeof showPC === 'function') {
+        showPC();
+      } else {
+        // fallback: directly show passcode element
+        const pc = document.getElementById('passcode');
+        if (pc) { pc.classList.add('vis'); }
+      }
     }, 650);
   } else {
-    try { showPC(); } catch(e) { console.error('[App] showPC error:', e); }
+    if (typeof showPC === 'function') {
+      showPC();
+    } else {
+      const pc = document.getElementById('passcode');
+      if (pc) { pc.classList.add('vis'); }
+    }
   }
 }
 
 /* ── GLOBAL ERROR HANDLERS ── */
 window.addEventListener('error', function(e) {
+  // Ignore broken image/resource errors — these are harmless
+  if(e.target && e.target !== window && e.target.tagName) return;
   console.error('[GlobalError]', e.message, 'at', e.filename, ':', e.lineno);
   hideLoaderAndStart('global-error');
 });
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[UnhandledPromise]', e.reason);
-  hideLoaderAndStart('unhandled-promise');
-  // Don't let it propagate to the browser's default handler
+  // Only force-start if loader is still visible (i.e. we're still in startup)
+  const ld = document.getElementById('loader');
+  if(ld && !ld.classList.contains('out') && ld.style.display !== 'none') {
+    hideLoaderAndStart('unhandled-promise');
+  }
   e.preventDefault();
 });
 
@@ -3414,13 +3487,14 @@ function kp(n){
   if(pin.length>=4)return;
   pin+=n;
   syncDots();
-  ripple(document.querySelector(`.kb[data-n="${n}"]`));
+  if(typeof ripple==='function') ripple(document.querySelector(`.kb[data-n="${n}"]`));
   if(pin.length===4)setTimeout(checkPin,220);
 }
 function kdel(){pin=pin.slice(0,-1);syncDots();}
 function syncDots(){
   for(let i=0;i<4;i++){
     const d=document.getElementById('pd'+i);
+    if(!d) continue;
     d.classList.toggle('on',i<pin.length);
     d.classList.remove('err','ok');
   }
@@ -3431,13 +3505,11 @@ function checkPin(){
     setTimeout(()=>{
       const ps=document.getElementById('passcode');
       ps.classList.add('out');ps.classList.remove('vis');
-      // Fully remove passcode from interaction after its exit transition (500ms)
       setTimeout(()=>{
         ps.style.display='none';
         ps.style.pointerEvents='none';
         ps.style.visibility='hidden';
       },520);
-      // Check if user already agreed to T&C
       if(localStorage.getItem('ab_tnc')==='agreed'){
         document.getElementById('app').classList.add('vis');
         updateCounts();startClock();animPbars();renderYTHome();tcStart();
@@ -3453,6 +3525,11 @@ function checkPin(){
     setTimeout(()=>{dots.classList.remove('shake');pin='';syncDots();},540);
   }
 }
+
+/* ── Export passcode functions IMMEDIATELY so onclick handlers work
+   even if the rest of the module is still loading ── */
+window.kp    = kp;
+window.kdel  = kdel;
 function animPbars(){
   requestAnimationFrame(()=>{
     document.querySelectorAll('.pfill').forEach(el=>{
@@ -5328,6 +5405,7 @@ window.startEditName=startEditName;window.cancelEditName=cancelEditName;window.s
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* EXPOSE GLOBALS for inline onclick handlers */
+window.toast=toast;
 window.kp=kp;window.kdel=kdel;window.switchTab=switchTab;
 window.openSubj=openSubj;window.closeSubj=closeSubj;
 window.openFile=openFile;window.closeViewer=closeViewer;window.frameOk=frameOk;window.openExt=openExt;
@@ -8798,12 +8876,13 @@ window._openLecViewer = function(lec){
       ld.style.opacity      = '0';
       ld.style.pointerEvents= 'none';
       ld.style.visibility   = 'hidden';
-      setTimeout(function(){ ld.style.display = 'none'; }, 500);
-      try {
+      setTimeout(function(){
+        ld.style.display = 'none';
+        // Show passcode screen (the step after loader)
         var pc = document.getElementById('passcode');
-        if(pc) pc.classList.add('vis');
-        if(typeof toast === 'function') toast('\u26a0\ufe0f Some content failed to load');
-      } catch(e){}
+        if(pc) { pc.classList.add('vis'); }
+        try { if(typeof toast === 'function') toast('\u26a0\ufe0f Some content failed to load'); } catch(e){}
+      }, 500);
     }
   }, 10000);
 
