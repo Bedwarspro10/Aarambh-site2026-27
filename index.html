@@ -4135,7 +4135,9 @@ window.openLecture = function(id){
   const all = [...(LECTURES_DB.english||[]),...(LECTURES_DB.hindi||[])];
   const lec = all.find(l => l.id === id);
   if(!lec) return;
-  // Require Google login for any lecture
+  // Private lectures: only admin can watch
+  if(!lec.isPublic && !isAdmin){ toast('🔒 This lecture is private.'); return; }
+  // Public lectures: require Google login to watch
   if(!gUser){ openLoginPopup(); _pendingLectureId = 'lec:' + id; return; }
   // Delegate to advanced player
   if(window._openLecViewer) window._openLecViewer(lec);
@@ -4186,7 +4188,7 @@ function renderLecturesSection(key, container){
 
     catLecs.forEach((lec, i) => {
       const card = document.createElement('div');
-      card.className = 'lcard';
+      card.className = 'lcard' + (!lec.isPublic && isAdmin ? ' lcard-private' : '');
       card.style.animationDelay = (i * 0.06) + 's';
       const thumbContent = lec.thumbnail
         ? `<img src="${esc(lec.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none'">`
@@ -7407,7 +7409,17 @@ window.wcStartFresh=function(){
   color:rgba(140,180,255,0.9);letter-spacing:.3px;
 }
 .lcard-badge.prv{
-  background:rgba(255,107,107,0.1);border-color:rgba(255,107,107,0.2);color:var(--red);
+  background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.3);color:var(--red);
+  animation:prvPulse 2.5s ease-in-out infinite;
+}
+@keyframes prvPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,0);}
+  50%{box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
+}
+/* Private lecture card — admin-only stripe overlay */
+.lcard.lcard-private{
+  border-color:rgba(255,107,107,0.22)!important;
+  background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,transparent 60%);
 }
 .lcard-lock{
   width:32px;height:32px;border-radius:50%;border:none;flex-shrink:0;
