@@ -4147,26 +4147,44 @@ async function fbUpdateLectureOrder(id, order){
 }
 
 async function fbLoadLectures(){
-  const snapshot = await getDocs(collection(db, 'lectures'));
-  LECTURES_DB = { english:[], hindi:[] };
-  snapshot.forEach(docSnap => {
-    const d = docSnap.data();
-    const subj = d.subject;
-    if(LECTURES_DB[subj]){
-      LECTURES_DB[subj].push({
-        id: docSnap.id,
-        title: d.title || 'Untitled',
-        subject: subj,
-        category: d.category || '2025-26 Session',
-        thumbnail: d.thumbnail || '',
-        hlsUrl: d.hlsUrl || '',
-        isPublic: !!d.isPublic,
-        order: typeof d.order === 'number' ? d.order : 9999,
-        createdAt: d.createdAt
-      });
-    }
-  });
-  Object.keys(LECTURES_DB).forEach(k => LECTURES_DB[k].sort((a,b) => a.order - b.order));
+  try {
+    console.log('[Lectures] Lectures loading...');
+    const snapshot = await getDocs(collection(db, 'lectures'));
+    LECTURES_DB = { english:[], hindi:[] };
+    snapshot.forEach(docSnap => {
+      try {
+        const d = docSnap.data();
+        if(!d) return;
+        const subj = d.subject;
+        // Only English and Hindi — ignore any other subjects
+        if(subj !== 'english' && subj !== 'hindi') return;
+        if(LECTURES_DB[subj]){
+          LECTURES_DB[subj].push({
+            id: docSnap.id,
+            title: d.title || 'Untitled',
+            subject: subj,
+            category: d.category || '2025-26 Session',
+            thumbnail: d.thumbnail || '',
+            hlsUrl: d.hlsUrl || '',
+            isPublic: !!d.isPublic,
+            order: typeof d.order === 'number' ? d.order : 9999,
+            createdAt: d.createdAt
+          });
+        }
+      } catch(docErr){
+        console.warn('[fbLoadLectures] Skipping bad doc:', docErr);
+      }
+    });
+    Object.keys(LECTURES_DB).forEach(k => {
+      if(Array.isArray(LECTURES_DB[k])) LECTURES_DB[k].sort((a,b) => (a.order||0) - (b.order||0));
+    });
+    console.log('[Lectures] Lectures rendered — English:', LECTURES_DB.english.length, '| Hindi:', LECTURES_DB.hindi.length);
+  } catch(e) {
+    console.error('[fbLoadLectures] Error:', e);
+    // Ensure LECTURES_DB is always a valid object — never leave it undefined
+    if(!LECTURES_DB || typeof LECTURES_DB !== 'object') LECTURES_DB = { english:[], hindi:[] };
+    throw e; // re-throw so caller can handle/skip
+  }
 }
 
 /* ── Admin: Add lecture ── */
@@ -4400,113 +4418,143 @@ window.lhubFilter = function(filter){
 };
 
 function renderLecturesHub(){
-  const scroll = document.getElementById('lhub-scroll');
-  if(!scroll) return;
+  try {
+    console.log('[Lectures] Lectures loading...');
+    const scroll = document.getElementById('lhub-scroll');
+    if(!scroll) return;
 
-  // Collect lectures based on filter
-  let engLecs = (LECTURES_DB.english||[]).filter(l => l.isPublic || isAdmin);
-  let hinLecs  = (LECTURES_DB.hindi||[]).filter(l => l.isPublic || isAdmin);
-
-  const showEng = _lhubFilter === 'all' || _lhubFilter === 'english';
-  const showHin = _lhubFilter === 'all' || _lhubFilter === 'hindi';
-  if(!showEng) engLecs = [];
-  if(!showHin) hinLecs  = [];
-
-  scroll.innerHTML = '';
-
-  if(!engLecs.length && !hinLecs.length){
-    scroll.innerHTML = `
-      <div class="lhub-empty">
-        <div class="lhub-empty-ico">🎬</div>
-        <div class="lhub-empty-txt">No lectures yet</div>
-        <div class="lhub-empty-sub">Public lectures will appear here.<br>${isAdmin ? 'Add lectures from the Admin Panel.' : 'Check back soon!'}</div>
-      </div>`;
-    return;
-  }
-
-  let delay = 0;
-
-  function renderGroup(lecs, subjKey){
-    if(!lecs.length) return;
-    const isEng = subjKey === 'english';
-    const icon  = isEng ? '🇬🇧' : '📖';
-    const name  = isEng ? 'English' : 'Hindi';
-    const tagClass = isEng ? 'eng' : 'hin';
-    const bgStyle = isEng
-      ? 'background:linear-gradient(135deg,rgba(37,99,235,0.2),rgba(91,154,255,0.1));'
-      : 'background:linear-gradient(135deg,rgba(217,119,6,0.2),rgba(245,158,11,0.1));';
-
-    // Section header
-    const hdr = document.createElement('div');
-    hdr.className = 'lhub-subj-hdr';
-    hdr.innerHTML = `
-      <div class="lhub-subj-ico" style="${bgStyle}">${icon}</div>
-      <div class="lhub-subj-name">${name}</div>
-      <div class="lhub-subj-cnt">${lecs.length} lecture${lecs.length!==1?'s':''}</div>`;
-    scroll.appendChild(hdr);
-
-    // Group by category
-    const cats = [...new Set(lecs.map(l => l.category))];
-    cats.forEach(cat => {
-      const catLecs = lecs.filter(l => l.category === cat);
-      if(!catLecs.length) return;
-
-      const catLbl = document.createElement('div');
-      catLbl.className = 'lhub-cat-lbl';
-      catLbl.textContent = cat;
-      scroll.appendChild(catLbl);
-
-      catLecs.forEach((lec, i) => {
-        const card = document.createElement('div');
-        card.className = 'lhub-card' + (!lec.isPublic && isAdmin ? ' lhub-private' : '');
-        card.style.animationDelay = (delay * 0.06) + 's';
-        delay++;
-
-        const thumbHtml = lec.thumbnail
-          ? `<img src="${esc(lec.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-             <div class="lhub-thumb-placeholder" style="display:none;">🎬</div>`
-          : `<div class="lhub-thumb-placeholder">🎬</div>`;
-
-        const prvTag = (!lec.isPublic && isAdmin)
-          ? `<div class="lhub-prv-tag">🔒 Private</div>` : '';
-
-        const lockOrPlay = gUser
-          ? `<div class="lhub-play-ico">▶</div>`
-          : `<div class="lhub-play-ico" title="Login to watch">🔒</div>`;
-
-        card.innerHTML = `
-          <div class="lhub-thumb">
-            ${thumbHtml}
-            <div class="lhub-thumb-overlay"></div>
-            <div class="lhub-subj-tag ${tagClass}">${icon} ${name}</div>
-            ${prvTag}
-            ${lockOrPlay}
-          </div>
-          <div class="lhub-info">
-            <div class="lhub-title">${esc(lec.title)}</div>
-            <div class="lhub-meta">
-              <span>${lec.category}</span>
-              <span class="lhub-meta-dot"></span>
-              <span>${lec.isPublic ? '🌐 Free' : '🔒 Admin'}</span>
-              ${gUser ? '' : '<span class="lhub-meta-dot"></span><span style="color:var(--blue);">Login to watch</span>'}
-            </div>
-          </div>`;
-
-        card.addEventListener('click', () => openLecture(lec.id));
-        scroll.appendChild(card);
-      });
-    });
-
-    // Divider between subjects (only if both are shown)
-    if(_lhubFilter === 'all' && subjKey === 'english' && hinLecs.length){
-      const div = document.createElement('div');
-      div.className = 'lhub-divider';
-      scroll.appendChild(div);
+    // Safeguard: ensure LECTURES_DB is valid
+    if(!LECTURES_DB || typeof LECTURES_DB !== 'object'){
+      LECTURES_DB = { english:[], hindi:[] };
     }
-  }
 
-  renderGroup(engLecs, 'english');
-  renderGroup(hinLecs, 'hindi');
+    // Collect lectures based on filter — English and Hindi ONLY
+    let engLecs = (LECTURES_DB.english||[]).filter(l => l && (l.isPublic || isAdmin));
+    let hinLecs  = (LECTURES_DB.hindi||[]).filter(l => l && (l.isPublic || isAdmin));
+
+    const showEng = _lhubFilter === 'all' || _lhubFilter === 'english';
+    const showHin = _lhubFilter === 'all' || _lhubFilter === 'hindi';
+    if(!showEng) engLecs = [];
+    if(!showHin) hinLecs  = [];
+
+    scroll.innerHTML = '';
+
+    if(!engLecs.length && !hinLecs.length){
+      scroll.innerHTML = `
+        <div class="lhub-empty">
+          <div class="lhub-empty-ico">🎬</div>
+          <div class="lhub-empty-txt">No lectures yet</div>
+          <div class="lhub-empty-sub">Public lectures will appear here.<br>${isAdmin ? 'Add lectures from the Admin Panel.' : 'Check back soon!'}</div>
+        </div>`;
+      console.log('[Lectures] Lectures rendered (empty state)');
+      return;
+    }
+
+    let delay = 0;
+
+    function renderGroup(lecs, subjKey){
+      try {
+        if(!lecs || !lecs.length) return;
+        const isEng = subjKey === 'english';
+        const icon  = isEng ? '🇬🇧' : '📖';
+        const name  = isEng ? 'English' : 'Hindi';
+        const tagClass = isEng ? 'eng' : 'hin';
+        const bgStyle = isEng
+          ? 'background:linear-gradient(135deg,rgba(37,99,235,0.2),rgba(91,154,255,0.1));'
+          : 'background:linear-gradient(135deg,rgba(217,119,6,0.2),rgba(245,158,11,0.1));';
+
+        // Section header
+        const hdr = document.createElement('div');
+        hdr.className = 'lhub-subj-hdr';
+        hdr.innerHTML = `
+          <div class="lhub-subj-ico" style="${bgStyle}">${icon}</div>
+          <div class="lhub-subj-name">${name}</div>
+          <div class="lhub-subj-cnt">${lecs.length} lecture${lecs.length!==1?'s':''}</div>`;
+        scroll.appendChild(hdr);
+
+        // Group by category
+        const cats = [...new Set(lecs.map(l => l.category||'General'))];
+        cats.forEach(cat => {
+          const catLecs = lecs.filter(l => l.category === cat);
+          if(!catLecs.length) return;
+
+          const catLbl = document.createElement('div');
+          catLbl.className = 'lhub-cat-lbl';
+          catLbl.textContent = cat;
+          scroll.appendChild(catLbl);
+
+          catLecs.forEach((lec) => {
+            try {
+              if(!lec || !lec.id) return;
+              const card = document.createElement('div');
+              card.className = 'lhub-card' + (!lec.isPublic && isAdmin ? ' lhub-private' : '');
+              card.style.animationDelay = (delay * 0.06) + 's';
+              delay++;
+
+              const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
+              const thumbHtml = safeThumb
+                ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                   <div class="lhub-thumb-placeholder" style="display:none;">🎬</div>`
+                : `<div class="lhub-thumb-placeholder">🎬</div>`;
+
+              const prvTag = (!lec.isPublic && isAdmin)
+                ? `<div class="lhub-prv-tag">🔒 Private</div>` : '';
+
+              const lockOrPlay = gUser
+                ? `<div class="lhub-play-ico">▶</div>`
+                : `<div class="lhub-play-ico" title="Login to watch">🔒</div>`;
+
+              card.innerHTML = `
+                <div class="lhub-thumb">
+                  ${thumbHtml}
+                  <div class="lhub-thumb-overlay"></div>
+                  <div class="lhub-subj-tag ${tagClass}">${icon} ${name}</div>
+                  ${prvTag}
+                  ${lockOrPlay}
+                </div>
+                <div class="lhub-info">
+                  <div class="lhub-title">${esc(lec.title||'Untitled')}</div>
+                  <div class="lhub-meta">
+                    <span>${esc(lec.category||'')}</span>
+                    <span class="lhub-meta-dot"></span>
+                    <span>${lec.isPublic ? '🌐 Free' : '🔒 Admin'}</span>
+                    ${gUser ? '' : '<span class="lhub-meta-dot"></span><span style="color:var(--blue);">Login to watch</span>'}
+                  </div>
+                </div>`;
+
+              card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
+              scroll.appendChild(card);
+            } catch(cardErr){
+              console.warn('[renderLecturesHub] Card error:', cardErr);
+            }
+          });
+        });
+
+        // Divider between subjects (only if both are shown)
+        if(_lhubFilter === 'all' && subjKey === 'english' && hinLecs.length){
+          const div = document.createElement('div');
+          div.className = 'lhub-divider';
+          scroll.appendChild(div);
+        }
+      } catch(grpErr){
+        console.error('[renderLecturesHub] Group error:', grpErr);
+      }
+    }
+
+    renderGroup(engLecs, 'english');
+    renderGroup(hinLecs, 'hindi');
+    console.log('[Lectures] Lectures rendered');
+  } catch(e) {
+    console.error('[renderLecturesHub] Fatal error:', e);
+    // Show empty state — never crash the page
+    const scroll = document.getElementById('lhub-scroll');
+    if(scroll) scroll.innerHTML = `
+      <div class="lhub-empty">
+        <div class="lhub-empty-ico">⚠️</div>
+        <div class="lhub-empty-txt">Could not load lectures</div>
+        <div class="lhub-empty-sub">Please refresh the page.</div>
+      </div>`;
+  }
 }
 
 /* ── Re-render hub when auth state changes ── */
@@ -4514,54 +4562,73 @@ function refreshLhubIfOpen(){
   const panel = document.getElementById('lhub-panel');
   if(panel && panel.classList.contains('open')) renderLecturesHub();
 }
-  const lecs = (LECTURES_DB[key]||[]).filter(l => l.isPublic || isAdmin);
-  if(!lecs.length) return;
 
-  // Group by category
-  const cats = [...new Set(lecs.map(l => l.category))];
-  const section = document.createElement('div');
-  section.className = 'lec-section';
-  const secLbl = document.createElement('div');
-  secLbl.className = 'lec-section-lbl';
-  secLbl.textContent = '🎬 Lectures';
-  section.appendChild(secLbl);
+/* ── Render lectures section inside subject detail panel (English/Hindi only) ── */
+function renderLecturesSection(key, container){
+  try {
+    console.log('[Lectures] renderLecturesSection called for:', key);
+    if(!key || !container) return;
+    // Only English and Hindi have lectures
+    if(key !== 'english' && key !== 'hindi') return;
 
-  cats.forEach(cat => {
-    const catLecs = lecs.filter(l => l.category === cat);
-    if(!catLecs.length) return;
-    const catLbl = document.createElement('div');
-    catLbl.className = 'lec-cat-lbl';
-    catLbl.textContent = cat;
-    section.appendChild(catLbl);
+    const lecs = (LECTURES_DB[key]||[]).filter(l => l.isPublic || isAdmin);
+    if(!lecs.length) return;
 
-    catLecs.forEach((lec, i) => {
-      const card = document.createElement('div');
-      card.className = 'lcard' + (!lec.isPublic && isAdmin ? ' lcard-private' : '');
-      card.style.animationDelay = (i * 0.06) + 's';
-      const thumbContent = lec.thumbnail
-        ? `<img src="${esc(lec.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-        : '';
-      const lockIco = gUser ? '▶' : '🔒';
-      const badge = lec.isPublic
-        ? `<span class="lcard-badge">🌐 Free</span>`
-        : `<span class="lcard-badge prv">🔒 Private</span>`;
-      card.innerHTML = `
-        <div class="lcard-thumb">
-          ${thumbContent}
-          <div class="lc-play"><div class="lc-play-ico">▶</div></div>
-        </div>
-        <div class="lcard-info">
-          <div class="lcard-title">${esc(lec.title)}</div>
-          <div class="lcard-meta">${badge} <span>${lec.category}</span></div>
-        </div>
-        <div class="lcard-lock" title="${gUser?'Watch':'Login to watch'}">${lockIco}</div>
-        ${isAdmin ? `<button class="lcard-del" onclick="event.stopPropagation();delLecture('${lec.id}')">🗑</button>` : ''}
-      `;
-      card.addEventListener('click', () => openLecture(lec.id));
-      section.appendChild(card);
+    // Group by category
+    const cats = [...new Set(lecs.map(l => l.category||'General'))];
+    const section = document.createElement('div');
+    section.className = 'lec-section';
+    const secLbl = document.createElement('div');
+    secLbl.className = 'lec-section-lbl';
+    secLbl.textContent = '🎬 Lectures';
+    section.appendChild(secLbl);
+
+    cats.forEach(cat => {
+      const catLecs = lecs.filter(l => l.category === cat);
+      if(!catLecs.length) return;
+      const catLbl = document.createElement('div');
+      catLbl.className = 'lec-cat-lbl';
+      catLbl.textContent = cat;
+      section.appendChild(catLbl);
+
+      catLecs.forEach((lec, i) => {
+        try {
+          const card = document.createElement('div');
+          card.className = 'lcard' + (!lec.isPublic && isAdmin ? ' lcard-private' : '');
+          card.style.animationDelay = (i * 0.06) + 's';
+          const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
+          const thumbContent = safeThumb
+            ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none'">`
+            : '';
+          const lockIco = gUser ? '▶' : '🔒';
+          const badge = lec.isPublic
+            ? `<span class="lcard-badge">🌐 Free</span>`
+            : `<span class="lcard-badge prv">🔒 Private</span>`;
+          card.innerHTML = `
+            <div class="lcard-thumb">
+              ${thumbContent}
+              <div class="lc-play"><div class="lc-play-ico">▶</div></div>
+            </div>
+            <div class="lcard-info">
+              <div class="lcard-title">${esc(lec.title||'Untitled')}</div>
+              <div class="lcard-meta">${badge} <span>${esc(lec.category||'')}</span></div>
+            </div>
+            <div class="lcard-lock" title="${gUser?'Watch':'Login to watch'}">${lockIco}</div>
+            ${isAdmin ? `<button class="lcard-del" onclick="event.stopPropagation();delLecture('${lec.id}')">🗑</button>` : ''}
+          `;
+          card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
+          section.appendChild(card);
+        } catch(cardErr){
+          console.warn('[renderLecturesSection] Card render error:', cardErr);
+        }
+      });
     });
-  });
-  container.appendChild(section);
+    container.appendChild(section);
+    console.log('[Lectures] renderLecturesSection complete for:', key);
+  } catch(e) {
+    console.error('[renderLecturesSection] Error:', e);
+    // Fail silently — do NOT crash the page
+  }
 }
 
 /* Wrap _renderFilesCore: append lectures section for english/hindi */
@@ -4573,10 +4640,8 @@ function renderFiles(key){
   }
 }
 
-/* Load lectures on init */
-(async ()=>{
-  try{ await fbLoadLectures(); } catch(e){ console.warn('[Lectures] Load error:', e); }
-})();
+/* Note: lectures are loaded during app startup inside window.addEventListener('load')
+   No separate IIFE needed — removing duplicate load to prevent race conditions */
 
 /* YOUTUBE CHANNELS — Firebase async */
 async function addYT(){
