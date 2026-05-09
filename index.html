@@ -469,8 +469,172 @@ body::before{
 }
 .ncenter:active{transform:scale(0.87);animation:none;}
 
-/* COURSES PAGE */
-.cpg-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 90px;}
+/* ══════════════════════════════════════════
+   LECTURES HUB PANEL
+══════════════════════════════════════════ */
+#lhub-panel{
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;
+  transform:translateY(40px) scale(0.97);
+  transition:opacity .4s var(--smooth),transform .42s var(--spring);
+  will-change:transform,opacity;
+}
+#lhub-panel.open{
+  opacity:1;pointer-events:all;
+  transform:translateY(0) scale(1);
+}
+.lhub-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 12px;
+  background:rgba(6,11,23,0.8);backdrop-filter:blur(32px);
+  border-bottom:1px solid var(--br);flex-shrink:0;
+  transition:background .45s;
+}
+.lm .lhub-bar{background:rgba(238,242,252,0.82);}
+.lhub-filter-btn{
+  padding:5px 11px;border-radius:99px;border:1px solid var(--br2);
+  background:var(--sf);color:var(--txt2);font-family:'Nunito',sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.lhub-filter-btn.active{
+  background:rgba(91,154,255,0.18);border-color:var(--blue);color:var(--blue);
+}
+.lhub-scroll{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 14px 90px;
+}
+.lhub-scroll::-webkit-scrollbar{display:none;}
+
+/* Loading state */
+.lhub-loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;
+}
+.lhub-spin{
+  width:40px;height:40px;border-radius:50%;
+  border:3px solid rgba(91,154,255,0.15);border-top-color:#5b9aff;
+  animation:lvSpin .8s linear infinite;
+}
+
+/* Subject section header */
+.lhub-subj-hdr{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;margin-top:6px;
+}
+.lhub-subj-ico{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.lhub-subj-name{font-size:15px;font-weight:900;letter-spacing:-.2px;}
+.lhub-subj-cnt{font-size:11px;color:var(--txt2);font-weight:600;margin-left:auto;}
+.lhub-divider{height:1px;background:var(--br);margin:20px 0;}
+
+/* Category label */
+.lhub-cat-lbl{
+  font-size:10px;font-weight:900;color:var(--txt3);
+  letter-spacing:1.2px;text-transform:uppercase;
+  margin-bottom:10px;margin-top:4px;
+  padding-left:2px;
+}
+
+/* BIG lecture card */
+.lhub-card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:20px;overflow:hidden;cursor:pointer;
+  margin-bottom:14px;
+  transition:transform .3s var(--bounce),box-shadow .3s,border-color .25s;
+  will-change:transform;
+  animation:fcIn .35s var(--spring) both;
+}
+.lhub-card:active{transform:scale(0.96)!important;box-shadow:none!important;}
+.lhub-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 36px rgba(0,0,0,0.35);
+  border-color:var(--br2);
+}
+/* Private card — admin only, red tint */
+.lhub-card.lhub-private{
+  border-color:rgba(255,107,107,0.25)!important;
+  background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,var(--card-bg) 55%);
+}
+
+/* Big thumbnail 16:9 */
+.lhub-thumb{
+  width:100%;aspect-ratio:16/9;
+  background:rgba(0,0,0,0.55);
+  position:relative;overflow:hidden;
+}
+.lhub-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .4s var(--smooth);
+}
+.lhub-card:hover .lhub-thumb img{transform:scale(1.04);}
+/* Gradient overlay on thumb */
+.lhub-thumb-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.12) 45%,transparent 100%);
+}
+/* No thumbnail fallback */
+.lhub-thumb-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(91,154,255,0.12),rgba(155,109,255,0.1));
+  font-size:48px;
+}
+/* Play button on thumb */
+.lhub-play-ico{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:54px;height:54px;border-radius:50%;
+  background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:#fff;
+  transition:transform .25s var(--bounce),background .2s;
+}
+.lhub-card:hover .lhub-play-ico{transform:translate(-50%,-50%) scale(1.12);background:rgba(91,154,255,0.55);}
+/* Subject tag on thumb (top-left) */
+.lhub-subj-tag{
+  position:absolute;top:10px;left:10px;
+  padding:3px 10px;border-radius:99px;
+  font-size:10px;font-weight:900;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.18);
+}
+.lhub-subj-tag.eng{background:rgba(37,99,235,0.75);color:#fff;}
+.lhub-subj-tag.hin{background:rgba(217,119,6,0.82);color:#fff;}
+/* Visibility badge on thumb (top-right) */
+.lhub-prv-tag{
+  position:absolute;top:10px;right:10px;
+  padding:3px 10px;border-radius:99px;font-size:10px;font-weight:900;
+  background:rgba(255,107,107,0.85);color:#fff;
+  backdrop-filter:blur(8px);border:1px solid rgba(255,107,107,0.4);
+}
+
+/* Card body */
+.lhub-info{padding:13px 14px 14px;}
+.lhub-title{
+  font-size:15px;font-weight:900;letter-spacing:-.25px;
+  line-height:1.3;margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.lhub-meta{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--txt2);font-weight:600;flex-wrap:wrap;
+}
+.lhub-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--txt3);}
+
+/* Empty state */
+.lhub-empty{
+  text-align:center;padding:60px 20px;
+}
+.lhub-empty-ico{font-size:52px;margin-bottom:14px;opacity:0.6;}
+.lhub-empty-txt{font-size:15px;font-weight:800;margin-bottom:6px;}
+.lhub-empty-sub{font-size:12px;color:var(--txt2);font-weight:600;line-height:1.6;}
+
+@keyframes fcIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .cpg-scroll::-webkit-scrollbar{display:none;}
 .cptitle{font-size:24px;font-weight:900;margin-bottom:3px;letter-spacing:-.4px;}
 .cpsub{font-size:12px;color:var(--txt2);margin-bottom:20px;font-weight:600;}
@@ -2234,7 +2398,12 @@ button,
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 3L1 9l4 2.18V17l7 4 7-4v-5.82L23 9zm0 2.28L20.55 9 12 13.28 3.45 9zM19 14.76l-7 4-7-4v-2.5l7 3.82 7-3.82z"/></svg>
       <span class="nl">Courses</span>
     </button>
-    <button class="ncenter" id="nt-center-btn" onclick="openSubj('maths',null)" style="font-size:16px;font-weight:900;letter-spacing:-.5px;">AB</button>
+    <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;">
+      <img src="https://raw.githubusercontent.com/ujjawal-04/nexttopper-feed/main/icon-192.png" 
+           alt="NT" 
+           style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
+           onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-size:20px;\'>🎬</span>';">
+    </button>
     <button class="ntab" id="nt-profile" onclick="switchTab('profile')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
       <span class="nl">Profile</span>
@@ -2257,6 +2426,35 @@ button,
     </div>
   </div>
   <div class="dpscroll" id="dpscroll"></div>
+</div>
+
+<!-- LECTURES HUB PANEL -->
+<div id="lhub-panel">
+  <div class="lhub-bar">
+    <button class="bkbtn" onclick="closeLecturesHub()">←</button>
+    <div style="display:flex;align-items:center;gap:10px;flex:1;">
+      <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(91,154,255,0.3);">
+        <img src="https://raw.githubusercontent.com/ujjawal-04/nexttopper-feed/main/icon-192.png" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:900;letter-spacing:-.3px;">Lectures</div>
+        <div style="font-size:11px;color:var(--txt2);font-weight:600;">English &amp; Hindi</div>
+      </div>
+    </div>
+    <!-- Subject filter tabs -->
+    <div style="display:flex;gap:6px;">
+      <button class="lhub-filter-btn active" id="lhub-filter-all" onclick="lhubFilter('all')">All</button>
+      <button class="lhub-filter-btn" id="lhub-filter-english" onclick="lhubFilter('english')">🇬🇧</button>
+      <button class="lhub-filter-btn" id="lhub-filter-hindi" onclick="lhubFilter('hindi')">📖</button>
+    </div>
+  </div>
+  <div class="lhub-scroll" id="lhub-scroll">
+    <!-- Filled by JS -->
+    <div class="lhub-loading" id="lhub-loading">
+      <div class="lhub-spin"></div>
+      <div style="font-size:13px;color:var(--txt2);font-weight:600;margin-top:12px;">Loading lectures…</div>
+    </div>
+  </div>
 </div>
 
 <!-- FILE VIEWER -->
@@ -2812,6 +3010,7 @@ onAuthStateChanged(auth, user => {
   // elements still get the correct values so they're right on show.
   updateProfileUI(gUser);
   if(gUser) closeLoginPopup();
+  if(typeof refreshLhubIfOpen === 'function') refreshLhubIfOpen();
 }, e => {
   console.error('[Auth] onAuthStateChanged error:', e);
 });
@@ -3982,6 +4181,7 @@ window.addLecture = async function(){
     await fbLoadLectures();
     renderAPLectures();
     updateCounts();
+    refreshLhubIfOpen();
     // Reset form
     document.getElementById('lec-title').value = '';
     document.getElementById('lec-thumb').value = '';
@@ -4006,6 +4206,7 @@ window.delLecture = async function(id, fromAP){
     if(fromAP) renderAPLectures();
     if(curSubj === 'english' || curSubj === 'hindi') renderFiles(curSubj);
     updateCounts();
+    refreshLhubIfOpen();
     toast('🗑 Lecture deleted');
   } catch(e){
     toast('❌ ' + e.message);
@@ -4125,6 +4326,7 @@ window.saveLecEdit = async function(){
     await fbLoadLectures();
     renderAPLectures();
     updateCounts();
+    refreshLhubIfOpen();
     closeLecEdit();
     toast('✅ Lecture updated!');
   } catch(e){ toast('❌ '+e.message); }
@@ -4164,8 +4366,149 @@ window.closeLecViewer = function(){
   }catch(e){}
 };
 
-/* ── Render lectures inside subject detail panel ── */
-function renderLecturesSection(key, container){
+/* ══════════════════════════════════════════
+   LECTURES HUB — center button panel
+   Shows all English + Hindi lectures with big thumbs
+══════════════════════════════════════════ */
+let _lhubFilter = 'all'; // 'all' | 'english' | 'hindi'
+
+window.openLecturesHub = function(){
+  const panel = document.getElementById('lhub-panel');
+  if(!panel) return;
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderLecturesHub();
+};
+
+window.closeLecturesHub = function(){
+  const panel = document.getElementById('lhub-panel');
+  if(panel) panel.classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.lhubFilter = function(filter){
+  _lhubFilter = filter;
+  ['all','english','hindi'].forEach(k=>{
+    document.getElementById('lhub-filter-'+k)?.classList.toggle('active', k===filter);
+  });
+  renderLecturesHub();
+};
+
+function renderLecturesHub(){
+  const scroll = document.getElementById('lhub-scroll');
+  if(!scroll) return;
+
+  // Collect lectures based on filter
+  let engLecs = (LECTURES_DB.english||[]).filter(l => l.isPublic || isAdmin);
+  let hinLecs  = (LECTURES_DB.hindi||[]).filter(l => l.isPublic || isAdmin);
+
+  const showEng = _lhubFilter === 'all' || _lhubFilter === 'english';
+  const showHin = _lhubFilter === 'all' || _lhubFilter === 'hindi';
+  if(!showEng) engLecs = [];
+  if(!showHin) hinLecs  = [];
+
+  scroll.innerHTML = '';
+
+  if(!engLecs.length && !hinLecs.length){
+    scroll.innerHTML = `
+      <div class="lhub-empty">
+        <div class="lhub-empty-ico">🎬</div>
+        <div class="lhub-empty-txt">No lectures yet</div>
+        <div class="lhub-empty-sub">Public lectures will appear here.<br>${isAdmin ? 'Add lectures from the Admin Panel.' : 'Check back soon!'}</div>
+      </div>`;
+    return;
+  }
+
+  let delay = 0;
+
+  function renderGroup(lecs, subjKey){
+    if(!lecs.length) return;
+    const isEng = subjKey === 'english';
+    const icon  = isEng ? '🇬🇧' : '📖';
+    const name  = isEng ? 'English' : 'Hindi';
+    const tagClass = isEng ? 'eng' : 'hin';
+    const bgStyle = isEng
+      ? 'background:linear-gradient(135deg,rgba(37,99,235,0.2),rgba(91,154,255,0.1));'
+      : 'background:linear-gradient(135deg,rgba(217,119,6,0.2),rgba(245,158,11,0.1));';
+
+    // Section header
+    const hdr = document.createElement('div');
+    hdr.className = 'lhub-subj-hdr';
+    hdr.innerHTML = `
+      <div class="lhub-subj-ico" style="${bgStyle}">${icon}</div>
+      <div class="lhub-subj-name">${name}</div>
+      <div class="lhub-subj-cnt">${lecs.length} lecture${lecs.length!==1?'s':''}</div>`;
+    scroll.appendChild(hdr);
+
+    // Group by category
+    const cats = [...new Set(lecs.map(l => l.category))];
+    cats.forEach(cat => {
+      const catLecs = lecs.filter(l => l.category === cat);
+      if(!catLecs.length) return;
+
+      const catLbl = document.createElement('div');
+      catLbl.className = 'lhub-cat-lbl';
+      catLbl.textContent = cat;
+      scroll.appendChild(catLbl);
+
+      catLecs.forEach((lec, i) => {
+        const card = document.createElement('div');
+        card.className = 'lhub-card' + (!lec.isPublic && isAdmin ? ' lhub-private' : '');
+        card.style.animationDelay = (delay * 0.06) + 's';
+        delay++;
+
+        const thumbHtml = lec.thumbnail
+          ? `<img src="${esc(lec.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+             <div class="lhub-thumb-placeholder" style="display:none;">🎬</div>`
+          : `<div class="lhub-thumb-placeholder">🎬</div>`;
+
+        const prvTag = (!lec.isPublic && isAdmin)
+          ? `<div class="lhub-prv-tag">🔒 Private</div>` : '';
+
+        const lockOrPlay = gUser
+          ? `<div class="lhub-play-ico">▶</div>`
+          : `<div class="lhub-play-ico" title="Login to watch">🔒</div>`;
+
+        card.innerHTML = `
+          <div class="lhub-thumb">
+            ${thumbHtml}
+            <div class="lhub-thumb-overlay"></div>
+            <div class="lhub-subj-tag ${tagClass}">${icon} ${name}</div>
+            ${prvTag}
+            ${lockOrPlay}
+          </div>
+          <div class="lhub-info">
+            <div class="lhub-title">${esc(lec.title)}</div>
+            <div class="lhub-meta">
+              <span>${lec.category}</span>
+              <span class="lhub-meta-dot"></span>
+              <span>${lec.isPublic ? '🌐 Free' : '🔒 Admin'}</span>
+              ${gUser ? '' : '<span class="lhub-meta-dot"></span><span style="color:var(--blue);">Login to watch</span>'}
+            </div>
+          </div>`;
+
+        card.addEventListener('click', () => openLecture(lec.id));
+        scroll.appendChild(card);
+      });
+    });
+
+    // Divider between subjects (only if both are shown)
+    if(_lhubFilter === 'all' && subjKey === 'english' && hinLecs.length){
+      const div = document.createElement('div');
+      div.className = 'lhub-divider';
+      scroll.appendChild(div);
+    }
+  }
+
+  renderGroup(engLecs, 'english');
+  renderGroup(hinLecs, 'hindi');
+}
+
+/* ── Re-render hub when auth state changes ── */
+function refreshLhubIfOpen(){
+  const panel = document.getElementById('lhub-panel');
+  if(panel && panel.classList.contains('open')) renderLecturesHub();
+}
   const lecs = (LECTURES_DB[key]||[]).filter(l => l.isPublic || isAdmin);
   if(!lecs.length) return;
 
