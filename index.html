@@ -61,6 +61,12 @@ body::before{
   transition:opacity .7s var(--smooth);
 }
 #loader.out{opacity:0;pointer-events:none;visibility:hidden;}
+/* Failsafe: force-hide loader after 8s even if JS hangs */
+@keyframes loaderFailsafe{
+  0%,99%{opacity:1;pointer-events:auto;visibility:visible;}
+  100%{opacity:0;pointer-events:none;visibility:hidden;}
+}
+#loader:not(.out){animation:loaderFailsafe 8s linear 1 forwards;}
 .lorb{
   width:90px;height:90px;border-radius:26px;
   background:var(--grd-blue);
@@ -3000,8 +3006,9 @@ window.openLoginPopup  = openLoginPopup;
    onAuthStateChanged — fires on load with
    the persisted user (if any). This is what
    restores the session after a normal refresh.
-   Since we no longer use redirect, there is
-   no race condition with getRedirectResult.
+   NOTE: Initial auth resolution now happens inside
+   the startup block with a timeout. This listener
+   handles subsequent changes (login/logout).
 ───────────────────────────────────────── */
 onAuthStateChanged(auth, user => {
   console.log('[Auth] onAuthStateChanged → user:', user ? user.email : 'null');
@@ -3270,38 +3277,133 @@ function fixDrive(u){
 }
 
 /* ═══════════════════════════════════════════
-   LOADER — waits for Firebase data
+   RESILIENT STARTUP — failsafe loader bypass
+   • 5 s hard timeout hides loader no matter what
+   • Every Firebase call has its own 10 s timeout
+   • Auth has its own 8 s timeout
+   • Global error handlers catch everything else
 ═══════════════════════════════════════════ */
+
+/* ── Utility: wrap any promise with a timeout ── */
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => {
+      console.warn('[Timeout]', label, 'timed out after', ms, 'ms');
+      resolve(null); // resolve (not reject) so callers keep going
+    }, ms);
+    promise.then(v => { clearTimeout(t); resolve(v); })
+           .catch(e => { clearTimeout(t); reject(e); });
+  });
+}
+
+/* ── Hide loader and show passcode — idempotent ── */
+let _appStarted = false;
+function hideLoaderAndStart(reason) {
+  if (_appStarted) return;
+  _appStarted = true;
+  console.log('[App] hideLoaderAndStart — reason:', reason);
+  const ld = document.getElementById('loader');
+  if (ld) {
+    ld.classList.add('out');
+    setTimeout(() => {
+      ld.style.display = 'none';
+      try { showPC(); } catch(e) { console.error('[App] showPC error:', e); }
+    }, 650);
+  } else {
+    try { showPC(); } catch(e) { console.error('[App] showPC error:', e); }
+  }
+}
+
+/* ── GLOBAL ERROR HANDLERS ── */
+window.addEventListener('error', function(e) {
+  console.error('[GlobalError]', e.message, 'at', e.filename, ':', e.lineno);
+  hideLoaderAndStart('global-error');
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[UnhandledPromise]', e.reason);
+  hideLoaderAndStart('unhandled-promise');
+  // Don't let it propagate to the browser's default handler
+  e.preventDefault();
+});
+
+/* ── HARD FAILSAFE: 5 s after load, force-show app ── */
+const _failsafeTimer = setTimeout(() => {
+  if (!_appStarted) {
+    console.warn('[Failsafe] 5 s timeout fired — forcing loader hide');
+    try { toast('⚠️ Some content failed to load'); } catch(e) {}
+    hideLoaderAndStart('failsafe-timeout');
+  }
+}, 5000);
+
 window.addEventListener('load', async () => {
-  // Start loading Firebase data in background during loader animation
+  console.log('[App] Window load fired — starting init');
+
   let firebaseReady = false;
-  let loaderDone = false;
+  let loaderDone    = false;
 
   const proceed = () => {
     if (firebaseReady && loaderDone) {
-      const ld = document.getElementById('loader');
-      ld.classList.add('out');
-      setTimeout(() => { ld.style.display = 'none'; showPC(); }, 650);
+      clearTimeout(_failsafeTimer); // cancel failsafe — we made it in time
+      hideLoaderAndStart('normal');
     }
   };
 
-  // Firebase load
+  /* ── Auth init with timeout (8 s) ── */
+  const authReady = new Promise(resolve => {
+    try {
+      const unsub = onAuthStateChanged(auth, user => {
+        console.log('[Auth] Initial state resolved —', user ? user.email : 'no user');
+        unsub();
+        resolve(user);
+      }, err => {
+        console.error('[Auth] onAuthStateChanged error:', err);
+        resolve(null);
+      });
+    } catch(e) {
+      console.error('[Auth] setup error:', e);
+      resolve(null);
+    }
+  });
+  // Don't block UI on auth — fire & forget with timeout
+  withTimeout(authReady, 8000, 'auth-init').then(user => {
+    gUser = user || null;
+    updateProfileUI(gUser);
+    if (gUser) closeLoginPopup();
+    console.log('[Auth] Auth loaded ✓');
+  }).catch(() => {});
+
+  /* ── Firebase data load (each capped at 10 s) ── */
+  console.log('[Firebase] Starting data load…');
   try {
-    await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
-    // Load lectures separately — don't block startup if collection is missing/empty
-    try { await fbLoadLectures(); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
-    // One-time cleanup: fix any existing docs with missing/empty category
-    await fixMissingCategories();
+    await Promise.all([
+      withTimeout(fbLoadFiles(),   10000, 'fbLoadFiles').catch(e   => console.warn('[Firebase] files error:',   e)),
+      withTimeout(fbLoadYT(),      10000, 'fbLoadYT').catch(e      => console.warn('[Firebase] YT error:',      e)),
+      withTimeout(fbLoadFolders(), 10000, 'fbLoadFolders').catch(e => console.warn('[Firebase] folders error:', e)),
+    ]);
+    console.log('[Firestore] Files/YT/Folders loaded ✓');
+
+    // Lectures — non-blocking
+    withTimeout(fbLoadLectures(), 10000, 'fbLoadLectures')
+      .then(() => { console.log('[Firestore] Lectures loaded ✓'); })
+      .catch(e => console.warn('[Lectures] Load skipped:', e));
+
+    // Category cleanup — non-blocking, fire & forget
+    fixMissingCategories().catch(e => console.warn('[fixCategories]', e));
+
     firebaseReady = true;
+    console.log('[Firebase] Init complete ✓');
   } catch(e) {
-    console.error('Firebase load error:', e);
-    toast('⚠️ Could not load data. Check connection.');
-    firebaseReady = true; // proceed anyway
+    console.error('[Firebase] Load error:', e);
+    try { toast('⚠️ Some content failed to load'); } catch(_) {}
+    firebaseReady = true; // always proceed
   }
+
   proceed();
 
-  // Minimum loader display time (1800ms for animation)
+  // Minimum loader display time for animation (1800 ms)
   setTimeout(() => { loaderDone = true; proceed(); }, 1800);
+
+  console.log('[App] Startup sequence dispatched ✓');
 });
 
 /* ═══════════════════════════════════════════
@@ -8501,13 +8603,31 @@ window._openLecViewer = function(lec){
   // Load HLS
   _currentLecUrl = lec.hlsUrl;
 
+  // HLS load with timeout protection
+  const _hlsLoadTimeout = setTimeout(() => {
+    console.warn('[HLS] Load timed out after 15s');
+    try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(e){}
+  }, 15000);
+
+  const _doHlsInit = (url) => {
+    clearTimeout(_hlsLoadTimeout);
+    try { _initHLSLoad(url); } catch(e) {
+      console.error('[HLS] _initHLSLoad error:', e);
+      try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(_){}
+    }
+  };
+
   if(window.Hls){
-    _initHLSLoad(lec.hlsUrl);
+    _doHlsInit(lec.hlsUrl);
   } else {
     const s=document.createElement('script');
     s.src='https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
-    s.onload=()=>_initHLSLoad(lec.hlsUrl);
-    s.onerror=()=>{ el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); };
+    s.onload=()=>_doHlsInit(lec.hlsUrl);
+    s.onerror=()=>{
+      clearTimeout(_hlsLoadTimeout);
+      console.error('[HLS] Script load failed');
+      try { el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); } catch(_){}
+    };
     document.head.appendChild(s);
   }
 };
@@ -8658,7 +8778,72 @@ window._openLecViewer = function(lec){
   <p>Signing you in…</p>
 </div>
 
+<script>
+/* ══════════════════════════════════════════════════
+   CRASH RECOVERY & MOBILE PERFORMANCE HARDENING
+   Runs as plain (non-module) script so it executes
+   even if the ES-module script above throws.
+══════════════════════════════════════════════════ */
+(function(){
+  'use strict';
 
+  /* ── 1. Absolute last-resort failsafe (10 s) ──
+     If the module script never ran (Firebase SDK
+     import failed etc.), this still hides the loader. */
+  var _lastResort = setTimeout(function(){
+    var ld = document.getElementById('loader');
+    if(ld && getComputedStyle(ld).opacity !== '0' && ld.style.display !== 'none'){
+      console.warn('[LastResort] Forcing loader hide at 10 s');
+      ld.style.transition   = 'opacity .5s';
+      ld.style.opacity      = '0';
+      ld.style.pointerEvents= 'none';
+      ld.style.visibility   = 'hidden';
+      setTimeout(function(){ ld.style.display = 'none'; }, 500);
+      try {
+        var pc = document.getElementById('passcode');
+        if(pc) pc.classList.add('vis');
+        if(typeof toast === 'function') toast('\u26a0\ufe0f Some content failed to load');
+      } catch(e){}
+    }
+  }, 10000);
+
+  /* ── 2. Image error suppression ──
+     Broken images must never freeze layout. */
+  document.addEventListener('error', function(e){
+    if(e.target && e.target.tagName === 'IMG'){
+      e.target.style.visibility = 'hidden';
+      e.stopPropagation();
+    }
+  }, true);
+
+  /* ── 3. Reduce motion on low-end Android ── */
+  var cores = navigator.hardwareConcurrency || 4;
+  if(cores <= 2){
+    try {
+      var style = document.createElement('style');
+      style.textContent =
+        '@keyframes loaderPulse{0%,100%{transform:scale(1);box-shadow:0 8px 32px rgba(91,154,255,0.35);}}'
+        + '.lorb{animation-duration:3.5s!important;}'
+        + '.lfill{animation-duration:2.5s!important;}'
+        + '@keyframes centerPulse{0%,100%{box-shadow:0 6px 28px var(--gb);}}';
+      document.head.appendChild(style);
+      console.log('[Perf] Reduced animations — hardware cores:', cores);
+    } catch(e){}
+  }
+
+  /* ── 4. Cancel last-resort if module script already handled it ── */
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var ld = document.getElementById('loader');
+      if(!ld || ld.style.display === 'none' || ld.classList.contains('out')){
+        clearTimeout(_lastResort);
+      }
+    }, 600);
+  });
+
+  console.log('[App] Crash-recovery guard active ✓');
+})();
+</script>
 
 </body>
 </html>
