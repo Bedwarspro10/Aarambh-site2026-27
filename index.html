@@ -4804,67 +4804,120 @@ function renderLecturesSection(key, container){
   try {
     console.log('[Lectures] renderLecturesSection called for:', key);
     if(!key || !container) return;
-    // Only English and Hindi have lectures
     if(key !== 'english' && key !== 'hindi') return;
 
     const lecs = (LECTURES_DB[key]||[]).filter(l => l.isPublic || isAdmin);
     if(!lecs.length) return;
 
-    // Group by category
-    const cats = [...new Set(lecs.map(l => l.category||'General'))];
+    const folders = (LECTURE_FOLDERS_DB[key]||[]);
+
     const section = document.createElement('div');
     section.className = 'lec-section';
+
+    // Section header
     const secLbl = document.createElement('div');
     secLbl.className = 'lec-section-lbl';
     secLbl.textContent = '🎬 Lectures';
     section.appendChild(secLbl);
 
-    cats.forEach(cat => {
-      const catLecs = lecs.filter(l => l.category === cat);
-      if(!catLecs.length) return;
-      const catLbl = document.createElement('div');
-      catLbl.className = 'lec-cat-lbl';
-      catLbl.textContent = cat;
-      section.appendChild(catLbl);
+    // ── 1. RENDER FOLDER BLOCKS FIRST ──
+    folders.forEach(fo => {
+      const folderLecs = lecs.filter(l => l.folder === fo.id);
+      if(!folderLecs.length) return; // skip empty folders
 
-      catLecs.forEach((lec, i) => {
-        try {
-          const card = document.createElement('div');
-          card.className = 'lcard' + (!lec.isPublic && isAdmin ? ' lcard-private' : '');
-          card.style.animationDelay = (i * 0.06) + 's';
-          const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
-          const thumbContent = safeThumb
-            ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none'">`
-            : '';
-          const lockIco = gUser ? '▶' : '🔒';
-          const badge = lec.isPublic
-            ? `<span class="lcard-badge">🌐 Free</span>`
-            : `<span class="lcard-badge prv">🔒 Private</span>`;
-          card.innerHTML = `
-            <div class="lcard-thumb">
-              ${thumbContent}
-              <div class="lc-play"><div class="lc-play-ico">▶</div></div>
-            </div>
-            <div class="lcard-info">
-              <div class="lcard-title">${esc(lec.title||'Untitled')}</div>
-              <div class="lcard-meta">${badge} <span>${esc(lec.category||'')}</span></div>
-            </div>
-            <div class="lcard-lock" title="${gUser?'Watch':'Login to watch'}">${lockIco}</div>
-            ${isAdmin ? `<button class="lcard-del" onclick="event.stopPropagation();delLecture('${lec.id}')">🗑</button>` : ''}
-          `;
-          card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
-          section.appendChild(card);
-        } catch(cardErr){
-          console.warn('[renderLecturesSection] Card render error:', cardErr);
-        }
+      const fblk = document.createElement('div');
+      fblk.className = 'lhub-folder-blk';
+
+      const fhdr = document.createElement('div');
+      fhdr.className = 'lhub-folder-hdr';
+      fhdr.innerHTML = `
+        <span class="lhub-folder-ico">📁</span>
+        <span class="lhub-folder-name">${esc(fo.name)}</span>
+        <span class="lhub-folder-cnt">${folderLecs.length} lecture${folderLecs.length!==1?'s':''}</span>
+        ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
+        <span class="lhub-folder-arrow">›</span>`;
+      fhdr.addEventListener('click', () => {
+        if(!gUser){ openLoginPopup(); return; }
+        fblk.classList.toggle('open');
       });
+
+      const fbody = document.createElement('div');
+      fbody.className = 'lhub-folder-body';
+
+      folderLecs.forEach((lec, i) => {
+        try {
+          const card = mkLecCard(lec, i);
+          if(card) fbody.appendChild(card);
+        } catch(e){ console.warn('[renderLecturesSection] folder card error:', e); }
+      });
+
+      fblk.appendChild(fhdr);
+      fblk.appendChild(fbody);
+      section.appendChild(fblk);
     });
+
+    // ── 2. RENDER UNFOLDERED LECTURES (grouped by category) ──
+    const unfolderedLecs = lecs.filter(l => !l.folder);
+    if(unfolderedLecs.length){
+      if(folders.length){
+        const sepLbl = document.createElement('div');
+        sepLbl.className = 'lec-cat-lbl';
+        sepLbl.style.marginTop = '16px';
+        sepLbl.textContent = 'OTHER';
+        section.appendChild(sepLbl);
+      }
+      const cats = [...new Set(unfolderedLecs.map(l => l.category||'General'))];
+      cats.forEach(cat => {
+        const catLecs = unfolderedLecs.filter(l => l.category === cat);
+        if(!catLecs.length) return;
+        const catLbl = document.createElement('div');
+        catLbl.className = 'lec-cat-lbl';
+        catLbl.textContent = cat;
+        section.appendChild(catLbl);
+        catLecs.forEach((lec, i) => {
+          try {
+            const card = mkLecCard(lec, i);
+            if(card) section.appendChild(card);
+          } catch(e){ console.warn('[renderLecturesSection] card error:', e); }
+        });
+      });
+    }
+
     container.appendChild(section);
     console.log('[Lectures] renderLecturesSection complete for:', key);
   } catch(e) {
     console.error('[renderLecturesSection] Error:', e);
-    // Fail silently — do NOT crash the page
   }
+}
+
+/* ── Build a single lecture card for the subject detail panel ── */
+function mkLecCard(lec, i){
+  if(!lec || !lec.id) return null;
+  const card = document.createElement('div');
+  card.className = 'lcard' + (!lec.isPublic && isAdmin ? ' lcard-private' : '');
+  card.style.animationDelay = (i * 0.06) + 's';
+  const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
+  const thumbContent = safeThumb
+    ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    : '';
+  const lockIco = gUser ? '▶' : '🔒';
+  const badge = lec.isPublic
+    ? `<span class="lcard-badge">🌐 Free</span>`
+    : `<span class="lcard-badge prv">🔒 Private</span>`;
+  card.innerHTML = `
+    <div class="lcard-thumb">
+      ${thumbContent}
+      <div class="lc-play"><div class="lc-play-ico">▶</div></div>
+    </div>
+    <div class="lcard-info">
+      <div class="lcard-title">${esc(lec.title||'Untitled')}</div>
+      <div class="lcard-meta">${badge} <span>${esc(lec.category||'')}</span></div>
+    </div>
+    <div class="lcard-lock" title="${gUser?'Watch':'Login to watch'}">${lockIco}</div>
+    ${isAdmin ? `<button class="lcard-del" onclick="event.stopPropagation();delLecture('${lec.id}')">🗑</button>` : ''}
+  `;
+  card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
+  return card;
 }
 
 /* Wrap _renderFilesCore: append lectures section for english/hindi */
