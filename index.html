@@ -3059,6 +3059,10 @@ async function googleSignIn(){
     const result = await signInWithPopup(auth, googleProvider);
     console.log('[Auth] signInWithPopup success:', result.user.email);
     gUser = result.user;
+    // ── EmailJS: send welcome email on first-time signup only ──
+    if(result?._tokenResponse?.isNewUser){
+      sendWelcomeEmail(gUser);
+    }
     if(spinner) spinner.style.display = 'none';
     closeLoginPopup();
     updateProfileUI(gUser);
@@ -9279,6 +9283,35 @@ window._openLecViewer = function(lec){
 </div>
 
 
+
+
+<!-- ══════════ EMAILJS ══════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+(function(){
+  // Initialize EmailJS with your Public Key
+  emailjs.init('7HEMO3LD0tNggo1kG');
+
+  // Send a welcome email to a newly registered user
+  window.sendWelcomeEmail = async function(user){
+    try {
+      const templateParams = {
+        to_name:  user.displayName || 'Student',
+        to_email: user.email
+      };
+      const res = await emailjs.send(
+        'service_0u7abra',   // Service ID
+        'template_6tl4vhr',  // Template ID
+        templateParams
+      );
+      console.log('[EmailJS] Welcome email sent successfully:', res.status, res.text);
+    } catch(err){
+      // Log error but never crash the app
+      console.error('[EmailJS] Failed to send welcome email:', err);
+    }
+  };
+})();
+</script>
 
 </body>
 </html>
