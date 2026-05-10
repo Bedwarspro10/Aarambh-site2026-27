@@ -5163,9 +5163,11 @@ function toast(msg){
    CUSTOM CATEGORIES — localStorage
 ═══════════════════════════════════════════ */
 const DEFAULT_CATS = {
-  maths: ['WPP','DPP','MODULE','NOTES','ACP'],
+  maths:   ['WPP','DPP','MODULE','NOTES','ACP'],
   science: ['WPP','DPP','MODULE','NOTES','ACP'],
-  sst: ['WPP','DPP','MODULE','NOTES','ACP']
+  sst:     ['WPP','DPP','MODULE','NOTES','ACP'],
+  english: ['NOTES','LECTURE','GRAMMAR'],
+  hindi:   ['NOTES','LECTURE','VYAKARAN']
 };
 
 function loadCategories(){
@@ -5173,15 +5175,15 @@ function loadCategories(){
     const saved=localStorage.getItem('ab_cats');
     if(saved){
       const parsed=JSON.parse(saved);
-      // Merge with defaults — add any new subjects if missing
-      ['maths','science','sst'].forEach(k=>{
-        if(!parsed[k])parsed[k]=DEFAULT_CATS[k].slice();
+      // Merge with defaults — add any new subjects if missing (including english/hindi)
+      ['maths','science','sst','english','hindi'].forEach(k=>{
+        if(!parsed[k])parsed[k]=(DEFAULT_CATS[k]||[]).slice();
         SUBJ[k].cats=parsed[k];
       });
     } else {
       // Use SUBJ cats as-is (already set at init), also add defaults
-      ['maths','science','sst'].forEach(k=>{
-        if(!SUBJ[k].cats.length)SUBJ[k].cats=DEFAULT_CATS[k].slice();
+      ['maths','science','sst','english','hindi'].forEach(k=>{
+        if(!SUBJ[k].cats.length)SUBJ[k].cats=(DEFAULT_CATS[k]||[]).slice();
       });
       saveCategories();
     }
@@ -5190,7 +5192,7 @@ function loadCategories(){
 
 function saveCategories(){
   const data={};
-  ['maths','science','sst'].forEach(k=>data[k]=SUBJ[k].cats);
+  ['maths','science','sst','english','hindi'].forEach(k=>data[k]=SUBJ[k].cats);
   localStorage.setItem('ab_cats',JSON.stringify(data));
 }
 
@@ -5198,7 +5200,7 @@ function addCategory(){
   const raw=document.getElementById('cat-name').value.trim();
   if(!raw){toast('⚠️ Category name required');return;}
   const name=raw.toUpperCase();
-  const subjects=['maths','science','sst'].filter(k=>document.getElementById('cat-subj-'+k)?.checked);
+  const subjects=['maths','science','sst','english','hindi'].filter(k=>document.getElementById('cat-subj-'+k)?.checked);
   if(!subjects.length){toast('⚠️ Select at least one subject');return;}
   let added=false;
   subjects.forEach(k=>{
@@ -5230,7 +5232,7 @@ function renderAPCats(){
   const list=document.getElementById('ap-cats-list');
   if(!list)return;
   list.innerHTML='';
-  ['maths','science','sst'].forEach(subj=>{
+  ['maths','science','sst','english','hindi'].forEach(subj=>{
     const cats=SUBJ[subj].cats||[];
     const sg=document.createElement('div');
     sg.className='ap-subj-group';
@@ -5324,7 +5326,7 @@ function renderFolderOrganizer(){
   card.style.display='';
   el.innerHTML='';
 
-  ['maths','science','sst'].forEach(subj=>{
+  ['maths','science','sst','english','hindi'].forEach(subj=>{
     const subjFiles=DB[subj]||[];
     const subjFolders=FOLDERS_DB[subj]||[];
     if(!subjFiles.length&&!subjFolders.length)return;
