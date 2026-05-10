@@ -3060,8 +3060,8 @@ async function googleSignIn(){
     console.log('[Auth] signInWithPopup success:', result.user.email);
     gUser = result.user;
     // ── EmailJS: send welcome email on first-time signup only ──
-    if(result?._tokenResponse?.isNewUser){
-      sendWelcomeEmail(gUser);
+    if(result?._tokenResponse?.isNewUser === true){
+      await sendWelcomeEmail(gUser);
     }
     if(spinner) spinner.style.display = 'none';
     closeLoginPopup();
@@ -9295,6 +9295,7 @@ window._openLecViewer = function(lec){
   // Send a welcome email to a newly registered user
   window.sendWelcomeEmail = async function(user){
     try {
+      console.log('[EmailJS] Sending welcome email to:', user.email);
       const templateParams = {
         to_name:  user.displayName || 'Student',
         to_email: user.email
@@ -9304,10 +9305,9 @@ window._openLecViewer = function(lec){
         'template_6tl4vhr',  // Template ID
         templateParams
       );
-      console.log('[EmailJS] Welcome email sent successfully:', res.status, res.text);
+      console.log('[EmailJS] Welcome email sent — status:', res.status, '| text:', res.text);
     } catch(err){
-      // Log error but never crash the app
-      console.error('[EmailJS] Failed to send welcome email:', err);
+      console.error('[EmailJS] Failed to send welcome email — name:', err.name, '| message:', err.message, '| full error:', err);
     }
   };
 })();
