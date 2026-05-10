@@ -476,14 +476,15 @@ body::before{
   position:fixed;inset:0;z-index:500;
   background:var(--bg);
   display:flex;flex-direction:column;
-  opacity:0;pointer-events:none;
+  opacity:0;pointer-events:none;visibility:hidden;
   transform:translateY(40px) scale(0.97);
-  transition:opacity .4s var(--smooth),transform .42s var(--spring);
+  transition:opacity .4s var(--smooth),transform .42s var(--spring),visibility 0s linear .4s;
   will-change:transform,opacity;
 }
 #lhub-panel.open{
-  opacity:1;pointer-events:all;
+  opacity:1;pointer-events:all;visibility:visible;
   transform:translateY(0) scale(1);
+  transition:opacity .4s var(--smooth),transform .42s var(--spring),visibility 0s linear 0s;
 }
 .lhub-bar{
   display:flex;align-items:center;gap:10px;
@@ -638,6 +639,7 @@ body::before{
 .lhub-empty-sub{font-size:12px;color:var(--txt2);font-weight:600;line-height:1.6;}
 
 @keyframes fcIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.cpg-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cpg-scroll::-webkit-scrollbar{display:none;}
 .cptitle{font-size:24px;font-weight:900;margin-bottom:3px;letter-spacing:-.4px;}
 .cpsub{font-size:12px;color:var(--txt2);margin-bottom:20px;font-weight:600;}
@@ -2402,9 +2404,9 @@ button,
       <span class="nl">Courses</span>
     </button>
     <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;background:var(--grd-blue);">
-      <img src="https://raw.githubusercontent.com/ujjawal-04/nexttopper-feed/main/icon-192.png" 
+      <img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" 
            alt="NT" 
-           style="width:100%;height:100%;object-fit:contain;border-radius:50%;display:block;"
+           style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
            onerror="this.style.display='none';this.parentElement.textContent='🎬';">
     </button>
     <button class="ntab" id="nt-profile" onclick="switchTab('profile')">
