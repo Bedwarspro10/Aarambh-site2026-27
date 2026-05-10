@@ -677,6 +677,40 @@ body::before{
   padding:2px 10px 10px;
 }
 
+/* ── PARENT (L1 with subfolders) folder ── */
+.lhub-parent-blk{
+  border-color:rgba(91,154,255,0.25);
+  background:rgba(91,154,255,0.03);
+}
+.lhub-parent-hdr{
+  background:rgba(91,154,255,0.07);
+}
+.lhub-parent-body{
+  display:flex;flex-direction:column;gap:8px;
+  padding:0 8px;
+}
+.lhub-folder-blk.open .lhub-parent-body{
+  padding:8px 8px 10px;
+}
+
+/* ── SUBFOLDER (L2) styles ── */
+.lhub-subfolder-blk{
+  margin-bottom:0;
+  border:1px solid rgba(155,109,255,0.2);
+  background:rgba(155,109,255,0.03);
+  border-radius:12px;
+  overflow:hidden;
+}
+.lhub-subfolder-hdr{
+  padding:10px 12px;
+  background:rgba(155,109,255,0.06);
+  font-size:13px;
+}
+.lhub-subfolder-hdr .lhub-folder-ico{font-size:18px;}
+.lhub-subfolder-hdr .lhub-folder-name{font-size:13px;}
+.lhub-subfolder-body{padding:0 8px;}
+.lhub-subfolder-blk.open .lhub-subfolder-body{padding:6px 8px 8px;}
+
 @keyframes fcIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .cpg-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cpg-scroll::-webkit-scrollbar{display:none;}
@@ -2725,15 +2759,20 @@ button,
       <div class="ap-card">
         <div class="ap-card-hdr">📁 Lecture Folders</div>
         <div class="fg"><label class="fl">Subject</label>
-          <select class="fi fi-sel" id="lf-subj" onchange="updateLecFolderSelect('lec-folder',this.value)">
+          <select class="fi fi-sel" id="lf-subj" onchange="updateLecFolderSelect('lec-folder',this.value);updateLecParentFolderSelect(this.value)">
             <option value="english">🇬🇧 English</option>
             <option value="hindi">📖 Hindi</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Parent Folder <span style="font-size:10px;color:var(--txt3);font-weight:600;">(optional — makes this a subfolder)</span></label>
+          <select class="fi fi-sel" id="lf-parent">
+            <option value="">— No parent (top-level folder) —</option>
           </select>
         </div>
         <div class="fg"><label class="fl">Folder Name</label>
           <input class="fi" id="lf-name" placeholder="e.g. Chapter 1, Unit 2…">
         </div>
-        <button class="btnm" onclick="addLectureFolder()" style="background:linear-gradient(135deg,#5b9aff,#9b6dff);">📁 Create Lecture Folder</button>
+        <button class="btnm" onclick="addLectureFolder()" style="background:linear-gradient(135deg,#5b9aff,#9b6dff);">📁 Create Folder</button>
         <div id="ap-lec-folder-list" style="margin-top:12px;"></div>
       </div>
 
@@ -4210,8 +4249,12 @@ async function fbUpdateLectureOrder(id, order){
 }
 
 /* ── Lecture Folder Firestore CRUD ── */
-async function fbAddLectureFolder(subject, name){
-  await addDoc(collection(db, 'lecture_folders'), { subject, name, createdAt: serverTimestamp() });
+async function fbAddLectureFolder(subject, name, parentFolder){
+  await addDoc(collection(db, 'lecture_folders'), {
+    subject, name,
+    parentFolder: parentFolder || '',
+    createdAt: serverTimestamp()
+  });
 }
 async function fbDeleteLectureFolder(id){
   await deleteDoc(doc(db, 'lecture_folders', id));
@@ -4225,7 +4268,12 @@ async function fbLoadLectureFolders(){
       if(!d) return;
       const subj = d.subject;
       if(subj !== 'english' && subj !== 'hindi') return;
-      LECTURE_FOLDERS_DB[subj].push({ id: docSnap.id, subject: subj, name: d.name || 'Folder' });
+      LECTURE_FOLDERS_DB[subj].push({
+        id: docSnap.id,
+        subject: subj,
+        name: d.name || 'Folder',
+        parentFolder: d.parentFolder || ''
+      });
     });
   } catch(e) {
     console.warn('[fbLoadLectureFolders] Error:', e);
@@ -4618,21 +4666,19 @@ function renderLecturesHub(){
           <div class="lhub-subj-cnt">${lecs.length} lecture${lecs.length!==1?'s':''}</div>`;
         scroll.appendChild(hdr);
 
-        const folders = (LECTURE_FOLDERS_DB[subjKey]||[]);
+        const allFolders = (LECTURE_FOLDERS_DB[subjKey]||[]);
+        const l1Folders  = allFolders.filter(f => !f.parentFolder);
+        const l2Folders  = allFolders.filter(f => !!f.parentFolder);
 
-        // ── 1. Render FOLDERS first ──
-        folders.forEach(fo => {
-          const folderLecs = lecs.filter(l => l.folder === fo.id);
-          if(!folderLecs.length) return; // skip empty folders
-
-          // Folder block
+        // ── helper: build a folder block (works for L1-direct & L2 subfolders) ──
+        function mkFolderBlk(fo, folderLecs, isSubfolder){
           const fblk = document.createElement('div');
-          fblk.className = 'lhub-folder-blk';
+          fblk.className = 'lhub-folder-blk' + (isSubfolder ? ' lhub-subfolder-blk' : '');
 
           const fhdr = document.createElement('div');
-          fhdr.className = 'lhub-folder-hdr';
+          fhdr.className = 'lhub-folder-hdr' + (isSubfolder ? ' lhub-subfolder-hdr' : '');
           fhdr.innerHTML = `
-            <span class="lhub-folder-ico">📁</span>
+            <span class="lhub-folder-ico">${isSubfolder ? '📂' : '📁'}</span>
             <span class="lhub-folder-name">${esc(fo.name)}</span>
             <span class="lhub-folder-cnt">${folderLecs.length} lecture${folderLecs.length!==1?'s':''}</span>
             ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
@@ -4643,7 +4689,7 @@ function renderLecturesHub(){
           });
 
           const fbody = document.createElement('div');
-          fbody.className = 'lhub-folder-body';
+          fbody.className = 'lhub-folder-body' + (isSubfolder ? ' lhub-subfolder-body' : '');
           folderLecs.forEach(lec => {
             const card = mkLhubCard(lec, subjKey);
             if(card) fbody.appendChild(card);
@@ -4651,13 +4697,62 @@ function renderLecturesHub(){
 
           fblk.appendChild(fhdr);
           fblk.appendChild(fbody);
-          scroll.appendChild(fblk);
+          return fblk;
+        }
+
+        // ── 1. Render L1 FOLDERS first ──
+        l1Folders.forEach(fo => {
+          const children = l2Folders.filter(f => f.parentFolder === fo.id);
+          const hasChildren = children.length > 0;
+
+          if(hasChildren){
+            // L1 with subfolders — show as parent; files only inside L2 children
+            const allChildLecs = lecs.filter(l => children.some(c => c.id === l.folder));
+            if(!allChildLecs.length) return;
+
+            const fblk = document.createElement('div');
+            fblk.className = 'lhub-folder-blk lhub-parent-blk';
+
+            const fhdr = document.createElement('div');
+            fhdr.className = 'lhub-folder-hdr lhub-parent-hdr';
+            fhdr.innerHTML = `
+              <span class="lhub-folder-ico">📁</span>
+              <span class="lhub-folder-name">${esc(fo.name)}</span>
+              <span class="lhub-folder-cnt">${allChildLecs.length} lecture${allChildLecs.length!==1?'s':''}</span>
+              ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
+              <span class="lhub-folder-arrow">›</span>`;
+            fhdr.addEventListener('click', () => {
+              if(!gUser){ openLoginPopup(); return; }
+              fblk.classList.toggle('open');
+            });
+
+            const fbody = document.createElement('div');
+            fbody.className = 'lhub-folder-body lhub-parent-body';
+
+            children.forEach(child => {
+              const childLecs = lecs.filter(l => l.folder === child.id);
+              if(!childLecs.length) return;
+              const sub = mkFolderBlk(child, childLecs, true);
+              fbody.appendChild(sub);
+            });
+
+            fblk.appendChild(fhdr);
+            fblk.appendChild(fbody);
+            scroll.appendChild(fblk);
+
+          } else {
+            // L1 without subfolders — lectures directly inside
+            const folderLecs = lecs.filter(l => l.folder === fo.id);
+            if(!folderLecs.length) return;
+            const fblk = mkFolderBlk(fo, folderLecs, false);
+            scroll.appendChild(fblk);
+          }
         });
 
         // ── 2. Render unfoldered lectures (by category) ──
         const unfolderedLecs = lecs.filter(l => !l.folder);
         if(unfolderedLecs.length){
-          if(folders.length){
+          if(l1Folders.length){
             // Label to separate from folders
             const uLbl = document.createElement('div');
             uLbl.className = 'lhub-cat-lbl';
@@ -4669,7 +4764,7 @@ function renderLecturesHub(){
           cats.forEach(cat => {
             const catLecs = unfolderedLecs.filter(l => l.category === cat);
             if(!catLecs.length) return;
-            if(folders.length || cats.length > 1){
+            if(l1Folders.length || cats.length > 1){
               const catLbl = document.createElement('div');
               catLbl.className = 'lhub-cat-lbl';
               catLbl.textContent = cat;
@@ -4717,19 +4812,47 @@ function refreshLhubIfOpen(){
 
 /* ── Lecture Folder helpers ── */
 function updateLecFolderSelect(selectId, subj, currentVal){
-  // Update the folder <select> for the given subject
   const sel = document.getElementById(selectId);
   if(!sel) return;
-  const folders = (LECTURE_FOLDERS_DB[subj]||[]);
+  const allFolders = (LECTURE_FOLDERS_DB[subj]||[]);
+  // IDs of L1 folders that have children (they cannot hold lectures directly)
+  const parentIds = new Set(allFolders.filter(f => f.parentFolder).map(f => f.parentFolder));
+
   sel.innerHTML = '<option value="">— No folder —</option>';
-  folders.forEach(fo => {
+  allFolders.forEach(fo => {
+    const isL1 = !fo.parentFolder;
+    const isL2 = !!fo.parentFolder;
+    const hasChildren = isL1 && parentIds.has(fo.id);
+    if(hasChildren) return; // L1 with children can't hold lectures
     const opt = document.createElement('option');
-    opt.value = fo.id; opt.textContent = '📁 ' + fo.name;
+    opt.value = fo.id;
+    if(isL2){
+      const parent = allFolders.find(f => f.id === fo.parentFolder);
+      opt.textContent = '📁 ' + (parent ? parent.name + ' › ' : '') + fo.name;
+    } else {
+      opt.textContent = '📁 ' + fo.name;
+    }
     sel.appendChild(opt);
   });
   if(currentVal && sel.querySelector(`option[value="${currentVal}"]`)) sel.value = currentVal;
 }
 window.updateLecFolderSelect = updateLecFolderSelect;
+
+/* Populate the "parent folder" select in the create-folder form (only L1 folders) */
+function updateLecParentFolderSelect(subj){
+  const sel = document.getElementById('lf-parent');
+  if(!sel) return;
+  const allFolders = (LECTURE_FOLDERS_DB[subj]||[]);
+  // Only L1 folders can be parents
+  const l1 = allFolders.filter(f => !f.parentFolder);
+  sel.innerHTML = '<option value="">— No parent (top-level folder) —</option>';
+  l1.forEach(fo => {
+    const opt = document.createElement('option');
+    opt.value = fo.id; opt.textContent = '📁 ' + fo.name;
+    sel.appendChild(opt);
+  });
+}
+window.updateLecParentFolderSelect = updateLecParentFolderSelect;
 
 /* Update lec-folder select when subject changes in add-lecture form */
 window.updateLecAddFolderSelect = function(){
@@ -4769,33 +4892,42 @@ function renderAPLecFolders(){
 window.renderAPLecFolders = renderAPLecFolders;
 
 window.addLectureFolder = async function(){
-  const subj = document.getElementById('lf-subj')?.value;
-  const name = document.getElementById('lf-name')?.value.trim();
+  const subj   = document.getElementById('lf-subj')?.value;
+  const name   = document.getElementById('lf-name')?.value.trim();
+  const parent = document.getElementById('lf-parent')?.value || '';
   if(!name){ toast('⚠️ Folder name is required'); return; }
   try {
-    await fbAddLectureFolder(subj, name);
+    await fbAddLectureFolder(subj, name, parent);
     await fbLoadLectureFolders();
     renderAPLecFolders();
+    // refresh parent select so new subfolder appears
+    updateLecParentFolderSelect(subj);
     updateLecFolderSelect('lec-folder', document.getElementById('lec-subj')?.value || 'english');
     document.getElementById('lf-name').value = '';
-    toast('✅ Lecture folder created!');
+    toast('✅ ' + (parent ? 'Subfolder' : 'Folder') + ' created!');
   } catch(e){ toast('❌ ' + e.message); }
 };
 
 window.delLectureFolder = async function(id){
-  if(!confirm('Delete this folder? Lectures inside will become unfoldered.')) return;
+  if(!confirm('Delete this folder? All subfolders and lectures inside will be unfoldered.')) return;
   try {
-    // Unset folder on lectures that used this folder
     const allLecs = [...(LECTURES_DB.english||[]),...(LECTURES_DB.hindi||[])];
-    const affected = allLecs.filter(l => l.folder === id);
+    const allFolders = [...(LECTURE_FOLDERS_DB.english||[]),...(LECTURE_FOLDERS_DB.hindi||[])];
+    // Collect this folder + all its children
+    const toDelete = [id, ...allFolders.filter(f => f.parentFolder === id).map(f => f.id)];
+    // Unassign lectures in any of these folders
+    const affected = allLecs.filter(l => toDelete.includes(l.folder));
     await Promise.all(affected.map(l => fbUpdateLecture(l.id, { folder: '' })));
-    await fbDeleteLectureFolder(id);
+    // Delete all folder docs
+    await Promise.all(toDelete.map(fid => fbDeleteLectureFolder(fid)));
     await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]);
     renderAPLecFolders();
     renderAPLectures();
-    updateLecFolderSelect('lec-folder', document.getElementById('lec-subj')?.value || 'english');
+    const curSubjVal = document.getElementById('lec-subj')?.value || 'english';
+    updateLecFolderSelect('lec-folder', curSubjVal);
+    updateLecParentFolderSelect(document.getElementById('lf-subj')?.value || 'english');
     refreshLhubIfOpen();
-    toast('🗑 Lecture folder deleted');
+    toast('🗑 Folder deleted');
   } catch(e){ toast('❌ ' + e.message); }
 };
 
@@ -4809,7 +4941,10 @@ function renderLecturesSection(key, container){
     const lecs = (LECTURES_DB[key]||[]).filter(l => l.isPublic || isAdmin);
     if(!lecs.length) return;
 
-    const folders = (LECTURE_FOLDERS_DB[key]||[]);
+    const allFolders = (LECTURE_FOLDERS_DB[key]||[]);
+    // L1 = top-level folders; L2 = subfolders (have a parentFolder)
+    const l1Folders = allFolders.filter(f => !f.parentFolder);
+    const l2Folders = allFolders.filter(f => !!f.parentFolder);
 
     const section = document.createElement('div');
     section.className = 'lec-section';
@@ -4820,18 +4955,15 @@ function renderLecturesSection(key, container){
     secLbl.textContent = '🎬 Lectures';
     section.appendChild(secLbl);
 
-    // ── 1. RENDER FOLDER BLOCKS FIRST ──
-    folders.forEach(fo => {
-      const folderLecs = lecs.filter(l => l.folder === fo.id);
-      if(!folderLecs.length) return; // skip empty folders
-
+    // ── helper: build a folder block (used for both L1-direct and L2) ──
+    function mkFolderBlock(fo, folderLecs, isSubfolder){
       const fblk = document.createElement('div');
-      fblk.className = 'lhub-folder-blk';
+      fblk.className = 'lhub-folder-blk' + (isSubfolder ? ' lhub-subfolder-blk' : '');
 
       const fhdr = document.createElement('div');
-      fhdr.className = 'lhub-folder-hdr';
+      fhdr.className = 'lhub-folder-hdr' + (isSubfolder ? ' lhub-subfolder-hdr' : '');
       fhdr.innerHTML = `
-        <span class="lhub-folder-ico">📁</span>
+        <span class="lhub-folder-ico">${isSubfolder ? '📂' : '📁'}</span>
         <span class="lhub-folder-name">${esc(fo.name)}</span>
         <span class="lhub-folder-cnt">${folderLecs.length} lecture${folderLecs.length!==1?'s':''}</span>
         ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
@@ -4853,13 +4985,64 @@ function renderLecturesSection(key, container){
 
       fblk.appendChild(fhdr);
       fblk.appendChild(fbody);
-      section.appendChild(fblk);
+      return fblk;
+    }
+
+    // ── 1. RENDER L1 FOLDER BLOCKS FIRST ──
+    l1Folders.forEach(fo => {
+      const children = l2Folders.filter(f => f.parentFolder === fo.id);
+      const hasChildren = children.length > 0;
+
+      if(hasChildren){
+        // ── L1 with subfolders: render as parent container, files only in L2 ──
+        // Count total lectures across all L2 children
+        const allChildLecs = lecs.filter(l => children.some(c => c.id === l.folder));
+        if(!allChildLecs.length) return; // skip if all subfolders are empty
+
+        const fblk = document.createElement('div');
+        fblk.className = 'lhub-folder-blk lhub-parent-blk';
+
+        const fhdr = document.createElement('div');
+        fhdr.className = 'lhub-folder-hdr lhub-parent-hdr';
+        fhdr.innerHTML = `
+          <span class="lhub-folder-ico">📁</span>
+          <span class="lhub-folder-name">${esc(fo.name)}</span>
+          <span class="lhub-folder-cnt">${allChildLecs.length} lecture${allChildLecs.length!==1?'s':''}</span>
+          ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
+          <span class="lhub-folder-arrow">›</span>`;
+        fhdr.addEventListener('click', () => {
+          if(!gUser){ openLoginPopup(); return; }
+          fblk.classList.toggle('open');
+        });
+
+        const fbody = document.createElement('div');
+        fbody.className = 'lhub-folder-body lhub-parent-body';
+
+        // Render each L2 subfolder inside
+        children.forEach(child => {
+          const childLecs = lecs.filter(l => l.folder === child.id);
+          if(!childLecs.length) return;
+          const sub = mkFolderBlock(child, childLecs, true);
+          fbody.appendChild(sub);
+        });
+
+        fblk.appendChild(fhdr);
+        fblk.appendChild(fbody);
+        section.appendChild(fblk);
+
+      } else {
+        // ── L1 without subfolders: lectures go directly inside ──
+        const folderLecs = lecs.filter(l => l.folder === fo.id);
+        if(!folderLecs.length) return;
+        const fblk = mkFolderBlock(fo, folderLecs, false);
+        section.appendChild(fblk);
+      }
     });
 
     // ── 2. RENDER UNFOLDERED LECTURES (grouped by category) ──
     const unfolderedLecs = lecs.filter(l => !l.folder);
     if(unfolderedLecs.length){
-      if(folders.length){
+      if(l1Folders.length){
         const sepLbl = document.createElement('div');
         sepLbl.className = 'lec-cat-lbl';
         sepLbl.style.marginTop = '16px';
@@ -7661,6 +7844,10 @@ window.wcStartFresh=function(){
   width:100%;height:100%;
   object-fit:contain;display:block;background:#000;
   pointer-events:none;
+  /* GPU compositing — keeps video decode on its own layer, prevents layout repaints causing lag */
+  will-change:transform;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
 }
 
 /* ── Loading spinner ── */
@@ -8446,8 +8633,17 @@ function syncPlayIcon(){
     : '<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
 }
 
-/* ══ SEEK BAR ══ */
+/* ══ SEEK BAR — rAF throttled to prevent 60fps DOM thrashing ══ */
+let _seekRafPending = false;
 function updateSeekBar(){
+  if(_seekRafPending) return;
+  _seekRafPending = true;
+  requestAnimationFrame(()=>{
+    _seekRafPending = false;
+    _doUpdateSeekBar();
+  });
+}
+function _doUpdateSeekBar(){
   const vid = el('lec-video');
   if(!vid||_seeking) return;
   const dur=vid.duration||0, cur=vid.currentTime||0;
@@ -8525,13 +8721,40 @@ function buildQualityMenu(){
 }
 function setQualityLevel(level){
   if(!_hls) return;
-  _hls.currentLevel=(level===-1)?-1:parseInt(level);
-  const lbl=el('lv-qual-lbl');
-  if(lbl) lbl.textContent=(level===-1)?'Auto':(el('lv-qual-menu').querySelector(`[data-level="${level}"]`)?.textContent?.trim().split(' ')[0]||'?');
-  const btn=el('lv-qual-btn');
-  if(btn) btn.classList.toggle('active-glow',level!==-1);
+  const vid = el('lec-video');
+  const wasPlaying = vid && !vid.paused;
+  const currentTime = vid ? vid.currentTime : 0;
+
+  // Show buffering spinner during switch
+  const spin = el('lv-buf-spin');
+  if(spin) spin.classList.add('show');
+
+  // Pause before switching to prevent audio/video desync
+  if(wasPlaying && vid) vid.pause();
+
+  // Switch level
+  _hls.currentLevel = (level === -1) ? -1 : parseInt(level);
+
+  // After a short tick, flush buffer and resume from same position
+  setTimeout(()=>{
+    if(!_hls || !vid) return;
+    // Seek back to current position to force decoder flush
+    if(isFinite(vid.duration) && currentTime > 0){
+      vid.currentTime = currentTime;
+    }
+    if(wasPlaying){
+      vid.play().catch(()=>{});
+    }
+    // Spinner hides when 'playing' event fires
+  }, 80);
+
+  // Update UI
+  const lbl = el('lv-qual-lbl');
+  if(lbl) lbl.textContent = (level===-1) ? 'Auto' : (el('lv-qual-menu').querySelector(`[data-level="${level}"]`)?.textContent?.trim().split(' ')[0] || '?');
+  const btn = el('lv-qual-btn');
+  if(btn) btn.classList.toggle('active-glow', level !== -1);
   el('lv-qual-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.classList.toggle('selected',it.dataset.level==level);
+    it.classList.toggle('selected', it.dataset.level == level);
   });
   closeAllMenus();
 }
@@ -8784,21 +9007,30 @@ function _initHLSLoad(url){
 
   if(window.Hls&&window.Hls.isSupported()){
     _hls = new window.Hls({
-      enableWorker:true,
-      lowLatencyMode:false,
-      maxBufferLength:90,
-      maxMaxBufferLength:180,
-      maxBufferSize:60*1000*1000,
-      startLevel:-1,
-      // Retry settings for slow/broken connections
-      manifestLoadingMaxRetry:5,
-      manifestLoadingRetryDelay:1000,
-      manifestLoadingMaxRetryTimeout:30000,
-      levelLoadingMaxRetry:5,
-      levelLoadingRetryDelay:1000,
-      fragLoadingMaxRetry:8,
-      fragLoadingRetryDelay:500,
-      fragLoadingMaxRetryTimeout:30000,
+      enableWorker: true,
+      lowLatencyMode: false,
+
+      // ── Buffer tuning (mobile-safe) ──
+      maxBufferLength: 20,          // was 90 — keep only 20s ahead
+      maxMaxBufferLength: 40,       // was 180 — hard cap at 40s
+      maxBufferSize: 20*1000*1000,  // was 60MB — cap at 20MB
+      maxBufferHole: 0.5,           // tolerate small gaps without stalling
+
+      // ── ABR: start low, ramp up fast ──
+      startLevel: -1,               // auto-pick first level
+      abrEwmaDefaultEstimate: 500000, // assume 500 Kbps at start (safe on mobile)
+      abrBandWidthFactor: 0.85,     // use 85% of measured BW to avoid over-estimation
+      abrBandWidthUpFactor: 0.6,    // be conservative going UP in quality
+
+      // ── Retry settings ──
+      manifestLoadingMaxRetry: 4,
+      manifestLoadingRetryDelay: 1000,
+      manifestLoadingMaxRetryTimeout: 20000,
+      levelLoadingMaxRetry: 4,
+      levelLoadingRetryDelay: 1000,
+      fragLoadingMaxRetry: 6,
+      fragLoadingRetryDelay: 500,
+      fragLoadingMaxRetryTimeout: 20000,
     });
     _hls.loadSource(url);
     _hls.attachMedia(vid);
@@ -8808,10 +9040,34 @@ function _initHLSLoad(url){
       buildQualityMenu();
       vid.play().catch(()=>{});
     });
+
+    // ── Quality switch: resume playback cleanly after level change ──
+    _hls.on(window.Hls.Events.LEVEL_SWITCHED, (e, data)=>{
+      // If video got stuck during quality switch, nudge it back
+      if(!vid.paused && vid.readyState >= 2){
+        const spin = el('lv-buf-spin');
+        if(spin) spin.classList.remove('show');
+      }
+    });
+
+    // ── Buffer stall detection: if video hasn't moved for 2s, recover ──
+    let _stallTimer = null;
+    let _lastTime = -1;
+    _hls.on(window.Hls.Events.FRAG_BUFFERED, ()=>{
+      clearTimeout(_stallTimer);
+      _stallTimer = setTimeout(()=>{
+        if(!vid.paused && vid.currentTime === _lastTime && vid.readyState < 3){
+          // Video is stuck — try to nudge
+          const nudge = vid.currentTime;
+          vid.currentTime = nudge + 0.001;
+        }
+        _lastTime = vid.currentTime;
+      }, 2000);
+    });
+
     _hls.on(window.Hls.Events.ERROR, (e,data)=>{
       if(data.fatal){
         if(data.type===window.Hls.ErrorTypes.NETWORK_ERROR){
-          // Network dropped — show buffering spinner and attempt recovery
           el('lv-buf-spin').classList.add('show');
           _hls.startLoad();
         } else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
