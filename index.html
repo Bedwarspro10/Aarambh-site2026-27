@@ -638,6 +638,45 @@ body::before{
 .lhub-empty-txt{font-size:15px;font-weight:800;margin-bottom:6px;}
 .lhub-empty-sub{font-size:12px;color:var(--txt2);font-weight:600;line-height:1.6;}
 
+/* ── Lecture Folder blocks (student-facing) ── */
+.lhub-folder-blk{
+  margin-bottom:14px;
+  border:1px solid var(--card-border);
+  border-radius:18px;overflow:hidden;
+  background:linear-gradient(145deg,rgba(10,18,38,0.88),rgba(8,14,30,0.94));
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  animation:fcIn .35s var(--spring) both;
+}
+.lhub-folder-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;cursor:pointer;
+  user-select:none;
+  transition:background .2s;
+}
+.lhub-folder-hdr:active{background:rgba(255,255,255,0.04);}
+.lhub-folder-ico{font-size:22px;flex-shrink:0;}
+.lhub-folder-name{flex:1;font-size:14px;font-weight:900;letter-spacing:-.2px;}
+.lhub-folder-cnt{font-size:11px;color:var(--txt2);font-weight:600;flex-shrink:0;}
+.lhub-folder-lock{
+  font-size:10px;color:var(--blue);font-weight:700;
+  background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);
+  border-radius:99px;padding:2px 8px;flex-shrink:0;
+}
+.lhub-folder-arrow{
+  font-size:20px;color:var(--txt3);flex-shrink:0;font-weight:700;
+  transition:transform .3s var(--bounce);
+}
+.lhub-folder-blk.open .lhub-folder-arrow{transform:rotate(90deg);}
+.lhub-folder-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .4s cubic-bezier(0.4,0,0.2,1);
+  padding:0 10px;
+}
+.lhub-folder-blk.open .lhub-folder-body{
+  max-height:9999px;
+  padding:2px 10px 10px;
+}
+
 @keyframes fcIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .cpg-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cpg-scroll::-webkit-scrollbar{display:none;}
@@ -2655,7 +2694,7 @@ button,
         <div class="fg"><label class="fl">Lecture Title</label><input class="fi" id="lec-title" placeholder="e.g. Chapter 3 – Reading Comprehension"></div>
         <div class="ap-row2">
           <div class="fg" style="flex:1"><label class="fl">Subject</label>
-            <select class="fi fi-sel" id="lec-subj">
+            <select class="fi fi-sel" id="lec-subj" onchange="updateLecAddFolderSelect()">
               <option value="english">🇬🇧 English</option>
               <option value="hindi">📖 Hindi</option>
             </select>
@@ -2665,6 +2704,11 @@ button,
               <option value="2025-26 Session">2025-26 Session</option>
             </select>
           </div>
+        </div>
+        <div class="fg"><label class="fl">📁 Folder (optional)</label>
+          <select class="fi fi-sel" id="lec-folder">
+            <option value="">— No folder —</option>
+          </select>
         </div>
         <div class="fg"><label class="fl">🖼 Thumbnail URL</label><input class="fi" id="lec-thumb" placeholder="https://i.ytimg.com/vi/…/hqdefault.jpg"></div>
         <div class="fg"><label class="fl">📡 HLS Video URL (.m3u8)</label><input class="fi" id="lec-hls" placeholder="https://cdn.example.com/lecture.m3u8"></div>
@@ -2676,6 +2720,21 @@ button,
           </div>
         </div>
         <button class="btnm" id="lec-submit-btn" onclick="addLecture()">🎬 Add Lecture</button>
+      </div>
+
+      <div class="ap-card">
+        <div class="ap-card-hdr">📁 Lecture Folders</div>
+        <div class="fg"><label class="fl">Subject</label>
+          <select class="fi fi-sel" id="lf-subj" onchange="updateLecFolderSelect('lec-folder',this.value)">
+            <option value="english">🇬🇧 English</option>
+            <option value="hindi">📖 Hindi</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Folder Name</label>
+          <input class="fi" id="lf-name" placeholder="e.g. Chapter 1, Unit 2…">
+        </div>
+        <button class="btnm" onclick="addLectureFolder()" style="background:linear-gradient(135deg,#5b9aff,#9b6dff);">📁 Create Lecture Folder</button>
+        <div id="ap-lec-folder-list" style="margin-top:12px;"></div>
       </div>
 
       <div class="ap-card">
@@ -3294,7 +3353,7 @@ window.addEventListener('load', async () => {
   try {
     await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
     // Load lectures separately — don't block startup if collection is missing/empty
-    try { await fbLoadLectures(); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
+    try { await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
     // One-time cleanup: fix any existing docs with missing/empty category
     await fixMissingCategories();
     firebaseReady = true;
@@ -3719,7 +3778,7 @@ function apSwitchTab(t){
   if(t==='folders')renderAPFolders();
   if(t==='cats')renderAPCats();
   if(t==='yt')renderAPYT();
-  if(t==='lectures')renderAPLectures();
+  if(t==='lectures'){renderAPLectures();renderAPLecFolders();updateLecFolderSelect('lec-folder',document.getElementById('lec-subj')?.value||'english');}
 }
 
 /* ADMIN */
@@ -3728,7 +3787,7 @@ function openAL(){
     // Already logged in — just open admin panel directly
     document.getElementById('apanel').classList.add('open');
     apSwitchTab('files');
-    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();
+    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();renderAPLecFolders();
     return;
   }
   document.getElementById('almodal').classList.add('open');
@@ -3747,7 +3806,7 @@ function tryLogin(){
     document.getElementById('apanel').classList.add('open');
     document.getElementById('admin-badge').style.display='flex';
     apSwitchTab('files');
-    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();toast('✅ Admin logged in');
+    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();renderAPLecFolders();toast('✅ Admin logged in');
   }else{
     ['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.add('err'));
     setTimeout(()=>['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.remove('err')),1500);
@@ -4103,6 +4162,7 @@ function tncExit(){
 
 /* In-memory lecture DB */
 let LECTURES_DB = { english:[], hindi:[] };
+let LECTURE_FOLDERS_DB = { english:[], hindi:[] }; // folders for lectures
 let _lecVisMode = 'public'; // 'public' | 'private'
 let _lecEditId  = null;     // ID of lecture being edited
 let _lecDragSrc = null;     // drag-reorder state
@@ -4124,13 +4184,14 @@ window.setLecEditVis = function(mode){
 };
 
 /* ── Firestore CRUD ── */
-async function fbAddLecture(title, subject, category, thumbnail, hlsUrl, isPublic){
+async function fbAddLecture(title, subject, category, thumbnail, hlsUrl, isPublic, folder){
   const maxOrder = LECTURES_DB[subject] ? LECTURES_DB[subject].length : 0;
   await addDoc(collection(db, 'lectures'), {
     title, subject, category,
     thumbnail: thumbnail || '',
     hlsUrl,
     isPublic: !!isPublic,
+    folder: folder || '',
     order: maxOrder,
     createdAt: serverTimestamp()
   });
@@ -4146,6 +4207,30 @@ async function fbUpdateLecture(id, data){
 
 async function fbUpdateLectureOrder(id, order){
   await updateDoc(doc(db, 'lectures', id), { order });
+}
+
+/* ── Lecture Folder Firestore CRUD ── */
+async function fbAddLectureFolder(subject, name){
+  await addDoc(collection(db, 'lecture_folders'), { subject, name, createdAt: serverTimestamp() });
+}
+async function fbDeleteLectureFolder(id){
+  await deleteDoc(doc(db, 'lecture_folders', id));
+}
+async function fbLoadLectureFolders(){
+  try {
+    const snapshot = await getDocs(collection(db, 'lecture_folders'));
+    LECTURE_FOLDERS_DB = { english:[], hindi:[] };
+    snapshot.forEach(docSnap => {
+      const d = docSnap.data();
+      if(!d) return;
+      const subj = d.subject;
+      if(subj !== 'english' && subj !== 'hindi') return;
+      LECTURE_FOLDERS_DB[subj].push({ id: docSnap.id, subject: subj, name: d.name || 'Folder' });
+    });
+  } catch(e) {
+    console.warn('[fbLoadLectureFolders] Error:', e);
+    if(!LECTURE_FOLDERS_DB) LECTURE_FOLDERS_DB = { english:[], hindi:[] };
+  }
 }
 
 async function fbLoadLectures(){
@@ -4169,6 +4254,7 @@ async function fbLoadLectures(){
             thumbnail: d.thumbnail || '',
             hlsUrl: d.hlsUrl || '',
             isPublic: !!d.isPublic,
+            folder: d.folder || '',
             order: typeof d.order === 'number' ? d.order : 9999,
             createdAt: d.createdAt
           });
@@ -4202,8 +4288,9 @@ window.addLecture = async function(){
   const btn = document.getElementById('lec-submit-btn');
   btn.textContent = 'Saving…'; btn.disabled = true;
   try{
-    await fbAddLecture(title, subject, cat, thumb, hls, _lecVisMode==='public');
-    await fbLoadLectures();
+    const folder = document.getElementById('lec-folder')?.value || '';
+    await fbAddLecture(title, subject, cat, thumb, hls, _lecVisMode==='public', folder);
+    await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]);
     renderAPLectures();
     updateCounts();
     refreshLhubIfOpen();
@@ -4227,7 +4314,7 @@ window.delLecture = async function(id, fromAP){
   if(!confirm('Delete this lecture?')) return;
   try{
     await fbDeleteLecture(id);
-    await fbLoadLectures();
+    await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]);
     if(fromAP) renderAPLectures();
     if(curSubj === 'english' || curSubj === 'hindi') renderFiles(curSubj);
     updateCounts();
@@ -4265,10 +4352,13 @@ window.renderAPLectures = function(){
       const thumbEl = lec.thumbnail
         ? `<img src="${esc(lec.thumbnail)}" onerror="this.parentElement.textContent='🎬'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
         : '🎬';
+      const folderName = lec.folder
+        ? (LECTURE_FOLDERS_DB[subj]||[]).find(fo=>fo.id===lec.folder)?.name||''
+        : '';
       row.innerHTML = `
         <div class="lec-drag">⠿</div>
         <div class="lec-athumb">${thumbEl}</div>
-        <div class="lec-ainfo">${esc(lec.title)}<span>${lec.category} · ${lec.isPublic ? '🌐 Public':'🔒 Private'}</span></div>
+        <div class="lec-ainfo">${esc(lec.title)}<span>${lec.category}${folderName?' · 📁'+esc(folderName):''} · ${lec.isPublic ? '🌐 Public':'🔒 Private'}</span></div>
         <button onclick="openLecEdit('${lec.id}')" style="width:28px;height:28px;border-radius:50%;border:none;background:rgba(91,154,255,0.12);color:var(--blue);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✏️</button>
         <button class="lec-adel">🗑</button>`;
       row.querySelector('.lec-adel').addEventListener('click', () => delLecture(lec.id, true));
@@ -4282,6 +4372,7 @@ window.renderAPLectures = function(){
     grp.appendChild(dragList);
     list.appendChild(grp);
   });
+  renderAPLecFolders();
 };
 
 /* ── Lecture drag-reorder ── */
@@ -4328,6 +4419,8 @@ window.openLecEdit = function(id){
   document.getElementById('lec-edit-cat').value   = lec.category;
   document.getElementById('lec-edit-thumb').value = lec.thumbnail;
   document.getElementById('lec-edit-hls').value   = lec.hlsUrl;
+  // Populate edit folder select
+  updateLecFolderSelect('lec-edit-folder', lec.subject, lec.folder||'');
   // Set visibility toggle
   _lecEditVis = lec.isPublic ? 'public' : 'private';
   setLecEditVis(_lecEditVis);
@@ -4347,8 +4440,9 @@ window.saveLecEdit = async function(){
   const isPublic = _lecEditVis === 'public';
   if(!title){ toast('⚠️ Title required'); return; }
   try{
-    await fbUpdateLecture(_lecEditId, { title, subject:subj, category:cat, thumbnail:thumb, hlsUrl:hls, isPublic });
-    await fbLoadLectures();
+    const folder = document.getElementById('lec-edit-folder')?.value || '';
+    await fbUpdateLecture(_lecEditId, { title, subject:subj, category:cat, thumbnail:thumb, hlsUrl:hls, isPublic, folder });
+    await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]);
     renderAPLectures();
     updateCounts();
     refreshLhubIfOpen();
@@ -4454,18 +4548,68 @@ function renderLecturesHub(){
 
     let delay = 0;
 
+    // Helper: build one lecture card element
+    function mkLhubCard(lec, subjKey){
+      try {
+        if(!lec || !lec.id) return null;
+        const isEng = subjKey === 'english';
+        const icon = isEng ? '🇬🇧' : '📖';
+        const name = isEng ? 'English' : 'Hindi';
+        const tagClass = isEng ? 'eng' : 'hin';
+
+        const card = document.createElement('div');
+        card.className = 'lhub-card' + (!lec.isPublic && isAdmin ? ' lhub-private' : '');
+        card.style.animationDelay = (delay * 0.06) + 's';
+        delay++;
+
+        const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
+        const thumbHtml = safeThumb
+          ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+             <div class="lhub-thumb-placeholder" style="display:none;">🎬</div>`
+          : `<div class="lhub-thumb-placeholder">🎬</div>`;
+
+        const prvTag = (!lec.isPublic && isAdmin) ? `<div class="lhub-prv-tag">🔒 Private</div>` : '';
+        const lockOrPlay = gUser
+          ? `<div class="lhub-play-ico">▶</div>`
+          : `<div class="lhub-play-ico" title="Login to watch">🔒</div>`;
+
+        card.innerHTML = `
+          <div class="lhub-thumb">
+            ${thumbHtml}
+            <div class="lhub-thumb-overlay"></div>
+            <div class="lhub-subj-tag ${tagClass}">${icon} ${name}</div>
+            ${prvTag}
+            ${lockOrPlay}
+          </div>
+          <div class="lhub-info">
+            <div class="lhub-title">${esc(lec.title||'Untitled')}</div>
+            <div class="lhub-meta">
+              <span>${esc(lec.category||'')}</span>
+              <span class="lhub-meta-dot"></span>
+              <span>${lec.isPublic ? '🌐 Free' : '🔒 Admin'}</span>
+              ${gUser ? '' : '<span class="lhub-meta-dot"></span><span style="color:var(--blue);">Login to watch</span>'}
+            </div>
+          </div>`;
+
+        card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
+        return card;
+      } catch(e){
+        console.warn('[mkLhubCard] error:', e);
+        return null;
+      }
+    }
+
     function renderGroup(lecs, subjKey){
       try {
         if(!lecs || !lecs.length) return;
         const isEng = subjKey === 'english';
         const icon  = isEng ? '🇬🇧' : '📖';
         const name  = isEng ? 'English' : 'Hindi';
-        const tagClass = isEng ? 'eng' : 'hin';
         const bgStyle = isEng
           ? 'background:linear-gradient(135deg,rgba(37,99,235,0.2),rgba(91,154,255,0.1));'
           : 'background:linear-gradient(135deg,rgba(217,119,6,0.2),rgba(245,158,11,0.1));';
 
-        // Section header
+        // Subject section header
         const hdr = document.createElement('div');
         hdr.className = 'lhub-subj-hdr';
         hdr.innerHTML = `
@@ -4474,63 +4618,69 @@ function renderLecturesHub(){
           <div class="lhub-subj-cnt">${lecs.length} lecture${lecs.length!==1?'s':''}</div>`;
         scroll.appendChild(hdr);
 
-        // Group by category
-        const cats = [...new Set(lecs.map(l => l.category||'General'))];
-        cats.forEach(cat => {
-          const catLecs = lecs.filter(l => l.category === cat);
-          if(!catLecs.length) return;
+        const folders = (LECTURE_FOLDERS_DB[subjKey]||[]);
 
-          const catLbl = document.createElement('div');
-          catLbl.className = 'lhub-cat-lbl';
-          catLbl.textContent = cat;
-          scroll.appendChild(catLbl);
+        // ── 1. Render FOLDERS first ──
+        folders.forEach(fo => {
+          const folderLecs = lecs.filter(l => l.folder === fo.id);
+          if(!folderLecs.length) return; // skip empty folders
 
-          catLecs.forEach((lec) => {
-            try {
-              if(!lec || !lec.id) return;
-              const card = document.createElement('div');
-              card.className = 'lhub-card' + (!lec.isPublic && isAdmin ? ' lhub-private' : '');
-              card.style.animationDelay = (delay * 0.06) + 's';
-              delay++;
+          // Folder block
+          const fblk = document.createElement('div');
+          fblk.className = 'lhub-folder-blk';
 
-              const safeThumb = (lec.thumbnail||'').replace(/"/g,'&quot;');
-              const thumbHtml = safeThumb
-                ? `<img src="${safeThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                   <div class="lhub-thumb-placeholder" style="display:none;">🎬</div>`
-                : `<div class="lhub-thumb-placeholder">🎬</div>`;
-
-              const prvTag = (!lec.isPublic && isAdmin)
-                ? `<div class="lhub-prv-tag">🔒 Private</div>` : '';
-
-              const lockOrPlay = gUser
-                ? `<div class="lhub-play-ico">▶</div>`
-                : `<div class="lhub-play-ico" title="Login to watch">🔒</div>`;
-
-              card.innerHTML = `
-                <div class="lhub-thumb">
-                  ${thumbHtml}
-                  <div class="lhub-thumb-overlay"></div>
-                  <div class="lhub-subj-tag ${tagClass}">${icon} ${name}</div>
-                  ${prvTag}
-                  ${lockOrPlay}
-                </div>
-                <div class="lhub-info">
-                  <div class="lhub-title">${esc(lec.title||'Untitled')}</div>
-                  <div class="lhub-meta">
-                    <span>${esc(lec.category||'')}</span>
-                    <span class="lhub-meta-dot"></span>
-                    <span>${lec.isPublic ? '🌐 Free' : '🔒 Admin'}</span>
-                    ${gUser ? '' : '<span class="lhub-meta-dot"></span><span style="color:var(--blue);">Login to watch</span>'}
-                  </div>
-                </div>`;
-
-              card.addEventListener('click', () => { if(typeof openLecture==='function') openLecture(lec.id); });
-              scroll.appendChild(card);
-            } catch(cardErr){
-              console.warn('[renderLecturesHub] Card error:', cardErr);
-            }
+          const fhdr = document.createElement('div');
+          fhdr.className = 'lhub-folder-hdr';
+          fhdr.innerHTML = `
+            <span class="lhub-folder-ico">📁</span>
+            <span class="lhub-folder-name">${esc(fo.name)}</span>
+            <span class="lhub-folder-cnt">${folderLecs.length} lecture${folderLecs.length!==1?'s':''}</span>
+            ${!gUser ? '<span class="lhub-folder-lock">🔒 Login to view</span>' : ''}
+            <span class="lhub-folder-arrow">›</span>`;
+          fhdr.addEventListener('click', () => {
+            if(!gUser){ openLoginPopup(); return; }
+            fblk.classList.toggle('open');
           });
+
+          const fbody = document.createElement('div');
+          fbody.className = 'lhub-folder-body';
+          folderLecs.forEach(lec => {
+            const card = mkLhubCard(lec, subjKey);
+            if(card) fbody.appendChild(card);
+          });
+
+          fblk.appendChild(fhdr);
+          fblk.appendChild(fbody);
+          scroll.appendChild(fblk);
         });
+
+        // ── 2. Render unfoldered lectures (by category) ──
+        const unfolderedLecs = lecs.filter(l => !l.folder);
+        if(unfolderedLecs.length){
+          if(folders.length){
+            // Label to separate from folders
+            const uLbl = document.createElement('div');
+            uLbl.className = 'lhub-cat-lbl';
+            uLbl.style.marginTop = '16px';
+            uLbl.textContent = 'OTHER';
+            scroll.appendChild(uLbl);
+          }
+          const cats = [...new Set(unfolderedLecs.map(l => l.category||'General'))];
+          cats.forEach(cat => {
+            const catLecs = unfolderedLecs.filter(l => l.category === cat);
+            if(!catLecs.length) return;
+            if(folders.length || cats.length > 1){
+              const catLbl = document.createElement('div');
+              catLbl.className = 'lhub-cat-lbl';
+              catLbl.textContent = cat;
+              scroll.appendChild(catLbl);
+            }
+            catLecs.forEach(lec => {
+              const card = mkLhubCard(lec, subjKey);
+              if(card) scroll.appendChild(card);
+            });
+          });
+        }
 
         // Divider between subjects (only if both are shown)
         if(_lhubFilter === 'all' && subjKey === 'english' && hinLecs.length){
@@ -4564,6 +4714,90 @@ function refreshLhubIfOpen(){
   const panel = document.getElementById('lhub-panel');
   if(panel && panel.classList.contains('open')) renderLecturesHub();
 }
+
+/* ── Lecture Folder helpers ── */
+function updateLecFolderSelect(selectId, subj, currentVal){
+  // Update the folder <select> for the given subject
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  const folders = (LECTURE_FOLDERS_DB[subj]||[]);
+  sel.innerHTML = '<option value="">— No folder —</option>';
+  folders.forEach(fo => {
+    const opt = document.createElement('option');
+    opt.value = fo.id; opt.textContent = '📁 ' + fo.name;
+    sel.appendChild(opt);
+  });
+  if(currentVal && sel.querySelector(`option[value="${currentVal}"]`)) sel.value = currentVal;
+}
+window.updateLecFolderSelect = updateLecFolderSelect;
+
+/* Update lec-folder select when subject changes in add-lecture form */
+window.updateLecAddFolderSelect = function(){
+  const subj = document.getElementById('lec-subj')?.value || 'english';
+  updateLecFolderSelect('lec-folder', subj);
+};
+
+function renderAPLecFolders(){
+  const list = document.getElementById('ap-lec-folder-list');
+  if(!list) return;
+  list.innerHTML = '';
+  let any = false;
+  ['english','hindi'].forEach(subj => {
+    const folders = LECTURE_FOLDERS_DB[subj]||[];
+    if(!folders.length) return;
+    any = true;
+    const icon = subj === 'english' ? '🇬🇧' : '📖';
+    const name = subj === 'english' ? 'English' : 'Hindi';
+    const hdr = document.createElement('div');
+    hdr.className = 'ap-subj-hdr';
+    hdr.style.cssText = 'font-size:12px;font-weight:900;color:var(--txt2);margin-bottom:8px;margin-top:10px;';
+    hdr.textContent = icon + ' ' + name;
+    list.appendChild(hdr);
+    folders.forEach(fo => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px 12px;margin-bottom:7px;';
+      row.innerHTML = `
+        <span style="font-size:18px;">📁</span>
+        <span style="flex:1;font-size:13px;font-weight:800;">${esc(fo.name)}</span>
+        <span style="font-size:10px;color:var(--txt2);font-weight:600;">${name}</span>
+        <button onclick="delLectureFolder('${fo.id}')" style="background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.25);color:var(--red);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑 Delete</button>`;
+      list.appendChild(row);
+    });
+  });
+  if(!any) list.innerHTML = '<div style="font-size:12px;color:var(--txt3);font-weight:600;padding:6px 0;">No lecture folders yet.</div>';
+}
+window.renderAPLecFolders = renderAPLecFolders;
+
+window.addLectureFolder = async function(){
+  const subj = document.getElementById('lf-subj')?.value;
+  const name = document.getElementById('lf-name')?.value.trim();
+  if(!name){ toast('⚠️ Folder name is required'); return; }
+  try {
+    await fbAddLectureFolder(subj, name);
+    await fbLoadLectureFolders();
+    renderAPLecFolders();
+    updateLecFolderSelect('lec-folder', document.getElementById('lec-subj')?.value || 'english');
+    document.getElementById('lf-name').value = '';
+    toast('✅ Lecture folder created!');
+  } catch(e){ toast('❌ ' + e.message); }
+};
+
+window.delLectureFolder = async function(id){
+  if(!confirm('Delete this folder? Lectures inside will become unfoldered.')) return;
+  try {
+    // Unset folder on lectures that used this folder
+    const allLecs = [...(LECTURES_DB.english||[]),...(LECTURES_DB.hindi||[])];
+    const affected = allLecs.filter(l => l.folder === id);
+    await Promise.all(affected.map(l => fbUpdateLecture(l.id, { folder: '' })));
+    await fbDeleteLectureFolder(id);
+    await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]);
+    renderAPLecFolders();
+    renderAPLectures();
+    updateLecFolderSelect('lec-folder', document.getElementById('lec-subj')?.value || 'english');
+    refreshLhubIfOpen();
+    toast('🗑 Lecture folder deleted');
+  } catch(e){ toast('❌ ' + e.message); }
+};
 
 /* ── Render lectures section inside subject detail panel (English/Hindi only) ── */
 function renderLecturesSection(key, container){
@@ -7924,6 +8158,11 @@ window.wcStartFresh=function(){
           <option value="2025-26 Session">2025-26 Session</option>
         </select>
       </div>
+    </div>
+    <div class="fg"><label class="fl">📁 Folder (optional)</label>
+      <select class="fi fi-sel" id="lec-edit-folder">
+        <option value="">— No folder —</option>
+      </select>
     </div>
     <div class="fg"><label class="fl">Thumbnail URL</label><input class="fi" id="lec-edit-thumb" placeholder="https://…"></div>
     <div class="fg"><label class="fl">HLS URL (.m3u8)</label><input class="fi" id="lec-edit-hls" placeholder="https://…"></div>
