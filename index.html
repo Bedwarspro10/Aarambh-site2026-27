@@ -1948,7 +1948,7 @@ button,
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+  <div class="lorb"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
   <div class="llbl nt-gradient-text">Next Toppers - Feed</div>
   <div class="lsub">2026–27 · NextToppers Fanpage</div>
   <div class="ltrack"><div class="lfill"></div></div>
@@ -1986,7 +1986,7 @@ button,
 <div id="app">
   <div class="topbar">
     <div class="tbl">
-      <div class="tlogo"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+      <div class="tlogo"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
       <div class="tname"><span class="nt-gradient-text nt-topbar-name">Next Toppers - Feed</span><span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
@@ -2477,7 +2477,7 @@ button,
       <span class="nl">Courses</span>
     </button>
     <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;background:var(--grd-blue);">
-      <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" 
+      <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png" 
            alt="NT" 
            style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
            onerror="this.style.display='none';this.parentElement.textContent='🎬';">
@@ -2512,7 +2512,7 @@ button,
     <button class="bkbtn" onclick="closeLecturesHub()">←</button>
     <div style="display:flex;align-items:center;gap:10px;flex:1;">
       <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(91,154,255,0.3);">
-        <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">
+        <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">
       </div>
       <div>
         <div style="font-size:17px;font-weight:900;letter-spacing:-.3px;">Lectures</div>
@@ -8428,7 +8428,7 @@ window.wcStartFresh=function(){
 <div id="lec-viewer">
   <!-- Main video stage (tap area) -->
   <div class="lv-stage" id="lv-stage">
-    <video id="lec-video" playsinline preload="metadata" webkit-playsinline></video>
+    <video id="lec-video" playsinline preload="auto" webkit-playsinline></video>
 
     <!-- Initial loading overlay -->
     <div class="lv-load" id="lv-load">
@@ -8998,32 +8998,32 @@ function _initHLSLoad(url){
       enableWorker: true,
       lowLatencyMode: false,
 
-      // ── Buffer tuning (mobile-safe, spec-aligned) ──
-      backBufferLength: 90,           // keep 90s behind for backward seeks
-      maxBufferLength: 30,            // target 30s ahead
-      maxMaxBufferLength: 60,         // hard cap 60s ahead
-      maxBufferSize: 20*1000*1000,    // 20 MB cap
-      maxBufferHole: 0.5,             // tolerate small gaps without stalling
-      highBufferWatchdogPeriod: 2,    // check for stalls every 2s when buffered
-      nudgeOffset: 0.1,               // nudge by 0.1s to escape stalls
-      nudgeMaxRetry: 10,              // try up to 10 nudges before error
+      // ── Buffer tuning — lean for mobile RAM/network ──
+      backBufferLength: 30,           // only 30s behind; 90 was killing RAM on mobile
+      maxBufferLength: 12,            // fill 12s ahead — reachable on weak connections
+      maxMaxBufferLength: 30,         // absolute cap; prevents runaway buffering
+      maxBufferSize: 10*1000*1000,    // 10 MB — safe for low-end devices
+      maxBufferHole: 0.5,             // bridge small gaps without stalling
+      highBufferWatchdogPeriod: 2,    // hls.js built-in stall watchdog every 2s
+      nudgeOffset: 0.3,               // bigger nudge (0.1 was too small for decoders)
+      nudgeMaxRetry: 5,               // 5 nudges then escalate to error recovery
 
-      // ── ABR ──
-      capLevelToPlayerSize: true,     // never load quality higher than player res
-      startLevel: -1,                 // auto-pick first level
-      abrEwmaDefaultEstimate: 500000, // assume 500 Kbps at start (safe on mobile)
-      abrBandWidthFactor: 0.85,       // use 85% of measured BW
-      abrBandWidthUpFactor: 0.6,      // conservative when stepping up quality
+      // ── ABR — start LOW, ramp conservatively ──
+      capLevelToPlayerSize: true,     // never request resolution above player size
+      startLevel: 0,                  // always start at lowest quality, not auto
+      abrEwmaDefaultEstimate: 150000, // assume 150 Kbps — forces lowest level first
+      abrBandWidthFactor: 0.7,        // use only 70% of measured BW (conservative)
+      abrBandWidthUpFactor: 0.5,      // very conservative when stepping UP quality
 
-      // ── Retry settings ──
-      manifestLoadingMaxRetry: 4,
-      manifestLoadingRetryDelay: 1000,
-      manifestLoadingMaxRetryTimeout: 20000,
-      levelLoadingMaxRetry: 4,
-      levelLoadingRetryDelay: 1000,
-      fragLoadingMaxRetry: 6,
-      fragLoadingRetryDelay: 500,
-      fragLoadingMaxRetryTimeout: 20000,
+      // ── Retry — give slow networks more time between retries ──
+      manifestLoadingMaxRetry: 6,
+      manifestLoadingRetryDelay: 2000,
+      manifestLoadingMaxRetryTimeout: 32000,
+      levelLoadingMaxRetry: 6,
+      levelLoadingRetryDelay: 2000,
+      fragLoadingMaxRetry: 8,
+      fragLoadingRetryDelay: 1500,
+      fragLoadingMaxRetryTimeout: 30000,
     });
     _hls.loadSource(url);
     _hls.attachMedia(vid);
@@ -9034,35 +9034,66 @@ function _initHLSLoad(url){
       vid.play().catch(()=>{});
     });
 
-    // ── Quality switch: spinner hides via 'playing' event on the video element ──
-    _hls.on(window.Hls.Events.LEVEL_SWITCHING, ()=>{
-      const spin = el('lv-buf-spin');
-      if(spin) spin.classList.add('show');
+    // ── Quality switch: only show spinner on MANUAL level lock, not ABR auto-switches ──
+    _hls.on(window.Hls.Events.LEVEL_SWITCHING, (e, data)=>{
+      // _hls.manualLevel === -1 means ABR chose it — don't flash spinner for that
+      if(_hls.manualLevel !== -1){
+        const spin = el('lv-buf-spin');
+        if(spin) spin.classList.add('show');
+      }
     });
 
-    // ── Stall detector: poll every 3s; if playhead hasn't moved, nudge ──
+    // ── Stall detector: only nudge if buffered data exists ahead, else let HLS recover ──
     let _stallLastTime = -1;
+    let _stallCount = 0;
+    let _mediaErrCount = 0;
     const _stallInterval = setInterval(()=>{
       if(!_hls){ clearInterval(_stallInterval); return; }
-      if(!vid.paused && vid.readyState >= 2){
-        if(vid.currentTime === _stallLastTime){
-          vid.currentTime = vid.currentTime + 0.1;
+      if(vid.paused || vid.ended || vid.readyState === 0) {
+        _stallLastTime = vid.currentTime;
+        return;
+      }
+      if(vid.currentTime === _stallLastTime && vid.readyState >= 2){
+        // Playhead frozen but decoder has data — nudge it
+        _stallCount++;
+        if(_stallCount <= 3){
+          vid.currentTime = vid.currentTime + 0.3;
+        } else if(_stallCount <= 5){
+          // Escalate: try media recovery
+          try { _hls.recoverMediaError(); } catch(e){}
+          _stallCount = 0;
         }
+      } else {
+        _stallCount = 0; // reset if playhead is moving
       }
       _stallLastTime = vid.currentTime;
     }, 3000);
 
+    let _netErrCount = 0;
     _hls.on(window.Hls.Events.ERROR, (e,data)=>{
       if(data.fatal){
         if(data.type===window.Hls.ErrorTypes.NETWORK_ERROR){
           el('lv-buf-spin').classList.add('show');
-          _hls.startLoad();
+          _netErrCount++;
+          // Backoff: wait longer on repeated failures (don't hammer slow network)
+          const delay = Math.min(1000 * _netErrCount, 8000);
+          setTimeout(()=>{ if(_hls) _hls.startLoad(); }, delay);
         } else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
           el('lv-buf-spin').classList.add('show');
-          _hls.recoverMediaError();
+          _mediaErrCount++;
+          if(_mediaErrCount <= 3){
+            _hls.recoverMediaError();
+          } else {
+            // Too many media errors — full reload
+            _mediaErrCount = 0;
+            _initHLSLoad(url);
+          }
         } else {
           showErr();
         }
+      } else {
+        // Non-fatal: reset network error counter if things recovered
+        if(data.type!==window.Hls.ErrorTypes.NETWORK_ERROR) _netErrCount = 0;
       }
     });
   } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
