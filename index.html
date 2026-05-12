@@ -1948,7 +1948,7 @@ button,
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb"><img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+  <div class="lorb"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
   <div class="llbl nt-gradient-text">Next Toppers - Feed</div>
   <div class="lsub">2026–27 · NextToppers Fanpage</div>
   <div class="ltrack"><div class="lfill"></div></div>
@@ -1986,7 +1986,7 @@ button,
 <div id="app">
   <div class="topbar">
     <div class="tbl">
-      <div class="tlogo"><img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
+      <div class="tlogo"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
       <div class="tname"><span class="nt-gradient-text nt-topbar-name">Next Toppers - Feed</span><span>NextToppers Fanpage</span></div>
     </div>
     <div class="tbr">
@@ -2477,7 +2477,7 @@ button,
       <span class="nl">Courses</span>
     </button>
     <button class="ncenter" id="nt-center-btn" onclick="openLecturesHub()" style="overflow:hidden;padding:0;background:var(--grd-blue);">
-      <img src="https://i.postimg.cc/Nf9JrVzk/1000049837.jpg" 
+      <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" 
            alt="NT" 
            style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
            onerror="this.style.display='none';this.parentElement.textContent='🎬';">
@@ -2512,7 +2512,7 @@ button,
     <button class="bkbtn" onclick="closeLecturesHub()">←</button>
     <div style="display:flex;align-items:center;gap:10px;flex:1;">
       <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(91,154,255,0.3);">
-        <img src="https://raw.githubusercontent.com/ujjawal-04/nexttopper-feed/main/icon-192.png" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">
+        <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487598/1777904263546_jxhwe2.png" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">
       </div>
       <div>
         <div style="font-size:17px;font-weight:900;letter-spacing:-.3px;">Lectures</div>
@@ -8726,31 +8726,14 @@ function buildQualityMenu(){
 function setQualityLevel(level){
   if(!_hls) return;
   const vid = el('lec-video');
-  const wasPlaying = vid && !vid.paused;
-  const currentTime = vid ? vid.currentTime : 0;
 
-  // Show buffering spinner during switch
+  // Show buffering spinner; it hides automatically on 'playing' event
   const spin = el('lv-buf-spin');
   if(spin) spin.classList.add('show');
 
-  // Pause before switching to prevent audio/video desync
-  if(wasPlaying && vid) vid.pause();
-
-  // Switch level
+  // CORRECT: just set currentLevel — do NOT pause, seek, or recreate HLS
+  // hls.js handles the buffer flush and seamless switch internally
   _hls.currentLevel = (level === -1) ? -1 : parseInt(level);
-
-  // After a short tick, flush buffer and resume from same position
-  setTimeout(()=>{
-    if(!_hls || !vid) return;
-    // Seek back to current position to force decoder flush
-    if(isFinite(vid.duration) && currentTime > 0){
-      vid.currentTime = currentTime;
-    }
-    if(wasPlaying){
-      vid.play().catch(()=>{});
-    }
-    // Spinner hides when 'playing' event fires
-  }, 80);
 
   // Update UI
   const lbl = el('lv-qual-lbl');
@@ -8867,6 +8850,7 @@ function attachPlayerEvents(){
   vid.addEventListener('waiting',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
   vid.addEventListener('stalled',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
   vid.addEventListener('canplay',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
+  vid.addEventListener('canplaythrough',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
   vid.addEventListener('playing',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); resetHideTimer(); });
 
   /* ── Stage click: ONLY toggle controls if tap is on bare video area ──
@@ -9014,17 +8998,22 @@ function _initHLSLoad(url){
       enableWorker: true,
       lowLatencyMode: false,
 
-      // ── Buffer tuning (mobile-safe) ──
-      maxBufferLength: 20,          // was 90 — keep only 20s ahead
-      maxMaxBufferLength: 40,       // was 180 — hard cap at 40s
-      maxBufferSize: 20*1000*1000,  // was 60MB — cap at 20MB
-      maxBufferHole: 0.5,           // tolerate small gaps without stalling
+      // ── Buffer tuning (mobile-safe, spec-aligned) ──
+      backBufferLength: 90,           // keep 90s behind for backward seeks
+      maxBufferLength: 30,            // target 30s ahead
+      maxMaxBufferLength: 60,         // hard cap 60s ahead
+      maxBufferSize: 20*1000*1000,    // 20 MB cap
+      maxBufferHole: 0.5,             // tolerate small gaps without stalling
+      highBufferWatchdogPeriod: 2,    // check for stalls every 2s when buffered
+      nudgeOffset: 0.1,               // nudge by 0.1s to escape stalls
+      nudgeMaxRetry: 10,              // try up to 10 nudges before error
 
-      // ── ABR: start low, ramp up fast ──
-      startLevel: -1,               // auto-pick first level
+      // ── ABR ──
+      capLevelToPlayerSize: true,     // never load quality higher than player res
+      startLevel: -1,                 // auto-pick first level
       abrEwmaDefaultEstimate: 500000, // assume 500 Kbps at start (safe on mobile)
-      abrBandWidthFactor: 0.85,     // use 85% of measured BW to avoid over-estimation
-      abrBandWidthUpFactor: 0.6,    // be conservative going UP in quality
+      abrBandWidthFactor: 0.85,       // use 85% of measured BW
+      abrBandWidthUpFactor: 0.6,      // conservative when stepping up quality
 
       // ── Retry settings ──
       manifestLoadingMaxRetry: 4,
@@ -9045,29 +9034,23 @@ function _initHLSLoad(url){
       vid.play().catch(()=>{});
     });
 
-    // ── Quality switch: resume playback cleanly after level change ──
-    _hls.on(window.Hls.Events.LEVEL_SWITCHED, (e, data)=>{
-      // If video got stuck during quality switch, nudge it back
-      if(!vid.paused && vid.readyState >= 2){
-        const spin = el('lv-buf-spin');
-        if(spin) spin.classList.remove('show');
-      }
+    // ── Quality switch: spinner hides via 'playing' event on the video element ──
+    _hls.on(window.Hls.Events.LEVEL_SWITCHING, ()=>{
+      const spin = el('lv-buf-spin');
+      if(spin) spin.classList.add('show');
     });
 
-    // ── Buffer stall detection: if video hasn't moved for 2s, recover ──
-    let _stallTimer = null;
-    let _lastTime = -1;
-    _hls.on(window.Hls.Events.FRAG_BUFFERED, ()=>{
-      clearTimeout(_stallTimer);
-      _stallTimer = setTimeout(()=>{
-        if(!vid.paused && vid.currentTime === _lastTime && vid.readyState < 3){
-          // Video is stuck — try to nudge
-          const nudge = vid.currentTime;
-          vid.currentTime = nudge + 0.001;
+    // ── Stall detector: poll every 3s; if playhead hasn't moved, nudge ──
+    let _stallLastTime = -1;
+    const _stallInterval = setInterval(()=>{
+      if(!_hls){ clearInterval(_stallInterval); return; }
+      if(!vid.paused && vid.readyState >= 2){
+        if(vid.currentTime === _stallLastTime){
+          vid.currentTime = vid.currentTime + 0.1;
         }
-        _lastTime = vid.currentTime;
-      }, 2000);
-    });
+      }
+      _stallLastTime = vid.currentTime;
+    }, 3000);
 
     _hls.on(window.Hls.Events.ERROR, (e,data)=>{
       if(data.fatal){
