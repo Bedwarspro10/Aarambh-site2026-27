@@ -8572,6 +8572,7 @@ let _controlsTimer = null;
 let _controlsVisible = true;
 let _seeking = false;
 let _watermarkTimer = null;
+let _isSafariHLS = false;  // was missing — caused ReferenceError on Safari
 
 /* ── Element refs ── */
 function el(id){ return document.getElementById(id); }
@@ -8588,12 +8589,13 @@ function startWatermark(){
   stopWatermark();
   const wm = el('lv-watermark');
   if(!wm) return;
+  // Cache stage dimensions once — avoids forced layout on every interval tick
+  const stage = el('lv-stage');
+  let sw = stage ? (stage.clientWidth||320) : 320;
+  let sh = stage ? (stage.clientHeight||180) : 180;
   function moveWM(){
-    const stage = el('lv-stage');
-    if(!stage) return;
-    const sw=stage.clientWidth||320, sh=stage.clientHeight||180;
-    wm.style.left = Math.max(8,Math.random()*(sw-200))+'px';
-    wm.style.top  = Math.max(8,Math.min(sh-40,Math.random()*(sh-60)))+'px';
+    wm.style.left = Math.max(8, Math.random()*(sw-200))+'px';
+    wm.style.top  = Math.max(8, Math.min(sh-40, Math.random()*(sh-60)))+'px';
     wm.style.opacity = (Math.random()*0.10+0.07).toFixed(2);
   }
   moveWM();
@@ -8842,7 +8844,6 @@ function attachPlayerEvents(){
 
   /* Video state events */
   vid.addEventListener('timeupdate',updateSeekBar);
-  vid.addEventListener('progress',updateSeekBar);
   vid.addEventListener('durationchange',updateSeekBar);
   vid.addEventListener('play',()=>{ syncPlayIcon(); resetHideTimer(); });
   vid.addEventListener('pause',()=>{ syncPlayIcon(); clearTimeout(_controlsTimer); showControls(); });
@@ -8998,32 +8999,31 @@ function _initHLSLoad(url){
       enableWorker: true,
       lowLatencyMode: false,
 
-      // ── Buffer tuning — lean for mobile RAM/network ──
-      backBufferLength: 30,           // only 30s behind; 90 was killing RAM on mobile
-      maxBufferLength: 12,            // fill 12s ahead — reachable on weak connections
-      maxMaxBufferLength: 30,         // absolute cap; prevents runaway buffering
-      maxBufferSize: 10*1000*1000,    // 10 MB — safe for low-end devices
-      maxBufferHole: 0.5,             // bridge small gaps without stalling
-      highBufferWatchdogPeriod: 2,    // hls.js built-in stall watchdog every 2s
-      nudgeOffset: 0.3,               // bigger nudge (0.1 was too small for decoders)
-      nudgeMaxRetry: 5,               // 5 nudges then escalate to error recovery
+      // ── Buffer (requested config) ──
+      backBufferLength: 30,
+      maxBufferLength: 20,
+      maxMaxBufferLength: 40,
+      maxBufferHole: 0.5,
+      highBufferWatchdogPeriod: 2,
+      nudgeOffset: 0.1,
+      nudgeMaxRetry: 10,
 
-      // ── ABR — start LOW, ramp conservatively ──
-      capLevelToPlayerSize: true,     // never request resolution above player size
-      startLevel: 0,                  // always start at lowest quality, not auto
-      abrEwmaDefaultEstimate: 150000, // assume 150 Kbps — forces lowest level first
-      abrBandWidthFactor: 0.7,        // use only 70% of measured BW (conservative)
-      abrBandWidthUpFactor: 0.5,      // very conservative when stepping UP quality
+      // ── ABR: auto from start, trust the network measurement ──
+      capLevelToPlayerSize: true,
+      startLevel: -1,              // let hls.js pick — avoids mid-stream level jump that causes desync
+      abrEwmaDefaultEstimate: 500000,
+      abrBandWidthFactor: 0.85,
+      abrBandWidthUpFactor: 0.7,
 
-      // ── Retry — give slow networks more time between retries ──
-      manifestLoadingMaxRetry: 6,
-      manifestLoadingRetryDelay: 2000,
-      manifestLoadingMaxRetryTimeout: 32000,
-      levelLoadingMaxRetry: 6,
-      levelLoadingRetryDelay: 2000,
-      fragLoadingMaxRetry: 8,
-      fragLoadingRetryDelay: 1500,
-      fragLoadingMaxRetryTimeout: 30000,
+      // ── Retry ──
+      manifestLoadingMaxRetry: 4,
+      manifestLoadingRetryDelay: 1000,
+      manifestLoadingMaxRetryTimeout: 20000,
+      levelLoadingMaxRetry: 4,
+      levelLoadingRetryDelay: 1000,
+      fragLoadingMaxRetry: 6,
+      fragLoadingRetryDelay: 1000,
+      fragLoadingMaxRetryTimeout: 20000,
     });
     _hls.loadSource(url);
     _hls.attachMedia(vid);
@@ -9034,48 +9034,68 @@ function _initHLSLoad(url){
       vid.play().catch(()=>{});
     });
 
-    // ── Quality switch: only show spinner on MANUAL level lock, not ABR auto-switches ──
-    _hls.on(window.Hls.Events.LEVEL_SWITCHING, (e, data)=>{
-      // _hls.manualLevel === -1 means ABR chose it — don't flash spinner for that
+    // ── Quality switch: show spinner only on MANUAL level changes, not ABR auto-switches ──
+    _hls.on(window.Hls.Events.LEVEL_SWITCHING, ()=>{
       if(_hls.manualLevel !== -1){
         const spin = el('lv-buf-spin');
         if(spin) spin.classList.add('show');
       }
     });
 
-    // ── Stall detector: only nudge if buffered data exists ahead, else let HLS recover ──
-    let _stallLastTime = -1;
-    let _stallCount = 0;
+    // ── Desync + stall recovery ──
+    // All counters declared HERE so ERROR handler below shares the same scope
+    let _netErrCount   = 0;
     let _mediaErrCount = 0;
+    let _stallCount    = 0;
+    let _stallLastTime = -1;
+
     const _stallInterval = setInterval(()=>{
       if(!_hls){ clearInterval(_stallInterval); return; }
-      if(vid.paused || vid.ended || vid.readyState === 0) {
+      if(vid.paused || vid.ended || vid.readyState === 0){
         _stallLastTime = vid.currentTime;
         return;
       }
-      if(vid.currentTime === _stallLastTime && vid.readyState >= 2){
-        // Playhead frozen but decoder has data — nudge it
-        _stallCount++;
-        if(_stallCount <= 3){
-          vid.currentTime = vid.currentTime + 0.3;
-        } else if(_stallCount <= 5){
-          // Escalate: try media recovery
-          try { _hls.recoverMediaError(); } catch(e){}
-          _stallCount = 0;
-        }
-      } else {
-        _stallCount = 0; // reset if playhead is moving
-      }
-      _stallLastTime = vid.currentTime;
-    }, 3000);
 
-    let _netErrCount = 0;
+      // ── Audio/video desync detection ──
+      // If the browser reports video is playing but the decoded frame timestamp
+      // has fallen behind audio (video.currentTime lags real wall-clock),
+      // force a small seek to let the decoder catch up.
+      if(!vid.paused && vid.readyState >= 3){
+        const audioTrack = vid.audioTracks && vid.audioTracks[0];
+        // Use buffered end as a proxy for where audio has decoded to
+        let bufferedAhead = 0;
+        for(let i=0;i<vid.buffered.length;i++){
+          if(vid.buffered.start(i) <= vid.currentTime + 0.1){
+            bufferedAhead = Math.max(bufferedAhead, vid.buffered.end(i) - vid.currentTime);
+          }
+        }
+        // If we have >3s buffered but playhead hasn't moved → decoder stalled behind audio
+        if(vid.currentTime === _stallLastTime && bufferedAhead > 1){
+          _stallCount++;
+          if(_stallCount === 1){
+            // Light nudge — push decoder forward without user-visible jump
+            vid.currentTime = vid.currentTime + 0.1;
+          } else if(_stallCount <= 3){
+            // Stronger: small seek to force decoder flush
+            vid.currentTime = vid.currentTime + 0.5;
+          } else {
+            // Escalate: recover media pipeline
+            try { _hls.recoverMediaError(); } catch(ex){}
+            _stallCount = 0;
+          }
+        } else if(vid.currentTime !== _stallLastTime){
+          _stallCount = 0;  // playhead moving — clear counter
+        }
+      }
+
+      _stallLastTime = vid.currentTime;
+    }, 2000);  // check every 2s (tighter than before for faster desync correction)
+
     _hls.on(window.Hls.Events.ERROR, (e,data)=>{
       if(data.fatal){
         if(data.type===window.Hls.ErrorTypes.NETWORK_ERROR){
           el('lv-buf-spin').classList.add('show');
           _netErrCount++;
-          // Backoff: wait longer on repeated failures (don't hammer slow network)
           const delay = Math.min(1000 * _netErrCount, 8000);
           setTimeout(()=>{ if(_hls) _hls.startLoad(); }, delay);
         } else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
@@ -9084,7 +9104,6 @@ function _initHLSLoad(url){
           if(_mediaErrCount <= 3){
             _hls.recoverMediaError();
           } else {
-            // Too many media errors — full reload
             _mediaErrCount = 0;
             _initHLSLoad(url);
           }
@@ -9092,8 +9111,7 @@ function _initHLSLoad(url){
           showErr();
         }
       } else {
-        // Non-fatal: reset network error counter if things recovered
-        if(data.type!==window.Hls.ErrorTypes.NETWORK_ERROR) _netErrCount = 0;
+        if(data.type !== window.Hls.ErrorTypes.NETWORK_ERROR) _netErrCount = 0;
       }
     });
   } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
