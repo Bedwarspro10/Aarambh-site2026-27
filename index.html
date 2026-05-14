@@ -3983,7 +3983,7 @@ function closeSearch(){
 
 /* ADMIN PANEL TAB SWITCHER */
 function apSwitchTab(t){
-  ['files','folders','cats','yt','lectures','chat'].forEach(k=>{
+  ['files','folders','cats','yt','lectures','chat','announce'].forEach(k=>{
     document.getElementById('apt-'+k)?.classList.toggle('on',k===t);
     document.getElementById('aptp-'+k)?.classList.toggle('on',k===t);
   });
