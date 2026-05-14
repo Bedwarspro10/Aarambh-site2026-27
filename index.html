@@ -7823,564 +7823,330 @@ window.wcStartFresh=function(){
 
 <!-- ══════════ ADVANCED HLS LECTURE VIEWER ══════════ -->
 <style>
-/* ── Lecture viewer overlay ── */
 /* ══════════════════════════════════════════
-   OTT PLAYER — FULL OVERLAY REDESIGN
+   YOUTUBE-STYLE HLS PLAYER — Next Toppers Feed
 ══════════════════════════════════════════ */
 #lec-viewer{
   position:fixed;inset:0;z-index:900;
-  background:#000;
-  display:flex;flex-direction:column;
+  background:#000;display:flex;flex-direction:column;
   opacity:0;pointer-events:none;visibility:hidden;
   transition:opacity .38s cubic-bezier(0.4,0,0.2,1),visibility 0s linear .38s;
 }
 #lec-viewer.open{opacity:1;pointer-events:all;visibility:visible;transition:opacity .38s cubic-bezier(0.4,0,0.2,1),visibility 0s linear 0s;}
 
-/* ── Main video stage — fills entire viewer ── */
 .lv-stage{
-  position:relative;width:100%;height:100%;
-  background:#000;
+  position:relative;width:100%;height:100%;background:#000;
   display:flex;align-items:center;justify-content:center;
-  overflow:hidden;cursor:pointer;user-select:none;
-  -webkit-user-select:none;flex:1;
+  overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;flex:1;
 }
 #lec-video{
-  width:100%;height:100%;
-  object-fit:contain;display:block;background:#000;
-  pointer-events:none;
-  /* GPU compositing — keeps video decode on its own layer, prevents layout repaints causing lag */
-  will-change:transform;
-  transform:translateZ(0);
-  -webkit-transform:translateZ(0);
+  width:100%;height:100%;object-fit:contain;display:block;background:#000;pointer-events:none;
+  will-change:transform;transform:translateZ(0);-webkit-transform:translateZ(0);
 }
 
 /* ── Loading spinner ── */
 .lv-load{
-  position:absolute;inset:0;display:flex;
-  flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;background:rgba(0,0,0,0.75);z-index:10;
-  transition:opacity .3s;
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;
+  background:rgba(0,0,0,0.8);z-index:10;transition:opacity .3s;
 }
 .lv-load.hidden{opacity:0;pointer-events:none;}
 .lv-spin-ring{
-  width:52px;height:52px;border-radius:50%;
-  border:3px solid rgba(91,154,255,0.15);
-  border-top-color:#5b9aff;
-  animation:lvSpin .8s linear infinite;
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(255,255,255,0.15);border-top-color:#fff;
+  animation:lvSpin .85s linear infinite;
 }
 @keyframes lvSpin{to{transform:rotate(360deg);}}
-.lv-load-txt{font-size:13px;font-weight:700;color:rgba(140,180,255,0.7);letter-spacing:.5px;}
+.lv-load-txt{font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);}
 
-/* ── Error state ── */
-.lv-err{
-  position:absolute;inset:0;display:none;
-  flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;padding:32px;text-align:center;z-index:10;
-  background:rgba(0,0,0,0.85);
-}
+/* ── Error ── */
+.lv-err{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;text-align:center;z-index:10;background:rgba(0,0,0,0.88);}
 .lv-err.show{display:flex;}
-.lv-err-ico{font-size:56px;filter:grayscale(.5);}
-.lv-err-msg{font-size:14px;color:rgba(168,190,230,0.75);font-weight:600;line-height:1.6;}
-.lv-err a{color:#5b9aff;text-decoration:none;font-weight:800;}
-.lv-err-retry{
-  padding:10px 24px;border-radius:99px;border:none;
-  background:linear-gradient(135deg,#5b9aff,#9b6dff);
-  color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
-  cursor:pointer;margin-top:4px;
-  box-shadow:0 0 20px rgba(91,154,255,0.4);
-  transition:transform .2s,box-shadow .2s;
-}
+.lv-err-ico{font-size:52px;}
+.lv-err-msg{font-size:14px;color:rgba(255,255,255,0.65);font-weight:600;line-height:1.6;}
+.lv-err-retry{padding:10px 28px;border-radius:99px;border:none;background:#cc0000;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:4px;transition:transform .2s;}
 .lv-err-retry:active{transform:scale(0.93);}
 
-/* ══ WATERMARK ══ */
+/* ── Watermark ── */
 #lv-watermark{
-  position:absolute;
-  z-index:8;
-  pointer-events:none;
-  font-family:'Nunito',sans-serif;
-  font-size:13px;
-  font-weight:800;
-  color:rgba(255,255,255,0.13);
-  letter-spacing:.5px;
-  text-shadow:0 1px 4px rgba(0,0,0,0.5);
-  white-space:nowrap;
-  transition:top 2.5s cubic-bezier(0.4,0,0.2,1),left 2.5s cubic-bezier(0.4,0,0.2,1),opacity 1.5s;
-  transform:rotate(-8deg);
-  user-select:none;-webkit-user-select:none;
+  position:absolute;z-index:8;pointer-events:none;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  color:rgba(255,255,255,0.1);letter-spacing:.4px;text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  white-space:nowrap;transition:top 2.5s cubic-bezier(0.4,0,0.2,1),left 2.5s cubic-bezier(0.4,0,0.2,1),opacity 1.5s;
+  transform:rotate(-8deg);user-select:none;-webkit-user-select:none;
 }
 
-/* ══ CONTROLS OVERLAY — 3-zone flex layout ══ */
+/* ── Buffering spinner ── */
+#lv-buf-spin{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:9;pointer-events:none;opacity:0;transition:opacity .25s;
+}
+#lv-buf-spin.show{opacity:1;}
+#lv-buf-spin::before{
+  content:'';display:block;width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(255,255,255,0.15);border-top-color:#fff;
+  animation:lvSpin .75s linear infinite;
+}
+
+/* ── Skip indicators ── */
+.lv-skip-indicator{
+  position:absolute;top:50%;z-index:15;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  padding:10px 18px;border-radius:50%;
+  font-size:11px;font-weight:800;color:rgba(255,255,255,0.9);
+  transform:translateY(-50%) scale(0.7);opacity:0;
+  transition:transform .25s cubic-bezier(0.22,1,0.36,1),opacity .3s;
+}
+.lv-skip-indicator.pop{transform:translateY(-50%) scale(1);opacity:1;}
+#lv-skip-back{left:8%;}
+#lv-skip-fwd{right:8%;}
+.lv-skip-ico{font-size:22px;}
+
+/* ── Tap indicator ── */
+#lv-tap-indicator{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  z-index:15;pointer-events:none;
+  width:68px;height:68px;border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:#fff;opacity:0;
+  transition:transform .2s cubic-bezier(0.22,1,0.36,1),opacity .35s;
+}
+#lv-tap-indicator.pop{transform:translate(-50%,-50%) scale(1);opacity:1;}
+
+/* ══ CONTROLS OVERLAY ══ */
 #lv-controls-overlay{
   position:absolute;inset:0;z-index:20;
-  display:flex;flex-direction:column;
-  justify-content:space-between;
-  transition:opacity .35s cubic-bezier(0.4,0,0.2,1);
-  pointer-events:none;
+  display:flex;flex-direction:column;justify-content:space-between;
+  transition:opacity .35s cubic-bezier(0.4,0,0.2,1);pointer-events:none;
 }
 #lv-controls-overlay.hidden{opacity:0;}
 #lv-controls-overlay.hidden *{pointer-events:none !important;}
 #lv-controls-overlay:not(.hidden) button,
-#lv-controls-overlay:not(.hidden) .lv-pill-btn,
-#lv-controls-overlay:not(.hidden) .lv-dd-item,
 #lv-controls-overlay:not(.hidden) .lv-seek-wrap{pointer-events:all;}
 
-/* gradient shades */
-.lv-top-gradient{
-  position:absolute;top:0;left:0;right:0;height:160px;
-  background:linear-gradient(to bottom,rgba(0,0,0,0.88) 0%,transparent 100%);
-  pointer-events:none;z-index:0;border-radius:0;
-}
-.lv-bot-gradient{
-  position:absolute;bottom:0;left:0;right:0;height:200px;
-  background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,transparent 100%);
-  pointer-events:none;z-index:0;
-}
+.lv-top-gradient{position:absolute;top:0;left:0;right:0;height:130px;background:linear-gradient(to bottom,rgba(0,0,0,0.72) 0%,transparent 100%);pointer-events:none;z-index:0;}
+.lv-bot-gradient{position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to top,rgba(0,0,0,0.82) 0%,transparent 100%);pointer-events:none;z-index:0;}
 
-/* ── TOP ZONE: back + title ── */
+/* ── Top bar ── */
 .lv-top-bar{
-  display:flex;align-items:center;gap:10px;
-  padding:max(16px,env(safe-area-inset-top,16px)) 16px 12px;
-  position:relative;z-index:5;
-  flex-shrink:0;
+  display:flex;align-items:center;gap:8px;
+  padding:max(14px,env(safe-area-inset-top,14px)) 12px 10px;
+  position:relative;z-index:5;flex-shrink:0;
 }
 .lv-back-btn{
-  width:40px;height:40px;border-radius:50%;border:none;flex-shrink:0;
-  background:rgba(0,0,0,0.5);backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,0.15);
-  color:#fff;font-size:18px;cursor:pointer;
+  width:40px;height:40px;border-radius:50%;border:none;
+  background:transparent;color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:background .2s,transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
-  -webkit-tap-highlight-color:transparent;
-  box-shadow:0 2px 12px rgba(0,0,0,0.4);
+  transition:background .18s,transform .18s;-webkit-tap-highlight-color:transparent;flex-shrink:0;
 }
-.lv-back-btn:active{transform:scale(0.84);}
-.lv-back-btn:hover{background:rgba(91,154,255,0.25);box-shadow:0 0 16px rgba(91,154,255,0.3);}
-.lv-title-block{flex:1;min-width:0;padding-top:2px;}
-.lv-title{
-  font-size:15px;font-weight:900;letter-spacing:-.2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  color:#fff;text-shadow:0 1px 8px rgba(0,0,0,0.8);
-}
-.lv-meta{font-size:11px;font-weight:600;color:rgba(180,200,255,0.65);margin-top:2px;}
-.lv-ext-btn{
-  width:40px;height:40px;border-radius:50%;border:none;flex-shrink:0;
-  background:rgba(91,154,255,0.2);backdrop-filter:blur(16px);
-  border:1px solid rgba(91,154,255,0.35);
-  color:#5b9aff;font-size:15px;cursor:pointer;
+.lv-back-btn:active{transform:scale(0.82);background:rgba(255,255,255,0.12);}
+.lv-title-block{flex:1;min-width:0;}
+.lv-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,0.7);}
+.lv-meta{font-size:11px;font-weight:500;color:rgba(255,255,255,0.55);margin-top:1px;}
+.lv-settings-btn{
+  width:40px;height:40px;border-radius:50%;border:none;
+  background:transparent;color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:background .2s,transform .25s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
-  -webkit-tap-highlight-color:transparent;
-  box-shadow:0 2px 12px rgba(91,154,255,0.2);
+  transition:background .18s,transform .18s;-webkit-tap-highlight-color:transparent;flex-shrink:0;
 }
-.lv-ext-btn:active{transform:scale(0.84);}
-.lv-ext-btn:hover{background:rgba(91,154,255,0.35);box-shadow:0 0 20px rgba(91,154,255,0.4);}
+.lv-settings-btn:active{transform:scale(0.82);background:rgba(255,255,255,0.12);}
 
-/* ── CENTER ZONE: skip + play/pause ── */
+/* ── Center controls ── */
 .lv-center-controls{
   display:flex;align-items:center;justify-content:center;
-  gap:28px;
-  position:relative;z-index:5;
-  flex-shrink:0;
-  padding:0 20px;
+  gap:36px;position:relative;z-index:5;flex-shrink:0;padding:0 20px;
 }
 .lv-cbtn{
-  width:48px;height:48px;border-radius:50%;border:none;
-  background:rgba(0,0,0,0.45);backdrop-filter:blur(16px);
-  border:1.5px solid rgba(255,255,255,0.18);
-  color:#fff;font-size:18px;cursor:pointer;
+  width:44px;height:44px;border-radius:50%;border:none;
+  background:transparent;color:#fff;font-size:20px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:background .18s,transform .22s cubic-bezier(0.34,1.56,0.64,1),box-shadow .2s;
-  flex-shrink:0;-webkit-tap-highlight-color:transparent;position:relative;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  transition:background .18s,transform .18s;
+  flex-shrink:0;-webkit-tap-highlight-color:transparent;
 }
 .lv-cbtn:active{transform:scale(0.80);}
-.lv-cbtn:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.35);}
-.lv-cbtn.main{
-  width:66px;height:66px;font-size:26px;
-  background:linear-gradient(135deg,rgba(91,154,255,0.35),rgba(155,109,255,0.3));
-  border:2px solid rgba(91,154,255,0.6);
-  box-shadow:0 0 32px rgba(91,154,255,0.4),0 6px 24px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.15);
-}
-.lv-cbtn.main:active{transform:scale(0.83);}
-.lv-cbtn.main:hover{
-  background:linear-gradient(135deg,rgba(91,154,255,0.5),rgba(155,109,255,0.4));
-  box-shadow:0 0 44px rgba(91,154,255,0.6),0 8px 28px rgba(0,0,0,0.5);
-}
+.lv-cbtn.main{width:62px;height:62px;font-size:28px;}
+.lv-cbtn.icon-sm{width:36px;height:36px;font-size:16px;background:transparent;}
 .lv-cbtn svg{pointer-events:none;}
 
-/* skip label inside btn */
-.lv-skip-lbl{
-  position:absolute;bottom:1px;
-  font-size:8px;font-weight:900;color:rgba(180,210,255,0.85);letter-spacing:.5px;
-}
-
-/* ── CENTER tap/skip ripple indicators ── */
-#lv-tap-indicator{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
-  z-index:15;pointer-events:none;
-  width:80px;height:80px;border-radius:50%;
-  background:rgba(91,154,255,0.2);backdrop-filter:blur(8px);
-  border:2px solid rgba(91,154,255,0.5);
-  display:flex;align-items:center;justify-content:center;
-  font-size:30px;color:#fff;
-  transition:transform .25s cubic-bezier(0.22,1,0.36,1),opacity .4s;
-  opacity:0;
-}
-#lv-tap-indicator.pop{transform:translate(-50%,-50%) scale(1);opacity:1;}
-
-.lv-skip-indicator{
-  position:absolute;top:50%;z-index:15;pointer-events:none;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  padding:10px 18px;border-radius:16px;
-  background:rgba(0,0,0,0.55);backdrop-filter:blur(16px);
-  border:1px solid rgba(91,154,255,0.35);
-  font-size:11px;font-weight:800;color:rgba(140,180,255,0.95);letter-spacing:.3px;
-  transform:translateY(-50%) scale(0.7);opacity:0;
-  transition:transform .25s cubic-bezier(0.22,1,0.36,1),opacity .3s;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
-}
-.lv-skip-indicator.pop{transform:translateY(-50%) scale(1);opacity:1;}
-#lv-skip-back{left:10%;}
-#lv-skip-fwd{right:10%;}
-.lv-skip-ico{font-size:20px;}
-
-/* ── BOTTOM ZONE: seekbar + controls ── */
+/* ── Bottom controls ── */
 .lv-bottom-controls{
-  flex-shrink:0;
-  padding:0 16px max(20px,env(safe-area-inset-bottom,20px));
+  flex-shrink:0;padding:0 12px max(14px,env(safe-area-inset-bottom,14px));
   position:relative;z-index:5;
 }
 
-/* ── Progress / seek bar ── */
-.lv-seek-row{margin-bottom:12px;display:flex;align-items:center;gap:10px;}
-.lv-time{font-size:11.5px;font-weight:800;color:rgba(200,220,255,0.9);white-space:nowrap;min-width:40px;letter-spacing:.2px;text-shadow:0 1px 4px rgba(0,0,0,0.6);}
-.lv-seek-wrap{flex:1;position:relative;height:24px;display:flex;align-items:center;cursor:pointer;touch-action:none;}
+/* ── Seek bar — YouTube style (RED) ── */
+.lv-seek-row{margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.lv-time{font-size:11px;font-weight:600;color:rgba(255,255,255,0.88);white-space:nowrap;min-width:34px;letter-spacing:.1px;}
+.lv-seek-wrap{flex:1;position:relative;height:20px;display:flex;align-items:center;cursor:pointer;touch-action:none;}
 .lv-seek-track{
-  width:100%;height:4px;border-radius:99px;
-  background:rgba(255,255,255,0.2);
-  position:relative;overflow:hidden;
-  transition:height .2s;
-  box-shadow:0 1px 4px rgba(0,0,0,0.4);
+  width:100%;height:3px;border-radius:99px;
+  background:rgba(255,255,255,0.3);position:relative;overflow:visible;
+  transition:height .15s;
 }
-.lv-seek-wrap:active .lv-seek-track{height:6px;}
-.lv-seek-buf{
-  position:absolute;top:0;left:0;height:100%;
-  background:rgba(91,154,255,0.35);border-radius:99px;
-  transition:width .5s linear;width:0%;
-}
-.lv-seek-fill{
-  position:absolute;top:0;left:0;height:100%;
-  background:linear-gradient(90deg,#5b9aff,#9b6dff);
-  border-radius:99px;width:0%;
-  box-shadow:0 0 10px rgba(91,154,255,0.7);
-}
+.lv-seek-wrap.dragging .lv-seek-track{height:5px;}
+.lv-seek-buf{position:absolute;top:0;left:0;height:100%;background:rgba(255,255,255,0.45);border-radius:99px;transition:width .5s linear;width:0%;}
+.lv-seek-fill{position:absolute;top:0;left:0;height:100%;background:#ff0000;border-radius:99px;width:0%;}
 .lv-seek-thumb{
-  position:absolute;top:50%;width:16px;height:16px;border-radius:50%;
-  background:#fff;box-shadow:0 0 14px rgba(91,154,255,0.8),0 2px 8px rgba(0,0,0,0.5);
-  transform:translate(-50%,-50%);left:0%;
-  transition:transform .15s,width .15s,height .15s;
+  position:absolute;top:50%;width:13px;height:13px;border-radius:50%;
+  background:#ff0000;transform:translate(-50%,-50%) scale(0);left:0%;
+  transition:transform .15s;box-shadow:0 0 3px rgba(0,0,0,0.4);
 }
-.lv-seek-wrap:active .lv-seek-thumb{transform:translate(-50%,-50%) scale(1.3);}
+.lv-seek-wrap.dragging .lv-seek-thumb{transform:translate(-50%,-50%) scale(1);}
 
-/* ── Bottom controls row: time + speed + quality + fullscreen ── */
-.lv-ctrl-row{
-  display:flex;align-items:center;gap:8px;
-  justify-content:flex-end;
+.lv-ctrl-row{display:flex;align-items:center;justify-content:flex-end;padding-top:2px;}
+
+/* ── Landscape right panel ── */
+.lv-landscape-panel{
+  position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  z-index:22;display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 6px;
+  opacity:0;pointer-events:none;transition:opacity .3s;
 }
-
-/* ── Right controls group ── */
-.lv-ctrl-right{display:flex;align-items:center;gap:8px;}
-
-/* ── Pill controls (speed, quality) ── */
-.lv-pill-btn{
-  height:34px;padding:0 12px;border-radius:99px;border:none;
-  background:rgba(0,0,0,0.45);backdrop-filter:blur(16px);
+@media (orientation:landscape){
+  .lv-landscape-panel{opacity:1;pointer-events:all;}
+}
+.lv-land-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(0,0,0,0.45);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .18s,transform .18s;-webkit-tap-highlight-color:transparent;
   border:1px solid rgba(255,255,255,0.15);
-  color:rgba(200,220,255,0.9);font-family:'Nunito',sans-serif;
-  font-size:11.5px;font-weight:800;cursor:pointer;
-  display:flex;align-items:center;gap:5px;
-  transition:background .18s,transform .2s cubic-bezier(0.34,1.56,0.64,1),border-color .18s,box-shadow .2s;
-  white-space:nowrap;-webkit-tap-highlight-color:transparent;
-  box-shadow:0 2px 10px rgba(0,0,0,0.3);
 }
-.lv-pill-btn:active{transform:scale(0.9);}
-.lv-pill-btn:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.3);}
-.lv-pill-btn.active-glow{
-  background:rgba(91,154,255,0.2);
-  border-color:rgba(91,154,255,0.5);
-  color:#7ab8ff;
-  box-shadow:0 0 16px rgba(91,154,255,0.3);
-}
-.lv-pill-ico{font-size:13px;}
+.lv-land-btn:active{transform:scale(0.85);}
 
-/* ── Icon-only bottom btn (fullscreen) ── */
-.lv-cbtn.icon-sm{
-  width:36px;height:36px;font-size:16px;
-  background:rgba(0,0,0,0.45);backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,0.15);
-  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+/* ── CSS landscape fallback ── */
+#lec-viewer.lv-landscape-forced{
+  position:fixed !important;top:0 !important;left:0 !important;
+  width:100dvh !important;height:100dvw !important;
+  transform:rotate(90deg) translateY(-100%) !important;
+  transform-origin:top left !important;z-index:9999 !important;background:#000 !important;
 }
+#lec-viewer.lv-landscape-forced .lv-stage{width:100% !important;height:100% !important;}
+#lec-viewer:fullscreen,#lec-viewer:-webkit-full-screen{background:#000;}
+#lec-viewer:fullscreen .lv-stage,#lec-viewer:-webkit-full-screen .lv-stage{height:100vh;}
 
-/* ══ DROPDOWN MENUS ══ */
-.lv-dropdown{
-  position:absolute;bottom:calc(100% + 10px);right:0;
-  background:rgba(6,10,22,0.97);backdrop-filter:blur(32px) saturate(1.6);
-  border:1px solid rgba(91,154,255,0.3);
-  border-radius:18px;padding:8px;
-  min-width:160px;
-  box-shadow:0 -8px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(91,154,255,0.08),0 0 40px rgba(91,154,255,0.12);
-  opacity:0;pointer-events:none;transform:translateY(10px) scale(0.95);
-  transition:opacity .22s cubic-bezier(0.22,1,0.36,1),transform .22s cubic-bezier(0.22,1,0.36,1);
-  z-index:50;
+/* ══ SETTINGS BOTTOM SHEET (YouTube style) ══ */
+#lv-sheet-backdrop{
+  position:absolute;inset:0;z-index:25;
+  background:rgba(0,0,0,0.45);opacity:0;pointer-events:none;transition:opacity .25s;
 }
-.lv-dropdown.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1);}
-.lv-dropdown-title{
-  font-size:9.5px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(91,154,255,0.8);padding:4px 8px 8px;
-  border-bottom:1px solid rgba(91,154,255,0.15);margin-bottom:4px;
+#lv-sheet-backdrop.open{opacity:1;pointer-events:all;}
+#lv-settings-sheet{
+  position:absolute;bottom:0;left:0;right:0;z-index:26;
+  background:#212121;border-radius:16px 16px 0 0;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(0.22,1,0.36,1);
+  overflow:hidden;max-height:75%;
 }
-.lv-dd-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 10px;border-radius:12px;cursor:pointer;
-  font-size:13px;font-weight:700;color:rgba(200,220,255,0.85);
-  transition:background .15s,color .15s;
+#lv-settings-sheet.open{transform:translateY(0);}
+.lv-sheet-handle{width:32px;height:4px;border-radius:99px;background:rgba(255,255,255,0.28);margin:10px auto 4px;}
+.lv-sheet-panel{padding:4px 0 18px;}
+.lv-sheet-panel.hidden{display:none;}
+.lv-sheet-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 18px;cursor:pointer;transition:background .15s;
   -webkit-tap-highlight-color:transparent;
 }
-.lv-dd-item:hover{background:rgba(91,154,255,0.14);}
-.lv-dd-item.selected{
-  color:#7ab8ff;background:rgba(91,154,255,0.14);
-}
-.lv-dd-item.selected::after{
-  content:'✓';margin-left:auto;font-size:12px;color:#5b9aff;
-}
-.lv-dd-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:rgba(91,154,255,0.3);border:1.5px solid rgba(91,154,255,0.5);
-  flex-shrink:0;transition:background .15s,border-color .15s;
-}
-.lv-dd-item.selected .lv-dd-dot{background:#5b9aff;border-color:#5b9aff;}
+.lv-sheet-item:active{background:rgba(255,255,255,0.08);}
+.lv-sheet-item-left{display:flex;align-items:center;gap:14px;font-size:15px;font-weight:500;color:#fff;}
+.lv-sheet-item-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.75);}
+.lv-sheet-item-right{display:flex;align-items:center;gap:4px;font-size:13px;color:rgba(255,255,255,0.55);}
+.lv-sheet-arrow{font-size:20px;color:rgba(255,255,255,0.4);line-height:1;}
 
-/* dropdown wrapper for relative positioning */
-.lv-dd-wrap{position:relative;}
-
-/* ── Fullscreen ── */
-#lec-viewer:fullscreen,
-#lec-viewer:-webkit-full-screen{
-  background:#000;
-}
-#lec-viewer:fullscreen .lv-stage,
-#lec-viewer:-webkit-full-screen .lv-stage{
-  height:100vh;
-}
-
-/* ── Buffering spinner (inline, small) ── */
-#lv-buf-spin{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  z-index:9;pointer-events:none;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  opacity:0;transition:opacity .25s;
-}
-#lv-buf-spin.show{opacity:1;}
-#lv-buf-spin::before{
-  content:'';display:block;
-  width:52px;height:52px;border-radius:50%;
-  border:3px solid rgba(255,255,255,0.15);
-  border-top-color:rgba(91,154,255,0.95);
-  animation:lvSpin .75s linear infinite;
-}
-#lv-buf-spin::after{
-  content:'Buffering…';
-  font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);
-  letter-spacing:.3px;font-family:'Nunito',sans-serif;
-  text-shadow:0 1px 4px rgba(0,0,0,0.8);
-}
-
-/* ── CSS-transform landscape fallback (iOS Safari / browsers that block orientation lock) ──
-   When Screen Orientation API is unavailable or blocked, we rotate the viewer element itself.
-   This makes the player fill the screen in landscape without native fullscreen API. */
-#lec-viewer.lv-landscape-forced{
-  position:fixed!important;
-  /* Rotate 90° and reposition so it fills viewport as if landscape */
-  top:0!important;left:0!important;
-  width:100dvh!important;
-  height:100dvw!important;
-  transform:rotate(90deg) translateY(-100%)!important;
-  transform-origin:top left!important;
-  z-index:9999!important;
-  background:#000!important;
-}
-#lec-viewer.lv-landscape-forced .lv-stage{
-  width:100%!important;height:100%!important;
-}
-/* Smooth transition into/out of landscape */
-#lec-viewer{
-  transition:opacity .38s cubic-bezier(0.4,0,0.2,1),visibility 0s linear .38s;
-}
-
-/* ── Error state ── */
-.lv-err{
-  position:absolute;inset:0;display:none;
-  flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;padding:32px;text-align:center;z-index:10;
-  background:rgba(0,0,0,0.85);
-}
-.lv-err.show{display:flex;}
-.lv-err-ico{font-size:56px;filter:grayscale(.5);}
-.lv-err-msg{font-size:14px;color:rgba(168,190,230,0.75);font-weight:600;line-height:1.6;}
-.lv-err a{color:#5b9aff;text-decoration:none;font-weight:800;}
-.lv-err-retry{
-  padding:10px 24px;border-radius:99px;border:none;
-  background:linear-gradient(135deg,#5b9aff,#9b6dff);
-  color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
-  cursor:pointer;margin-top:4px;
-  box-shadow:0 0 20px rgba(91,154,255,0.4);
-  transition:transform .2s,box-shadow .2s;
-}
-.lv-err-retry:active{transform:scale(0.93);}
-
-/* ── Lecture cards in subject panel ── */
-.lec-section{margin-bottom:14px;}
-.lec-section-lbl{
-  font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;
-  color:var(--blue);margin-bottom:10px;padding:0 2px;
+/* Sub-panel header */
+.lv-sheet-sub-header{
   display:flex;align-items:center;gap:8px;
+  padding:6px 12px 12px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:2px;
 }
-.lec-section-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(91,154,255,0.35),transparent);}
-.lec-cat-lbl{
-  font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--txt2);margin:8px 0 6px 2px;
-  opacity:0.75;
+.lv-sheet-back{
+  width:36px;height:36px;border:none;background:transparent;color:#fff;
+  font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;border-radius:50%;transition:background .15s;flex-shrink:0;
+}
+.lv-sheet-back:active{background:rgba(255,255,255,0.1);}
+.lv-sheet-sub-title{font-size:14px;color:rgba(255,255,255,0.8);font-weight:500;}
+.lv-sheet-sub-cur{font-size:13px;color:rgba(255,255,255,0.45);margin-left:4px;}
+
+/* Quality list */
+.lv-qual-item{
+  padding:14px 18px;font-size:15px;color:rgba(255,255,255,0.75);cursor:pointer;
+  transition:background .15s;display:flex;align-items:center;gap:14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.lv-qual-item:active{background:rgba(255,255,255,0.08);}
+.lv-qual-item.selected{color:#fff;font-weight:600;}
+.lv-qual-item-check{width:20px;text-align:center;font-size:14px;color:#fff;flex-shrink:0;}
+.lv-sheet-note{
+  padding:12px 18px;font-size:12px;color:rgba(255,255,255,0.38);
+  line-height:1.55;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;
 }
 
-.lcard{
-  display:flex;align-items:center;gap:12px;
-  background:var(--card-bg);
-  border:1px solid rgba(91,154,255,0.12);
-  border-radius:18px;padding:12px 14px;
-  cursor:pointer;margin-bottom:9px;
-  position:relative;overflow:hidden;
-  transition:transform .28s var(--bounce),box-shadow .28s var(--smooth),border-color .25s;
-  will-change:transform;
-  animation:msgAppear .3s var(--spring) both;
-}
-.lcard::before{
-  content:'';position:absolute;inset:0;border-radius:18px;
-  background:linear-gradient(135deg,rgba(91,154,255,0.06),transparent);
-  opacity:0;transition:opacity .28s;
-}
-.lcard:hover::before,.lcard:active::before{opacity:1;}
-.lcard:hover{transform:translateY(-2px);border-color:rgba(91,154,255,0.28);
-  box-shadow:0 8px 28px rgba(91,154,255,0.12);}
-.lcard:active{transform:scale(0.97)!important;}
-
-.lcard-thumb{
-  width:72px;height:44px;border-radius:10px;
-  background:rgba(91,154,255,0.1);
-  flex-shrink:0;overflow:hidden;position:relative;
-  display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(91,154,255,0.15);
-}
-.lcard-thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;}
-.lcard-thumb .lc-play{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,0.35);border-radius:10px;
-}
-.lc-play-ico{
-  width:22px;height:22px;border-radius:50%;
-  background:rgba(91,154,255,0.85);
-  display:flex;align-items:center;justify-content:center;
-  font-size:8px;color:#fff;padding-left:2px;
-  box-shadow:0 2px 8px rgba(91,154,255,0.45);
-}
-.lcard-info{flex:1;min-width:0;}
-.lcard-title{font-size:13px;font-weight:800;letter-spacing:-.15px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lcard-meta{font-size:11px;color:var(--txt2);margin-top:3px;font-weight:600;
-  display:flex;align-items:center;gap:6px;}
-.lcard-badge{
-  display:inline-flex;align-items:center;gap:3px;
-  padding:2px 8px;border-radius:99px;font-size:9.5px;font-weight:900;
-  background:rgba(91,154,255,0.12);border:1px solid rgba(91,154,255,0.2);
-  color:rgba(140,180,255,0.9);letter-spacing:.3px;
-}
-.lcard-badge.prv{
-  background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.3);color:var(--red);
-  animation:prvPulse 2.5s ease-in-out infinite;
-}
-@keyframes prvPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,0);}
-  50%{box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
-}
-/* Private lecture card — admin-only stripe overlay */
-.lcard.lcard-private{
-  border-color:rgba(255,107,107,0.22)!important;
-  background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,transparent 60%);
-}
-.lcard-lock{
-  width:32px;height:32px;border-radius:50%;border:none;flex-shrink:0;
-  background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);
-  color:#5b9aff;font-size:14px;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .2s,transform .2s;
-}
-.lcard:hover .lcard-lock{background:rgba(91,154,255,0.2);}
-.lcard-del{
-  width:28px;height:28px;border-radius:50%;border:none;
-  background:rgba(255,107,107,0.1);color:var(--red);font-size:12px;
+/* Speed panel */
+.lv-speed-display{text-align:center;padding:14px 0 6px;font-size:26px;font-weight:700;color:#fff;}
+.lv-speed-slider-row{display:flex;align-items:center;gap:12px;padding:8px 18px 10px;}
+.lv-speed-minus,.lv-speed-plus{
+  width:34px;height:34px;border-radius:50%;border:none;
+  background:rgba(255,255,255,0.12);color:#fff;font-size:22px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:transform .2s var(--bounce),background .15s;flex-shrink:0;
-  margin-left:4px;
+  flex-shrink:0;transition:background .15s,transform .15s;-webkit-tap-highlight-color:transparent;
+  font-family:'Nunito',sans-serif;
 }
-.lcard-del:active{transform:scale(0.82);background:rgba(255,107,107,0.3);}
+.lv-speed-minus:active,.lv-speed-plus:active{transform:scale(0.9);background:rgba(255,255,255,0.22);}
+.lv-speed-range{
+  flex:1;height:3px;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,0.3);border-radius:99px;cursor:pointer;outline:none;
+}
+.lv-speed-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.4);}
+.lv-speed-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.4);}
+.lv-speed-presets{display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 18px 6px;flex-wrap:wrap;}
+.lv-speed-preset{
+  padding:6px 14px;border-radius:99px;border:none;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);
+  font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;
+  transition:background .15s,color .15s,transform .15s;-webkit-tap-highlight-color:transparent;
+}
+.lv-speed-preset:active{transform:scale(0.93);}
+.lv-speed-preset.sp-active{background:#fff;color:#000;}
+.lv-speed-preset-lbl{text-align:center;font-size:12px;color:rgba(255,255,255,0.45);padding:2px 18px 10px;}
 
-/* ── Lecture admin row ── */
-.lec-row{
-  display:flex;align-items:center;gap:9px;
-  background:rgba(91,154,255,0.04);
-  border:1px solid rgba(91,154,255,0.1);
-  border-radius:14px;padding:9px 12px;
-  margin-bottom:8px;
-  transition:background .2s,border-color .2s;
-  animation:fcIn .3s var(--spring) both;
-}
+/* ── Lecture cards ── */
+.lec-section{margin-bottom:14px;}
+.lec-section-lbl{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;padding:0 2px;display:flex;align-items:center;gap:8px;}
+.lec-section-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(91,154,255,0.35),transparent);}
+.lec-cat-lbl{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);margin:8px 0 6px 2px;opacity:.75;}
+.lcard{display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid rgba(91,154,255,0.12);border-radius:18px;padding:12px 14px;cursor:pointer;margin-bottom:9px;position:relative;overflow:hidden;transition:transform .28s var(--bounce),box-shadow .28s var(--smooth),border-color .25s;will-change:transform;animation:msgAppear .3s var(--spring) both;}
+.lcard::before{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,rgba(91,154,255,0.06),transparent);opacity:0;transition:opacity .28s;}
+.lcard:hover::before,.lcard:active::before{opacity:1;}
+.lcard:hover{transform:translateY(-2px);border-color:rgba(91,154,255,0.28);box-shadow:0 8px 28px rgba(91,154,255,0.12);}
+.lcard:active{transform:scale(0.97) !important;}
+.lcard-thumb{width:72px;height:44px;border-radius:10px;background:rgba(91,154,255,0.1);flex-shrink:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid rgba(91,154,255,0.15);}
+.lcard-thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;}
+.lcard-thumb .lc-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);border-radius:10px;}
+.lc-play-ico{width:22px;height:22px;border-radius:50%;background:rgba(91,154,255,0.85);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;padding-left:2px;box-shadow:0 2px 8px rgba(91,154,255,0.45);}
+.lcard-info{flex:1;min-width:0;}
+.lcard-title{font-size:13px;font-weight:800;letter-spacing:-.15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lcard-meta{font-size:11px;color:var(--txt2);margin-top:3px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.lcard-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:9.5px;font-weight:900;background:rgba(91,154,255,0.12);border:1px solid rgba(91,154,255,0.2);color:rgba(140,180,255,0.9);letter-spacing:.3px;}
+.lcard-badge.prv{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.3);color:var(--red);animation:prvPulse 2.5s ease-in-out infinite;}
+@keyframes prvPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,0);}50%{box-shadow:0 0 0 3px rgba(255,107,107,0.15);}}
+.lcard.lcard-private{border-color:rgba(255,107,107,0.22) !important;background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,transparent 60%);}
+.lcard-lock{width:32px;height:32px;border-radius:50%;border:none;background:rgba(91,154,255,0.1);border:1px solid rgba(91,154,255,0.2);color:#5b9aff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s;}
+.lcard:hover .lcard-lock{background:rgba(91,154,255,0.2);}
+.lcard-del{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,107,107,0.1);color:var(--red);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--bounce),background .15s;flex-shrink:0;margin-left:4px;}
+.lcard-del:active{transform:scale(0.82);background:rgba(255,107,107,0.3);}
+.lec-row{display:flex;align-items:center;gap:9px;background:rgba(91,154,255,0.04);border:1px solid rgba(91,154,255,0.1);border-radius:14px;padding:9px 12px;margin-bottom:8px;transition:background .2s,border-color .2s;animation:fcIn .3s var(--spring) both;}
 .lec-row:hover{background:rgba(91,154,255,0.08);border-color:rgba(91,154,255,0.2);}
 .lec-drag{font-size:18px;color:var(--txt3);cursor:grab;padding:0 2px;user-select:none;flex-shrink:0;}
 .lec-row:hover .lec-drag{color:var(--blue);}
 .lec-drag:active{cursor:grabbing;}
-.lec-athumb{
-  width:42px;height:28px;border-radius:8px;background:rgba(91,154,255,0.12);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;flex-shrink:0;overflow:hidden;
-}
+.lec-athumb{width:42px;height:28px;border-radius:8px;background:rgba(91,154,255,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden;}
 .lec-athumb img{width:100%;height:100%;object-fit:cover;border-radius:8px;}
-.lec-ainfo{flex:1;font-size:12px;font-weight:700;min-width:0;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lec-ainfo{flex:1;font-size:12px;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lec-ainfo span{color:var(--txt2);font-size:10px;font-weight:500;display:block;margin-top:1px;}
-.lec-adel{
-  width:30px;height:30px;border-radius:50%;border:none;
-  background:rgba(255,107,107,0.1);color:var(--red);font-size:13px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:transform .2s var(--bounce),background .15s;flex-shrink:0;
-}
+.lec-adel{width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,107,107,0.1);color:var(--red);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--bounce),background .15s;flex-shrink:0;}
 .lec-adel:active{transform:scale(0.82);background:rgba(255,107,107,0.3);}
-
-/* ── Edit lecture modal ── */
-#lec-edit-modal{
-  position:fixed;inset:0;z-index:1050;
-  background:rgba(4,8,20,0.8);backdrop-filter:blur(16px);
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;
-  transition:opacity .32s cubic-bezier(0.4,0,0.2,1);
-}
+#lec-edit-modal{position:fixed;inset:0;z-index:1050;background:rgba(4,8,20,0.8);backdrop-filter:blur(16px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .32s cubic-bezier(0.4,0,0.2,1);}
 #lec-edit-modal.open{opacity:1;pointer-events:all;}
-.lec-edit-card{
-  width:100%;max-width:520px;
-  background:linear-gradient(145deg,rgba(10,18,38,0.98),rgba(8,14,30,0.99));
-  border:1px solid rgba(91,154,255,0.2);border-radius:28px 28px 0 0;
-  padding:20px 18px 36px;
-  transform:translateY(40px);
-  transition:transform .38s cubic-bezier(0.22,1,0.36,1);
-}
+.lec-edit-card{width:100%;max-width:520px;background:linear-gradient(145deg,rgba(10,18,38,0.98),rgba(8,14,30,0.99));border:1px solid rgba(91,154,255,0.2);border-radius:28px 28px 0 0;padding:20px 18px 36px;transform:translateY(40px);transition:transform .38s cubic-bezier(0.22,1,0.36,1);}
 #lec-edit-modal.open .lec-edit-card{transform:translateY(0);}
 .lec-edit-title{font-size:15px;font-weight:900;margin-bottom:16px;letter-spacing:-.2px;}
 </style>
@@ -8426,76 +8192,78 @@ window.wcStartFresh=function(){
 
 <!-- Advanced HLS Lecture Viewer -->
 <div id="lec-viewer">
-  <!-- Main video stage (tap area) -->
   <div class="lv-stage" id="lv-stage">
     <video id="lec-video" playsinline preload="auto" webkit-playsinline></video>
 
-    <!-- Initial loading overlay -->
+    <!-- Loading overlay -->
     <div class="lv-load" id="lv-load">
       <div class="lv-spin-ring"></div>
-      <div class="lv-load-txt">Loading lecture…</div>
+      <div class="lv-load-txt">Loading…</div>
     </div>
 
     <!-- Error state -->
     <div class="lv-err" id="lv-err">
       <div class="lv-err-ico">📡</div>
-      <div class="lv-err-msg">Could not load this lecture.<br>Check your internet connection<br>and try again.</div>
+      <div class="lv-err-msg">Could not load this lecture.<br>Check your internet connection and try again.</div>
       <button class="lv-err-retry" id="lv-err-retry">Try Again</button>
     </div>
 
-    <!-- Buffering spinner (mid-playback) -->
+    <!-- Buffering spinner -->
     <div id="lv-buf-spin"></div>
 
-    <!-- Moving watermark -->
+    <!-- Watermark -->
     <div id="lv-watermark">Next Toppers - Feed</div>
 
-    <!-- Tap/skip indicators -->
-    <div id="lv-tap-indicator">▶</div>
-    <div class="lv-skip-indicator" id="lv-skip-back">
-      <span class="lv-skip-ico">⏪</span>
-      <span>10s</span>
-    </div>
-    <div class="lv-skip-indicator" id="lv-skip-fwd">
-      <span class="lv-skip-ico">⏩</span>
-      <span>10s</span>
-    </div>
+    <!-- Skip indicators -->
+    <div class="lv-skip-indicator" id="lv-skip-back"><span class="lv-skip-ico">⏪</span><span>10s</span></div>
+    <div class="lv-skip-indicator" id="lv-skip-fwd"><span class="lv-skip-ico">⏩</span><span>10s</span></div>
 
-    <!-- Controls overlay (auto-hide) — 3-zone OTT layout -->
+    <!-- Tap indicator -->
+    <div id="lv-tap-indicator">▶</div>
+
+    <!-- Controls overlay -->
     <div id="lv-controls-overlay">
-      <!-- Background gradients -->
       <div class="lv-top-gradient"></div>
       <div class="lv-bot-gradient"></div>
 
-      <!-- ── ZONE 1: TOP — back button + title ── -->
+      <!-- ZONE 1: TOP -->
       <div class="lv-top-bar">
         <button class="lv-back-btn" id="lv-back-btn" onclick="closeLecViewer()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="lv-title-block">
           <div class="lv-title" id="lv-title">Lecture</div>
           <div class="lv-meta" id="lv-meta">English · 2025-26 Session</div>
         </div>
-        <!-- ext button removed for stream security -->
+        <button class="lv-settings-btn" id="lv-settings-btn" title="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
       </div>
 
-      <!-- ── ZONE 2: CENTER — ⏪ 10s  ▶/⏸  ⏩ 10s ── -->
+      <!-- ZONE 2: CENTER -->
       <div class="lv-center-controls">
         <button class="lv-cbtn" id="lv-skip-back-btn" title="Back 10s">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 4C7.36 4 4 7.36 4 11.5S7.36 19 11.5 19 19 15.64 19 11.5H17c0 3.03-2.47 5.5-5.5 5.5S6 14.53 6 11.5 8.47 6 11.5 6V4z"/><path d="M13 3.5l-4 4 4 4V3.5z" opacity=".6"/><text x="8" y="14.5" font-size="5.5" font-weight="900" font-family="sans-serif" fill="currentColor">10</text></svg>
-          <span class="lv-skip-lbl">−10</span>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            <text x="8.8" y="14.2" font-size="5.5" font-weight="bold" font-family="sans-serif" fill="currentColor">10</text>
+          </svg>
         </button>
         <button class="lv-cbtn main" id="lv-play-btn" title="Play/Pause">
-          <svg id="lv-play-ico" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <svg id="lv-play-ico" width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
         <button class="lv-cbtn" id="lv-skip-fwd-btn" title="Forward 10s">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 4C16.64 4 20 7.36 20 11.5S16.64 19 12.5 19 6 15.64 6 11.5H8c0 3.03 2.47 5.5 4.5 5.5s5.5-2.47 5.5-5.5S15.53 6 12.5 6V4z"/><path d="M11 3.5l4 4-4 4V3.5z" opacity=".6"/><text x="9" y="14.5" font-size="5.5" font-weight="900" font-family="sans-serif" fill="currentColor">10</text></svg>
-          <span class="lv-skip-lbl">+10</span>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+            <text x="8.8" y="14.2" font-size="5.5" font-weight="bold" font-family="sans-serif" fill="currentColor">10</text>
+          </svg>
         </button>
       </div>
 
-      <!-- ── ZONE 3: BOTTOM — seekbar + time + speed + quality + fullscreen ── -->
+      <!-- ZONE 3: BOTTOM -->
       <div class="lv-bottom-controls">
-        <!-- Seek bar row -->
         <div class="lv-seek-row">
           <span class="lv-time" id="lv-cur-time">0:00</span>
           <div class="lv-seek-wrap" id="lv-seek-wrap">
@@ -8507,669 +8275,432 @@ window.wcStartFresh=function(){
           </div>
           <span class="lv-time" id="lv-dur-time" style="text-align:right">0:00</span>
         </div>
-
-        <!-- Bottom actions row: speed + quality + fullscreen -->
         <div class="lv-ctrl-row">
-          <div class="lv-ctrl-right">
-            <!-- Speed picker -->
-            <div class="lv-dd-wrap" id="lv-speed-wrap">
-              <button class="lv-pill-btn" id="lv-speed-btn">
-                <span class="lv-pill-ico">⚡</span>
-                <span id="lv-speed-lbl">1×</span>
-              </button>
-              <div class="lv-dropdown" id="lv-speed-menu">
-                <div class="lv-dropdown-title">Playback Speed</div>
-                <div class="lv-dd-item" data-speed="0.5"><div class="lv-dd-dot"></div>0.5×</div>
-                <div class="lv-dd-item" data-speed="0.75"><div class="lv-dd-dot"></div>0.75×</div>
-                <div class="lv-dd-item selected" data-speed="1"><div class="lv-dd-dot"></div>1× <span style="font-size:10px;color:rgba(91,154,255,0.7);margin-left:4px;">Normal</span></div>
-                <div class="lv-dd-item" data-speed="1.25"><div class="lv-dd-dot"></div>1.25×</div>
-                <div class="lv-dd-item" data-speed="1.5"><div class="lv-dd-dot"></div>1.5×</div>
-                <div class="lv-dd-item" data-speed="2"><div class="lv-dd-dot"></div>2×</div>
-                <div class="lv-dd-item" data-speed="2.5"><div class="lv-dd-dot"></div>2.5×</div>
-                <div class="lv-dd-item" data-speed="3"><div class="lv-dd-dot"></div>3×</div>
-              </div>
-            </div>
-
-            <!-- Quality picker -->
-            <div class="lv-dd-wrap" id="lv-qual-wrap">
-              <button class="lv-pill-btn" id="lv-qual-btn">
-                <span class="lv-pill-ico">🎞</span>
-                <span id="lv-qual-lbl">Auto</span>
-              </button>
-              <div class="lv-dropdown" id="lv-qual-menu">
-                <div class="lv-dropdown-title">Video Quality</div>
-                <div class="lv-dd-item selected" data-level="-1"><div class="lv-dd-dot"></div>Auto <span style="font-size:10px;color:rgba(91,154,255,0.7);margin-left:4px;">Recommended</span></div>
-                <div class="lv-dd-item" data-level="720"><div class="lv-dd-dot"></div>720p</div>
-                <div class="lv-dd-item" data-level="480"><div class="lv-dd-dot"></div>480p</div>
-                <div class="lv-dd-item" data-level="360"><div class="lv-dd-dot"></div>360p</div>
-                <div class="lv-dd-item" data-level="240"><div class="lv-dd-dot"></div>240p</div>
-              </div>
-            </div>
-
-            <!-- Fullscreen -->
-            <button class="lv-cbtn icon-sm" id="lv-fs-btn" title="Fullscreen">
-              <svg id="lv-fs-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            </button>
-          </div>
+          <button class="lv-cbtn icon-sm" id="lv-fs-btn" title="Fullscreen">
+            <svg id="lv-fs-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+              <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div><!-- /controls overlay -->
+
+    <!-- Landscape right-side panel (visible in landscape orientation) -->
+    <div class="lv-landscape-panel" id="lv-landscape-panel">
+      <button class="lv-land-btn" onclick="closeLecViewer()" title="Back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="lv-land-btn" id="lv-land-settings-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <button class="lv-land-btn" onclick="toggleFullscreen()" title="Fullscreen">
+        <svg id="lv-land-fs-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Settings Bottom Sheet (YouTube style: two-level menu) -->
+    <div id="lv-sheet-backdrop"></div>
+    <div id="lv-settings-sheet">
+      <div class="lv-sheet-handle"></div>
+
+      <!-- Main panel: Quality + Speed -->
+      <div class="lv-sheet-panel" id="lv-sheet-main">
+        <div class="lv-sheet-item" id="lv-sheet-quality-btn">
+          <div class="lv-sheet-item-left">
+            <span class="lv-sheet-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+            </span>
+            Quality
+          </div>
+          <div class="lv-sheet-item-right">
+            <span id="lv-qual-current">Auto</span>
+            <span class="lv-sheet-arrow">›</span>
+          </div>
+        </div>
+        <div class="lv-sheet-item" id="lv-sheet-speed-btn">
+          <div class="lv-sheet-item-left">
+            <span class="lv-sheet-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            Playback speed
+          </div>
+          <div class="lv-sheet-item-right">
+            <span id="lv-speed-current">Normal</span>
+            <span class="lv-sheet-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quality sub-panel -->
+      <div class="lv-sheet-panel hidden" id="lv-sheet-quality-panel">
+        <div class="lv-sheet-sub-header">
+          <button class="lv-sheet-back" id="lv-qual-back">&#8249;</button>
+          <span class="lv-sheet-sub-title">Quality for current video</span>
+          <span class="lv-sheet-sub-cur" id="lv-sheet-qual-dot">&#8226; Auto</span>
+        </div>
+        <div id="lv-qual-list">
+          <div class="lv-qual-item selected" data-level="-1">
+            <span class="lv-qual-item-check">&#10003;</span>Auto
+          </div>
+        </div>
+        <div class="lv-sheet-note">This selection only applies to the current video. For all videos, go to Settings &rsaquo; Video quality preferences.</div>
+      </div>
+
+      <!-- Speed sub-panel -->
+      <div class="lv-sheet-panel hidden" id="lv-sheet-speed-panel">
+        <div class="lv-sheet-sub-header">
+          <button class="lv-sheet-back" id="lv-speed-back">&#8249;</button>
+          <span class="lv-sheet-sub-title">Playback speed</span>
+        </div>
+        <div class="lv-speed-display" id="lv-speed-display-val">1.00x</div>
+        <div class="lv-speed-slider-row">
+          <button class="lv-speed-minus" id="lv-speed-minus">&#8722;</button>
+          <input type="range" class="lv-speed-range" id="lv-speed-range" min="0.25" max="3" step="0.05" value="1">
+          <button class="lv-speed-plus" id="lv-speed-plus">+</button>
+        </div>
+        <div class="lv-speed-presets">
+          <button class="lv-speed-preset sp-active" data-speed="1.0">1.0</button>
+          <button class="lv-speed-preset" data-speed="1.25">1.25</button>
+          <button class="lv-speed-preset" data-speed="1.5">1.5</button>
+          <button class="lv-speed-preset" data-speed="2.0">2.0</button>
+          <button class="lv-speed-preset" data-speed="3.0">3.0</button>
+        </div>
+        <div class="lv-speed-preset-lbl" id="lv-speed-preset-lbl">Normal</div>
+      </div>
+    </div>
   </div><!-- /lv-stage -->
 </div><!-- /lec-viewer -->
 
 <script>
 /* ══════════════════════════════════════════════════
-   ADVANCED HLS PLAYER — Next Toppers Feed
-   ══════════════════════════════════════════════════ */
+   YOUTUBE-STYLE HLS PLAYER — Next Toppers Feed
+   Fixes: quality-switch continuous-loading + speed freeze (audio/video desync)
+══════════════════════════════════════════════════ */
 (function(){
 'use strict';
 
-/* ── State ── */
-let _hls = null;
-let _hlsLevels = [];
-let _currentLecUrl = '';
-let _controlsTimer = null;
-let _controlsVisible = true;
-let _seeking = false;
-let _watermarkTimer = null;
-let _isSafariHLS = false;  // was missing — caused ReferenceError on Safari
+let _hls=null,_hlsLevels=[],_currentLecUrl='',_controlsTimer=null,_controlsVisible=true;
+let _seeking=false,_watermarkTimer=null,_isSafariHLS=false,_currentSpeed=1,_currentLevel=-1;
 
-/* ── Element refs ── */
-function el(id){ return document.getElementById(id); }
-
-/* ── Format seconds → m:ss ── */
-function fmtTime(s){
-  if(!isFinite(s)||s<0) s=0;
-  const m=Math.floor(s/60), sec=Math.floor(s%60);
-  return m+':'+(sec<10?'0':'')+sec;
-}
+function el(id){return document.getElementById(id);}
+function fmtTime(s){if(!isFinite(s)||s<0)s=0;const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
 
 /* ══ WATERMARK ══ */
 function startWatermark(){
-  stopWatermark();
-  const wm = el('lv-watermark');
-  if(!wm) return;
-  // Cache stage dimensions once — avoids forced layout on every interval tick
-  const stage = el('lv-stage');
-  let sw = stage ? (stage.clientWidth||320) : 320;
-  let sh = stage ? (stage.clientHeight||180) : 180;
-  function moveWM(){
-    wm.style.left = Math.max(8, Math.random()*(sw-200))+'px';
-    wm.style.top  = Math.max(8, Math.min(sh-40, Math.random()*(sh-60)))+'px';
-    wm.style.opacity = (Math.random()*0.10+0.07).toFixed(2);
-  }
-  moveWM();
-  _watermarkTimer = setInterval(moveWM, 4000);
+  stopWatermark();const wm=el('lv-watermark');if(!wm)return;
+  const stage=el('lv-stage');let sw=stage?(stage.clientWidth||320):320,sh=stage?(stage.clientHeight||180):180;
+  function moveWM(){wm.style.left=Math.max(8,Math.random()*(sw-200))+'px';wm.style.top=Math.max(8,Math.min(sh-40,Math.random()*(sh-60)))+'px';wm.style.opacity=(Math.random()*0.10+0.07).toFixed(2);}
+  moveWM();_watermarkTimer=setInterval(moveWM,4000);
 }
-function stopWatermark(){
-  if(_watermarkTimer){ clearInterval(_watermarkTimer); _watermarkTimer=null; }
-}
+function stopWatermark(){if(_watermarkTimer){clearInterval(_watermarkTimer);_watermarkTimer=null;}}
 
-/* ══ CONTROLS AUTO-HIDE ══ */
-function showControls(){
-  const ov = el('lv-controls-overlay');
-  if(!ov) return;
-  ov.classList.remove('hidden');
-  _controlsVisible = true;
-  resetHideTimer();
-}
+/* ══ CONTROLS ══ */
+function showControls(){const ov=el('lv-controls-overlay');if(!ov)return;ov.classList.remove('hidden');_controlsVisible=true;resetHideTimer();}
 function hideControls(){
-  /* Never hide if a dropdown menu is open */
-  if(document.querySelector('.lv-dropdown.open')) return;
-  const ov = el('lv-controls-overlay');
-  if(!ov) return;
-  ov.classList.add('hidden');
-  _controlsVisible = false;
+  const sheet=el('lv-settings-sheet');if(sheet&&sheet.classList.contains('open'))return;
+  const ov=el('lv-controls-overlay');if(!ov)return;ov.classList.add('hidden');_controlsVisible=false;
 }
 function resetHideTimer(){
   clearTimeout(_controlsTimer);
-  _controlsTimer = setTimeout(()=>{
-    const vid = el('lec-video');
-    if(vid && !vid.paused) hideControls();
-  }, 3000);
+  _controlsTimer=setTimeout(()=>{const vid=el('lec-video');if(vid&&!vid.paused)hideControls();},3500);
 }
 
-/* ══ PLAY / PAUSE icon sync ══ */
+/* ══ PLAY ICON ══ */
 function syncPlayIcon(){
-  const vid = el('lec-video');
-  const ico = el('lv-play-ico');
-  if(!vid||!ico) return;
-  ico.innerHTML = vid.paused
-    ? '<polygon points="5,3 19,12 5,21"/>'
-    : '<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
+  const vid=el('lec-video'),ico=el('lv-play-ico');if(!vid||!ico)return;
+  ico.innerHTML=vid.paused?'<polygon points="5,3 19,12 5,21"/>'
+    :'<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
 }
 
-/* ══ SEEK BAR — rAF throttled to prevent 60fps DOM thrashing ══ */
-let _seekRafPending = false;
-function updateSeekBar(){
-  if(_seekRafPending) return;
-  _seekRafPending = true;
-  requestAnimationFrame(()=>{
-    _seekRafPending = false;
-    _doUpdateSeekBar();
-  });
-}
+/* ══ SEEK BAR ══ */
+let _seekRafPending=false;
+function updateSeekBar(){if(_seekRafPending)return;_seekRafPending=true;requestAnimationFrame(()=>{_seekRafPending=false;_doUpdateSeekBar();});}
 function _doUpdateSeekBar(){
-  const vid = el('lec-video');
-  if(!vid||_seeking) return;
-  const dur=vid.duration||0, cur=vid.currentTime||0;
-  const pct = dur>0?(cur/dur*100):0;
-  const fill=el('lv-seek-fill'), thumb=el('lv-seek-thumb');
-  if(fill) fill.style.width=pct+'%';
-  if(thumb) thumb.style.left=pct+'%';
-  const ct=el('lv-cur-time'), dt=el('lv-dur-time');
-  if(ct) ct.textContent=fmtTime(cur);
-  if(dt) dt.textContent=fmtTime(dur);
-  if(vid.buffered.length>0){
-    const bp=(vid.buffered.end(vid.buffered.length-1)/dur*100);
-    const buf=el('lv-seek-buf');
-    if(buf) buf.style.width=Math.min(bp,100)+'%';
-  }
+  const vid=el('lec-video');if(!vid||_seeking)return;
+  const dur=vid.duration||0,cur=vid.currentTime||0,pct=dur>0?(cur/dur*100):0;
+  const fill=el('lv-seek-fill'),thumb=el('lv-seek-thumb');
+  if(fill)fill.style.width=pct+'%';if(thumb)thumb.style.left=pct+'%';
+  const ct=el('lv-cur-time'),dt=el('lv-dur-time');
+  if(ct)ct.textContent=fmtTime(cur);if(dt)dt.textContent=fmtTime(dur);
+  if(vid.buffered.length>0){const bp=vid.buffered.end(vid.buffered.length-1)/dur*100;const buf=el('lv-seek-buf');if(buf)buf.style.width=Math.min(bp,100)+'%';}
 }
-function seekTo(e, wrapEl){
-  const vid=el('lec-video');
-  if(!vid||!isFinite(vid.duration)||vid.duration===0) return;
-  const rect=wrapEl.getBoundingClientRect();
-  const clientX=e.touches?e.touches[0].clientX:e.clientX;
-  const pct=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
-  const newTime=pct*vid.duration;
+function seekTo(e,wrapEl){
+  const vid=el('lec-video');if(!vid||!isFinite(vid.duration)||vid.duration===0)return;
+  const rect=wrapEl.getBoundingClientRect();const clientX=e.touches?e.touches[0].clientX:e.clientX;
+  const pct=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));const newTime=pct*vid.duration;
   vid.currentTime=newTime;
-  const fill=el('lv-seek-fill'), thumb=el('lv-seek-thumb');
-  if(fill) fill.style.width=(pct*100)+'%';
-  if(thumb) thumb.style.left=(pct*100)+'%';
-  const ct=el('lv-cur-time');
-  if(ct) ct.textContent=fmtTime(newTime);
+  const fill=el('lv-seek-fill'),thumb=el('lv-seek-thumb');
+  if(fill)fill.style.width=(pct*100)+'%';if(thumb)thumb.style.left=(pct*100)+'%';
+  const ct=el('lv-cur-time');if(ct)ct.textContent=fmtTime(newTime);
 }
 
 /* ══ FLASH ANIMATIONS ══ */
-function flashSkip(dir){
-  const e2=el(dir==='back'?'lv-skip-back':'lv-skip-fwd');
-  if(!e2) return;
-  e2.classList.remove('pop');
-  void e2.offsetWidth;
-  e2.classList.add('pop');
-  setTimeout(()=>e2.classList.remove('pop'),700);
-}
-function flashTapIco(icon){
-  const ind=el('lv-tap-indicator');
-  if(!ind) return;
-  ind.textContent=icon;
-  ind.classList.remove('pop');
-  void ind.offsetWidth;
-  ind.classList.add('pop');
-  setTimeout(()=>ind.classList.remove('pop'),500);
-}
+function flashSkip(dir){const e2=el(dir==='back'?'lv-skip-back':'lv-skip-fwd');if(!e2)return;e2.classList.remove('pop');void e2.offsetWidth;e2.classList.add('pop');setTimeout(()=>e2.classList.remove('pop'),700);}
+function flashTapIco(icon){const ind=el('lv-tap-indicator');if(!ind)return;ind.textContent=icon;ind.classList.remove('pop');void ind.offsetWidth;ind.classList.add('pop');setTimeout(()=>ind.classList.remove('pop'),500);}
 
-/* ══ QUALITY MENU ══ */
+/* ══ SETTINGS SHEET ══ */
+function openSheet(){
+  const sheet=el('lv-settings-sheet'),backdrop=el('lv-sheet-backdrop');if(!sheet)return;
+  el('lv-sheet-main').classList.remove('hidden');el('lv-sheet-quality-panel').classList.add('hidden');el('lv-sheet-speed-panel').classList.add('hidden');
+  sheet.classList.add('open');backdrop.classList.add('open');clearTimeout(_controlsTimer);
+}
+function closeSheet(){const sheet=el('lv-settings-sheet'),backdrop=el('lv-sheet-backdrop');if(!sheet)return;sheet.classList.remove('open');backdrop.classList.remove('open');resetHideTimer();}
+function showMainPanel(){el('lv-sheet-main').classList.remove('hidden');el('lv-sheet-quality-panel').classList.add('hidden');el('lv-sheet-speed-panel').classList.add('hidden');}
+function showQualityPanel(){el('lv-sheet-main').classList.add('hidden');el('lv-sheet-quality-panel').classList.remove('hidden');el('lv-sheet-speed-panel').classList.add('hidden');}
+function showSpeedPanel(){el('lv-sheet-main').classList.add('hidden');el('lv-sheet-quality-panel').classList.add('hidden');el('lv-sheet-speed-panel').classList.remove('hidden');}
+
+/* ══ QUALITY ══ */
 function buildQualityMenu(){
-  if(!_hls||!_hlsLevels.length) return;
-  const menu=el('lv-qual-menu');
-  if(!menu) return;
-  menu.querySelectorAll('[data-level]').forEach(e=>e.remove());
-  const autoItem=document.createElement('div');
-  autoItem.className='lv-dd-item selected';
-  autoItem.dataset.level='-1';
-  autoItem.innerHTML='<div class="lv-dd-dot"></div>Auto <span style="font-size:10px;color:rgba(91,154,255,0.7);margin-left:4px;">Recommended</span>';
-  autoItem.onclick=()=>setQualityLevel(-1);
-  menu.appendChild(autoItem);
-  const labels={720:'720p',480:'480p',360:'360p',240:'240p'};
-  _hlsLevels.forEach((lvl,idx)=>{
-    const h=lvl.height||0;
-    const keys=Object.keys(labels).map(Number).sort((a,b)=>Math.abs(a-h)-Math.abs(b-h));
-    const label=(keys.length&&Math.abs(keys[0]-h)<80)?labels[keys[0]]:(h+'p');
-    const item=document.createElement('div');
-    item.className='lv-dd-item';
-    item.dataset.level=idx;
-    item.innerHTML=`<div class="lv-dd-dot"></div>${label}`;
-    item.onclick=()=>setQualityLevel(idx);
-    menu.appendChild(item);
+  if(!_hls||!_hlsLevels.length)return;
+  const list=el('lv-qual-list');if(!list)return;list.innerHTML='';
+  const autoDiv=document.createElement('div');autoDiv.className='lv-qual-item'+(_currentLevel===-1?' selected':'');autoDiv.dataset.level='-1';
+  autoDiv.innerHTML='<span class="lv-qual-item-check">'+(_currentLevel===-1?'&#10003;':'')+'</span>Auto';
+  autoDiv.addEventListener('click',()=>setQualityLevel(-1));list.appendChild(autoDiv);
+  const sorted=_hlsLevels.map((lvl,idx)=>({lvl,idx})).sort((a,b)=>(b.lvl.height||0)-(a.lvl.height||0));
+  sorted.forEach(({lvl,idx})=>{
+    const h=lvl.height||0,label=h?h+'p':'Level '+idx;
+    const div=document.createElement('div');div.className='lv-qual-item'+(_currentLevel===idx?' selected':'');div.dataset.level=idx;
+    div.innerHTML='<span class="lv-qual-item-check">'+(_currentLevel===idx?'&#10003;':'')+'</span>'+label;
+    div.addEventListener('click',()=>setQualityLevel(idx));list.appendChild(div);
   });
 }
+
 function setQualityLevel(level){
-  if(!_hls) return;
-  const vid = el('lec-video');
+  if(!_hls)return;
+  const vid=el('lec-video');
+  _currentLevel=(level===-1)?-1:parseInt(level);
 
-  // Show buffering spinner; it hides automatically on 'playing' event
-  const spin = el('lv-buf-spin');
-  if(spin) spin.classList.add('show');
+  /* ── BUG FIX: continuous loading + audio/video desync on quality switch ──
+     Problem: manually showing spinner here + hls.js buffer flush = spinner never hides
+     because the video decoder stalls (audio plays ahead, video freezes).
+     Fix:
+       1. Only set currentLevel — never manually show the spinner.
+       2. After the first new-quality fragment buffers (FRAG_BUFFERED), do a
+          zero-distance seek to force the decoder to flush stale frames and resync. */
+  _hls.currentLevel=_currentLevel;
 
-  // CORRECT: just set currentLevel — do NOT pause, seek, or recreate HLS
-  // hls.js handles the buffer flush and seamless switch internally
-  _hls.currentLevel = (level === -1) ? -1 : parseInt(level);
-
-  // Update UI
-  const lbl = el('lv-qual-lbl');
-  if(lbl) lbl.textContent = (level===-1) ? 'Auto' : (el('lv-qual-menu').querySelector(`[data-level="${level}"]`)?.textContent?.trim().split(' ')[0] || '?');
-  const btn = el('lv-qual-btn');
-  if(btn) btn.classList.toggle('active-glow', level !== -1);
-  el('lv-qual-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.classList.toggle('selected', it.dataset.level == level);
+  const wasPlaying=!vid.paused;
+  _hls.once(window.Hls.Events.FRAG_BUFFERED,()=>{
+    if(isFinite(vid.currentTime)&&vid.currentTime>0) vid.currentTime=vid.currentTime; // decoder resync
+    if(wasPlaying&&vid.paused) vid.play().catch(()=>{});
   });
-  closeAllMenus();
+
+  let qualLabel='Auto';
+  if(_currentLevel!==-1&&_hlsLevels[_currentLevel]){const h=_hlsLevels[_currentLevel].height;qualLabel=h?h+'p':'Level '+_currentLevel;}
+  const qc=el('lv-qual-current');if(qc)qc.textContent=qualLabel;
+  const dot=el('lv-sheet-qual-dot');if(dot)dot.textContent='\u2022 '+qualLabel;
+  if(el('lv-qual-list')){
+    el('lv-qual-list').querySelectorAll('.lv-qual-item').forEach(it=>{
+      const sel=parseInt(it.dataset.level)===_currentLevel;it.classList.toggle('selected',sel);
+      const chk=it.querySelector('.lv-qual-item-check');if(chk)chk.innerHTML=sel?'&#10003;':'';
+    });
+  }
+  showMainPanel();
 }
 
-/* ══ DROPDOWNS ══ */
-function closeAllMenus(){
-  document.querySelectorAll('#lec-viewer .lv-dropdown').forEach(d=>d.classList.remove('open'));
-}
-function toggleMenu(menuId){
-  const menu=el(menuId);
-  if(!menu) return;
-  const wasOpen=menu.classList.contains('open');
-  closeAllMenus();
-  if(!wasOpen){ menu.classList.add('open'); showControls(); }
-}
-
-/* ══ FULLSCREEN + LANDSCAPE ══ */
-
-/* --- CSS transform-based landscape fallback (iOS Safari / no ScreenOrientation) --- */
-function _applyLandscapeCSS(){
-  const viewer = el('lec-viewer');
-  if(!viewer) return;
-  viewer.classList.add('lv-landscape-forced');
-}
-function _removeLandscapeCSS(){
-  const viewer = el('lec-viewer');
-  if(!viewer) return;
-  viewer.classList.remove('lv-landscape-forced');
+/* ══ SPEED ══ */
+function applySpeed(spd){
+  spd=Math.max(0.25,Math.min(3,Math.round(spd*100)/100));_currentSpeed=spd;
+  const vid=el('lec-video');
+  if(vid){
+    /* ── BUG FIX: speed change freezes video ──
+       Some Chromium versions briefly enter "waiting" on playbackRate change.
+       After setting the rate, call play() to re-prime the media pipeline.
+       Do NOT seek — seeking on rate change causes its own desync. */
+    vid.playbackRate=spd;
+    if(!vid.paused) vid.play().catch(()=>{});
+  }
+  const disp=el('lv-speed-display-val');if(disp)disp.textContent=spd.toFixed(2)+'x';
+  const range=el('lv-speed-range');if(range)range.value=spd;
+  const lbl=el('lv-speed-preset-lbl');if(lbl)lbl.textContent=spd===1?'Normal':spd.toFixed(2)+'\xd7';
+  const cur=el('lv-speed-current');if(cur)cur.textContent=spd===1?'Normal':spd.toFixed(2)+'\xd7';
+  document.querySelectorAll('.lv-speed-preset').forEach(b=>b.classList.toggle('sp-active',parseFloat(b.dataset.speed)===spd));
 }
 
-/* Try native Screen Orientation API first, CSS transform as fallback */
+/* ══ FULLSCREEN ══ */
+function _applyLandscapeCSS(){const v=el('lec-viewer');if(v)v.classList.add('lv-landscape-forced');}
+function _removeLandscapeCSS(){const v=el('lec-viewer');if(v)v.classList.remove('lv-landscape-forced');}
 function _lockLandscape(){
-  try {
-    if(screen.orientation && screen.orientation.lock){
-      screen.orientation.lock('landscape').catch(()=>{ /* Permission denied or not supported */ });
-    } else if(window.screen.lockOrientation){
-      window.screen.lockOrientation('landscape');
-    } else if(window.screen.mozLockOrientation){
-      window.screen.mozLockOrientation('landscape');
-    }
-  } catch(e){}
-  /* Always apply CSS fallback for iOS/PWA where lock is blocked */
+  try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});else if(window.screen.lockOrientation)window.screen.lockOrientation('landscape');}catch(e){}
   _applyLandscapeCSS();
 }
 function _unlockOrientation(){
-  try {
-    if(screen.orientation && screen.orientation.unlock){
-      screen.orientation.unlock();
-    } else if(window.screen.unlockOrientation){
-      window.screen.unlockOrientation();
-    } else if(window.screen.mozUnlockOrientation){
-      window.screen.mozUnlockOrientation();
-    }
-  } catch(e){}
+  try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();else if(window.screen.unlockOrientation)window.screen.unlockOrientation();}catch(e){}
   _removeLandscapeCSS();
 }
-
 function toggleFullscreen(){
-  const viewer=el('lec-viewer');
-  if(!viewer) return;
+  const viewer=el('lec-viewer');if(!viewer)return;
   const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||viewer.classList.contains('lv-landscape-forced'));
-  if(isFs){
-    /* Exit fullscreen */
-    try{
-      if(document.fullscreenElement||document.webkitFullscreenElement){
-        (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
-      }
-    }catch(e){}
-    _unlockOrientation();
-  } else {
-    /* Enter fullscreen */
-    try{
-      const req = viewer.requestFullscreen||viewer.webkitRequestFullscreen||viewer.mozRequestFullScreen||viewer.msRequestFullscreen;
-      if(req) req.call(viewer,{navigationUI:'hide'});
-    }catch(e){}
-    _lockLandscape();
-  }
+  if(isFs){try{(document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);}catch(e){}_unlockOrientation();}
+  else{try{const req=viewer.requestFullscreen||viewer.webkitRequestFullscreen||viewer.mozRequestFullScreen||viewer.msRequestFullscreen;if(req)req.call(viewer,{navigationUI:'hide'});}catch(e){}_lockLandscape();}
 }
 function syncFsIcon(){
-  const ico=el('lv-fs-ico');
-  if(!ico) return;
-  const viewer=el('lec-viewer');
-  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||(viewer&&viewer.classList.contains('lv-landscape-forced')));
-  ico.innerHTML=isFs
-    ?'<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="3" y2="13"/><line x1="14" y1="4" x2="21" y2="11"/>'
-    :'<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  const viewer=el('lec-viewer');const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||(viewer&&viewer.classList.contains('lv-landscape-forced')));
+  const exitSVG='<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="3" y2="13"/><line x1="14" y1="4" x2="21" y2="11"/>';
+  const enterSVG='<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  const ico=el('lv-fs-ico');if(ico)ico.innerHTML=isFs?exitSVG:enterSVG;
+  const lico=el('lv-land-fs-ico');if(lico)lico.innerHTML=isFs?exitSVG:enterSVG;
 }
 
-/* ══ ATTACH EVENTS (once) ══ */
+/* ══ EVENTS ══ */
 let _eventsAttached=false;
 function attachPlayerEvents(){
-  if(_eventsAttached) return;
-  _eventsAttached=true;
+  if(_eventsAttached)return;_eventsAttached=true;
+  const vid=el('lec-video'),stage=el('lv-stage'),seekWrap=el('lv-seek-wrap');
 
-  const vid=el('lec-video');
-  const stage=el('lv-stage');
-  const seekWrap=el('lv-seek-wrap');
-
-  /* Video state events */
   vid.addEventListener('timeupdate',updateSeekBar);
   vid.addEventListener('durationchange',updateSeekBar);
-  vid.addEventListener('play',()=>{ syncPlayIcon(); resetHideTimer(); });
-  vid.addEventListener('pause',()=>{ syncPlayIcon(); clearTimeout(_controlsTimer); showControls(); });
-  vid.addEventListener('ended',()=>{ syncPlayIcon(); showControls(); });
-  vid.addEventListener('waiting',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
-  vid.addEventListener('stalled',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.add('show'); });
-  vid.addEventListener('canplay',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
-  vid.addEventListener('canplaythrough',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); });
-  vid.addEventListener('playing',()=>{ const s=el('lv-buf-spin'); if(s)s.classList.remove('show'); resetHideTimer(); });
+  vid.addEventListener('play',()=>{syncPlayIcon();resetHideTimer();});
+  vid.addEventListener('pause',()=>{syncPlayIcon();clearTimeout(_controlsTimer);showControls();});
+  vid.addEventListener('ended',()=>{syncPlayIcon();showControls();});
+  vid.addEventListener('waiting',()=>{const s=el('lv-buf-spin');if(s)s.classList.add('show');});
+  vid.addEventListener('stalled',()=>{const s=el('lv-buf-spin');if(s)s.classList.add('show');});
+  vid.addEventListener('canplay',()=>{const s=el('lv-buf-spin');if(s)s.classList.remove('show');});
+  vid.addEventListener('canplaythrough',()=>{const s=el('lv-buf-spin');if(s)s.classList.remove('show');});
+  vid.addEventListener('playing',()=>{const s=el('lv-buf-spin');if(s)s.classList.remove('show');resetHideTimer();});
 
-  /* ── Stage click: ONLY toggle controls if tap is on bare video area ──
-     CRITICAL: do NOT call stopPropagation on any child button
-     The stage click handler must not interfere with buttons */
-  stage.addEventListener('click', function(e){
-    /* If click came FROM any interactive control — ignore */
-    if(e.target.closest('#lv-controls-overlay button') ||
-       e.target.closest('.lv-pill-btn') ||
-       e.target.closest('.lv-dd-item') ||
-       e.target.closest('.lv-seek-wrap') ||
-       e.target.closest('.lv-dropdown')){
-      return;
-    }
-    /* Bare video tap: toggle controls */
-    if(_controlsVisible){
-      closeAllMenus();
-      hideControls();
-    } else {
-      showControls();
-    }
+  stage.addEventListener('click',function(e){
+    if(e.target.closest('#lv-controls-overlay button')||e.target.closest('.lv-seek-wrap')||e.target.closest('#lv-settings-sheet')||e.target.closest('#lv-sheet-backdrop')||e.target.closest('.lv-landscape-panel'))return;
+    if(_controlsVisible)hideControls();else showControls();
   });
 
-  /* Play/Pause */
-  el('lv-play-btn').addEventListener('click', function(e){
-    e.stopPropagation();
-    if(vid.paused){ vid.play().catch(()=>{}); flashTapIco('▶'); }
-    else { vid.pause(); flashTapIco('⏸'); }
-    showControls();
-  });
+  el('lv-play-btn').addEventListener('click',function(e){e.stopPropagation();if(vid.paused){vid.play().catch(()=>{});flashTapIco('&#9654;');}else{vid.pause();flashTapIco('&#9646;&#9646;');}showControls();});
+  el('lv-skip-back-btn').addEventListener('click',function(e){e.stopPropagation();vid.currentTime=Math.max(0,vid.currentTime-10);flashSkip('back');showControls();});
+  el('lv-skip-fwd-btn').addEventListener('click',function(e){e.stopPropagation();vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);flashSkip('fwd');showControls();});
 
-  /* Skip back */
-  el('lv-skip-back-btn').addEventListener('click', function(e){
-    e.stopPropagation();
-    vid.currentTime=Math.max(0,vid.currentTime-10);
-    flashSkip('back');
-    showControls();
-  });
-
-  /* Skip forward */
-  el('lv-skip-fwd-btn').addEventListener('click', function(e){
-    e.stopPropagation();
-    vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);
-    flashSkip('fwd');
-    showControls();
-  });
-
-  /* Double-tap zones */
-  let _dtCount=0, _dtSide=null, _dtTimer=null;
-  stage.addEventListener('touchend', function(e){
-    if(e.target.closest('#lv-controls-overlay button,.lv-pill-btn,.lv-dd-item,.lv-seek-wrap,.lv-dropdown')) return;
-    const x=e.changedTouches[0].clientX;
-    const sw=stage.clientWidth;
-    const side=x<sw*0.33?'left':x>sw*0.67?'right':null;
-    if(!side) return;
-    _dtCount++;
-    _dtSide=side;
-    clearTimeout(_dtTimer);
+  let _dtCount=0,_dtSide=null,_dtTimer=null;
+  stage.addEventListener('touchend',function(e){
+    if(e.target.closest('#lv-controls-overlay button,.lv-seek-wrap,#lv-settings-sheet,.lv-landscape-panel'))return;
+    const x=e.changedTouches[0].clientX,sw=stage.clientWidth;const side=x<sw*0.33?'left':x>sw*0.67?'right':null;if(!side)return;
+    _dtCount++;_dtSide=side;clearTimeout(_dtTimer);
     _dtTimer=setTimeout(()=>{
-      if(_dtCount>=2){
-        if(_dtSide==='left'){ vid.currentTime=Math.max(0,vid.currentTime-10); flashSkip('back'); }
-        else { vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10); flashSkip('fwd'); }
-        showControls();
-      }
-      _dtCount=0; _dtSide=null;
+      if(_dtCount>=2){if(_dtSide==='left'){vid.currentTime=Math.max(0,vid.currentTime-10);flashSkip('back');}else{vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);flashSkip('fwd');}showControls();}
+      _dtCount=0;_dtSide=null;
     },280);
   });
 
-  /* Seek — mouse */
-  seekWrap.addEventListener('mousedown', function(e){
-    e.stopPropagation();
-    _seeking=true; seekTo(e,seekWrap); showControls();
-    function onMove(ev){ seekTo(ev,seekWrap); }
-    function onUp(){ _seeking=false; document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
-    document.addEventListener('mousemove',onMove);
-    document.addEventListener('mouseup',onUp);
+  seekWrap.addEventListener('mousedown',function(e){
+    e.stopPropagation();_seeking=true;seekWrap.classList.add('dragging');seekTo(e,seekWrap);showControls();
+    function onMove(ev){seekTo(ev,seekWrap);}function onUp(){_seeking=false;seekWrap.classList.remove('dragging');document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+    document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
   });
+  seekWrap.addEventListener('touchstart',function(e){e.stopPropagation();_seeking=true;seekWrap.classList.add('dragging');e.preventDefault();seekTo(e,seekWrap);showControls();},{passive:false});
+  seekWrap.addEventListener('touchmove',function(e){e.preventDefault();seekTo(e,seekWrap);},{passive:false});
+  seekWrap.addEventListener('touchend',function(){setTimeout(()=>{_seeking=false;seekWrap.classList.remove('dragging');},80);});
 
-  /* Seek — touch */
-  seekWrap.addEventListener('touchstart', function(e){ e.stopPropagation(); _seeking=true; e.preventDefault(); seekTo(e,seekWrap); showControls(); },{passive:false});
-  seekWrap.addEventListener('touchmove', function(e){ e.preventDefault(); seekTo(e,seekWrap); },{passive:false});
-  seekWrap.addEventListener('touchend', function(){ setTimeout(()=>{ _seeking=false; },80); });
+  function doOpenSheet(e){e.stopPropagation();openSheet();showControls();}
+  el('lv-settings-btn').addEventListener('click',doOpenSheet);
+  el('lv-land-settings-btn').addEventListener('click',doOpenSheet);
+  el('lv-sheet-backdrop').addEventListener('click',closeSheet);
+  el('lv-sheet-quality-btn').addEventListener('click',showQualityPanel);
+  el('lv-sheet-speed-btn').addEventListener('click',showSpeedPanel);
+  el('lv-qual-back').addEventListener('click',showMainPanel);
+  el('lv-speed-back').addEventListener('click',showMainPanel);
 
-  /* Speed */
-  el('lv-speed-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleMenu('lv-speed-menu'); });
-  el('lv-speed-menu').querySelectorAll('.lv-dd-item').forEach(it=>{
-    it.addEventListener('click', function(e){
-      e.stopPropagation();
-      const spd=parseFloat(it.dataset.speed);
-      vid.playbackRate=spd;
-      const lbl=el('lv-speed-lbl'); if(lbl) lbl.textContent=spd===1?'1×':spd+'×';
-      const btn=el('lv-speed-btn'); if(btn) btn.classList.toggle('active-glow',spd!==1);
-      el('lv-speed-menu').querySelectorAll('.lv-dd-item').forEach(i=>i.classList.toggle('selected',i.dataset.speed==spd));
-      closeAllMenus();
-    });
-  });
+  el('lv-speed-range').addEventListener('input',function(){applySpeed(parseFloat(this.value));});
+  el('lv-speed-minus').addEventListener('click',function(){applySpeed(Math.max(0.25,_currentSpeed-0.05));});
+  el('lv-speed-plus').addEventListener('click',function(){applySpeed(Math.min(3,_currentSpeed+0.05));});
+  document.querySelectorAll('.lv-speed-preset').forEach(btn=>btn.addEventListener('click',function(){applySpeed(parseFloat(this.dataset.speed));}));
 
-  /* Quality */
-  el('lv-qual-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleMenu('lv-qual-menu'); });
-
-  /* Fullscreen */
-  el('lv-fs-btn').addEventListener('click', function(e){ e.stopPropagation(); toggleFullscreen(); showControls(); });
-  document.addEventListener('fullscreenchange', ()=>{ syncFsIcon(); });
-  document.addEventListener('webkitfullscreenchange', ()=>{ syncFsIcon(); });
-  /* When real fullscreen exits (e.g. hardware back), also remove landscape CSS */
-  document.addEventListener('fullscreenchange', ()=>{
-    if(!document.fullscreenElement&&!document.webkitFullscreenElement){
-      _unlockOrientation();
-    }
-  });
-  document.addEventListener('webkitfullscreenchange', ()=>{
-    if(!document.fullscreenElement&&!document.webkitFullscreenElement){
-      _unlockOrientation();
-    }
-  });
-
-  /* Retry */
-  el('lv-err-retry').addEventListener('click', function(e){
-    e.stopPropagation();
-    if(_currentLecUrl) _initHLSLoad(_currentLecUrl);
-  });
+  el('lv-fs-btn').addEventListener('click',function(e){e.stopPropagation();toggleFullscreen();showControls();});
+  document.addEventListener('fullscreenchange',()=>{syncFsIcon();if(!document.fullscreenElement&&!document.webkitFullscreenElement)_unlockOrientation();});
+  document.addEventListener('webkitfullscreenchange',()=>{syncFsIcon();if(!document.fullscreenElement&&!document.webkitFullscreenElement)_unlockOrientation();});
+  el('lv-err-retry').addEventListener('click',function(e){e.stopPropagation();if(_currentLecUrl)_initHLSLoad(_currentLecUrl);});
 }
 
 /* ══ HLS INIT ══ */
 function _initHLSLoad(url){
-  const vid = el('lec-video');
-  const loadEl = el('lv-load');
-  const errEl = el('lv-err');
-
-  loadEl.classList.remove('hidden');
-  errEl.classList.remove('show');
-  el('lv-buf-spin').classList.remove('show');
-
-  if(_hls){ _hls.destroy(); _hls=null; }
-  _hlsLevels = [];
-  vid.src = '';
-
-  function showErr(){
-    loadEl.classList.add('hidden');
-    errEl.classList.add('show');
-  }
+  const vid=el('lec-video'),loadEl=el('lv-load'),errEl=el('lv-err');
+  loadEl.classList.remove('hidden');errEl.classList.remove('show');el('lv-buf-spin').classList.remove('show');
+  if(_hls){_hls.destroy();_hls=null;}_hlsLevels=[];_currentLevel=-1;vid.src='';
+  function showErr(){loadEl.classList.add('hidden');errEl.classList.add('show');}
 
   if(window.Hls&&window.Hls.isSupported()){
-    _hls = new window.Hls({
-      enableWorker: true,
-      lowLatencyMode: false,
-
-      // ── Buffer (requested config) ──
-      backBufferLength: 30,
-      maxBufferLength: 20,
-      maxMaxBufferLength: 40,
-      maxBufferHole: 0.5,
-      highBufferWatchdogPeriod: 2,
-      nudgeOffset: 0.1,
-      nudgeMaxRetry: 10,
-
-      // ── ABR: auto from start, trust the network measurement ──
-      capLevelToPlayerSize: true,
-      startLevel: -1,              // let hls.js pick — avoids mid-stream level jump that causes desync
-      abrEwmaDefaultEstimate: 500000,
-      abrBandWidthFactor: 0.85,
-      abrBandWidthUpFactor: 0.7,
-
-      // ── Retry ──
-      manifestLoadingMaxRetry: 4,
-      manifestLoadingRetryDelay: 1000,
-      manifestLoadingMaxRetryTimeout: 20000,
-      levelLoadingMaxRetry: 4,
-      levelLoadingRetryDelay: 1000,
-      fragLoadingMaxRetry: 6,
-      fragLoadingRetryDelay: 1000,
-      fragLoadingMaxRetryTimeout: 20000,
+    _hls=new window.Hls({
+      enableWorker:true,lowLatencyMode:false,
+      backBufferLength:30,maxBufferLength:20,maxMaxBufferLength:40,maxBufferHole:0.5,
+      highBufferWatchdogPeriod:2,nudgeOffset:0.1,nudgeMaxRetry:10,
+      capLevelToPlayerSize:true,startLevel:-1,
+      abrEwmaDefaultEstimate:500000,abrBandWidthFactor:0.85,abrBandWidthUpFactor:0.7,
+      manifestLoadingMaxRetry:4,manifestLoadingRetryDelay:1000,manifestLoadingMaxRetryTimeout:20000,
+      levelLoadingMaxRetry:4,levelLoadingRetryDelay:1000,
+      fragLoadingMaxRetry:6,fragLoadingRetryDelay:1000,fragLoadingMaxRetryTimeout:20000,
     });
-    _hls.loadSource(url);
-    _hls.attachMedia(vid);
-    _hls.on(window.Hls.Events.MANIFEST_PARSED, (e,data)=>{
-      loadEl.classList.add('hidden');
-      _hlsLevels = _hls.levels||[];
-      buildQualityMenu();
-      vid.play().catch(()=>{});
+    _hls.loadSource(url);_hls.attachMedia(vid);
+    _hls.on(window.Hls.Events.MANIFEST_PARSED,(e,data)=>{
+      loadEl.classList.add('hidden');_hlsLevels=_hls.levels||[];buildQualityMenu();
+      const qc=el('lv-qual-current');if(qc)qc.textContent='Auto';vid.play().catch(()=>{});
     });
 
-    // ── Quality switch: show spinner only on MANUAL level changes, not ABR auto-switches ──
-    _hls.on(window.Hls.Events.LEVEL_SWITCHING, ()=>{
-      if(_hls.manualLevel !== -1){
-        const spin = el('lv-buf-spin');
-        if(spin) spin.classList.add('show');
-      }
-    });
-
-    // ── Desync + stall recovery ──
-    // All counters declared HERE so ERROR handler below shares the same scope
-    let _netErrCount   = 0;
-    let _mediaErrCount = 0;
-    let _stallCount    = 0;
-    let _stallLastTime = -1;
-
-    const _stallInterval = setInterval(()=>{
-      if(!_hls){ clearInterval(_stallInterval); return; }
-      if(vid.paused || vid.ended || vid.readyState === 0){
-        _stallLastTime = vid.currentTime;
-        return;
-      }
-
-      // ── Audio/video desync detection ──
-      // If the browser reports video is playing but the decoded frame timestamp
-      // has fallen behind audio (video.currentTime lags real wall-clock),
-      // force a small seek to let the decoder catch up.
-      if(!vid.paused && vid.readyState >= 3){
-        const audioTrack = vid.audioTracks && vid.audioTracks[0];
-        // Use buffered end as a proxy for where audio has decoded to
-        let bufferedAhead = 0;
-        for(let i=0;i<vid.buffered.length;i++){
-          if(vid.buffered.start(i) <= vid.currentTime + 0.1){
-            bufferedAhead = Math.max(bufferedAhead, vid.buffered.end(i) - vid.currentTime);
-          }
-        }
-        // If we have >3s buffered but playhead hasn't moved → decoder stalled behind audio
-        if(vid.currentTime === _stallLastTime && bufferedAhead > 1){
+    let _netErrCount=0,_mediaErrCount=0,_stallCount=0,_stallLastTime=-1;
+    const _stallInterval=setInterval(()=>{
+      if(!_hls){clearInterval(_stallInterval);return;}
+      if(vid.paused||vid.ended||vid.readyState===0){_stallLastTime=vid.currentTime;return;}
+      if(!vid.paused&&vid.readyState>=3){
+        let bufferedAhead=0;
+        for(let i=0;i<vid.buffered.length;i++){if(vid.buffered.start(i)<=vid.currentTime+0.1)bufferedAhead=Math.max(bufferedAhead,vid.buffered.end(i)-vid.currentTime);}
+        if(vid.currentTime===_stallLastTime&&bufferedAhead>1){
           _stallCount++;
-          if(_stallCount === 1){
-            // Light nudge — push decoder forward without user-visible jump
-            vid.currentTime = vid.currentTime + 0.1;
-          } else if(_stallCount <= 3){
-            // Stronger: small seek to force decoder flush
-            vid.currentTime = vid.currentTime + 0.5;
-          } else {
-            // Escalate: recover media pipeline
-            try { _hls.recoverMediaError(); } catch(ex){}
-            _stallCount = 0;
-          }
-        } else if(vid.currentTime !== _stallLastTime){
-          _stallCount = 0;  // playhead moving — clear counter
-        }
+          if(_stallCount===1)vid.currentTime=vid.currentTime+0.1;
+          else if(_stallCount<=3)vid.currentTime=vid.currentTime+0.5;
+          else{try{_hls.recoverMediaError();}catch(ex){}_stallCount=0;}
+        }else if(vid.currentTime!==_stallLastTime)_stallCount=0;
       }
+      _stallLastTime=vid.currentTime;
+    },2000);
 
-      _stallLastTime = vid.currentTime;
-    }, 2000);  // check every 2s (tighter than before for faster desync correction)
-
-    _hls.on(window.Hls.Events.ERROR, (e,data)=>{
+    _hls.on(window.Hls.Events.ERROR,(e,data)=>{
       if(data.fatal){
         if(data.type===window.Hls.ErrorTypes.NETWORK_ERROR){
-          el('lv-buf-spin').classList.add('show');
-          _netErrCount++;
-          const delay = Math.min(1000 * _netErrCount, 8000);
-          setTimeout(()=>{ if(_hls) _hls.startLoad(); }, delay);
-        } else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
-          el('lv-buf-spin').classList.add('show');
-          _mediaErrCount++;
-          if(_mediaErrCount <= 3){
-            _hls.recoverMediaError();
-          } else {
-            _mediaErrCount = 0;
-            _initHLSLoad(url);
-          }
-        } else {
-          showErr();
-        }
-      } else {
-        if(data.type !== window.Hls.ErrorTypes.NETWORK_ERROR) _netErrCount = 0;
-      }
+          el('lv-buf-spin').classList.add('show');_netErrCount++;
+          setTimeout(()=>{if(_hls)_hls.startLoad();},Math.min(1000*_netErrCount,8000));
+        }else if(data.type===window.Hls.ErrorTypes.MEDIA_ERROR){
+          el('lv-buf-spin').classList.add('show');_mediaErrCount++;
+          if(_mediaErrCount<=3)_hls.recoverMediaError();else{_mediaErrCount=0;_initHLSLoad(url);}
+        }else showErr();
+      }else{if(data.type!==window.Hls.ErrorTypes.NETWORK_ERROR)_netErrCount=0;}
     });
-  } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
-    _isSafariHLS = true;
-    vid.src = url;
-    vid.addEventListener('loadedmetadata',()=>{ loadEl.classList.add('hidden'); vid.play().catch(()=>{}); },{once:true});
-    vid.addEventListener('error',()=>{ showErr(); },{once:true});
-  } else {
-    showErr();
-  }
+  }else if(vid.canPlayType('application/vnd.apple.mpegurl')){
+    _isSafariHLS=true;vid.src=url;
+    vid.addEventListener('loadedmetadata',()=>{loadEl.classList.add('hidden');vid.play().catch(()=>{});},{once:true});
+    vid.addEventListener('error',()=>{showErr();},{once:true});
+  }else showErr();
 }
 
-/* ══ OPEN LECTURE (replaces old openLecture partially) ══ */
-window._openLecViewer = function(lec){
+/* ══ OPEN LECTURE ══ */
+window._openLecViewer=function(lec){
   attachPlayerEvents();
-
-  el('lv-title').textContent = lec.title||'Lecture';
-  el('lv-meta').textContent = (lec.subject==='english'?'🇬🇧 English':'📖 Hindi')+' · '+(lec.category||'');
-  // Stream URL is intentionally NOT exposed to UI (security)
-
-  // Tap indicator text reset
-  el('lv-tap-indicator').textContent='▶';
-
-  // Show viewer
-  const viewer = el('lec-viewer');
-  viewer.classList.add('open');
-  document.body.style.overflow='hidden';
-
-  // Reset speed
-  el('lec-video').playbackRate = 1;
-  el('lv-speed-lbl').textContent='1×';
-  el('lv-speed-btn').classList.remove('active-glow');
-  el('lv-speed-menu').querySelectorAll('.lv-dd-item').forEach(i=>i.classList.toggle('selected',i.dataset.speed==='1'));
-
-  // Reset quality label
-  el('lv-qual-lbl').textContent='Auto';
-  el('lv-qual-btn').classList.remove('active-glow');
-
-  // Controls visible on open
-  showControls();
-  startWatermark();
-
-  // Load HLS
-  _currentLecUrl = lec.hlsUrl;
-
-  if(window.Hls){
-    _initHLSLoad(lec.hlsUrl);
-  } else {
-    const s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
+  el('lv-title').textContent=lec.title||'Lecture';
+  el('lv-meta').textContent=(lec.subject==='english'?'English':'Hindi')+' \xb7 '+(lec.category||'');
+  el('lv-tap-indicator').textContent='\u25b6';
+  el('lec-viewer').classList.add('open');document.body.style.overflow='hidden';
+  _currentSpeed=1;const vid=el('lec-video');if(vid)vid.playbackRate=1;applySpeed(1);
+  _currentLevel=-1;
+  const qc=el('lv-qual-current');if(qc)qc.textContent='Auto';
+  const dot=el('lv-sheet-qual-dot');if(dot)dot.innerHTML='\u2022 Auto';
+  closeSheet();showControls();startWatermark();
+  _currentLecUrl=lec.hlsUrl;
+  if(window.Hls){_initHLSLoad(lec.hlsUrl);}
+  else{
+    const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
     s.onload=()=>_initHLSLoad(lec.hlsUrl);
-    s.onerror=()=>{ el('lv-load').classList.add('hidden'); el('lv-err').classList.add('show'); };
+    s.onerror=()=>{el('lv-load').classList.add('hidden');el('lv-err').classList.add('show');};
     document.head.appendChild(s);
   }
 };
 
 })();
 </script>
+
+
+
 
 <!-- ══════════ GOOGLE AUTH POPUP ══════════ -->
 <style>
