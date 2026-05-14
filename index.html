@@ -7996,23 +7996,7 @@ window.wcStartFresh=function(){
 
 .lv-ctrl-row{display:flex;align-items:center;justify-content:flex-end;padding-top:2px;}
 
-/* ── Landscape right panel ── */
-.lv-landscape-panel{
-  position:absolute;right:4px;top:50%;transform:translateY(-50%);
-  z-index:22;display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 6px;
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-@media (orientation:landscape){
-  .lv-landscape-panel{opacity:1;pointer-events:all;}
-}
-.lv-land-btn{
-  width:36px;height:36px;border-radius:50%;border:none;
-  background:rgba(0,0,0,0.45);color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .18s,transform .18s;-webkit-tap-highlight-color:transparent;
-  border:1px solid rgba(255,255,255,0.15);
-}
-.lv-land-btn:active{transform:scale(0.85);}
+/* landscape panel removed */
 
 /* ── CSS landscape fallback ── */
 #lec-viewer.lv-landscape-forced{
@@ -8286,24 +8270,6 @@ window.wcStartFresh=function(){
       </div>
     </div><!-- /controls overlay -->
 
-    <!-- Landscape right-side panel (visible in landscape orientation) -->
-    <div class="lv-landscape-panel" id="lv-landscape-panel">
-      <button class="lv-land-btn" onclick="closeLecViewer()" title="Back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="lv-land-btn" id="lv-land-settings-btn" title="Settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-      <button class="lv-land-btn" onclick="toggleFullscreen()" title="Fullscreen">
-        <svg id="lv-land-fs-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-        </svg>
-      </button>
-    </div>
 
     <!-- Settings Bottom Sheet (YouTube style: two-level menu) -->
     <div id="lv-sheet-backdrop"></div>
@@ -8443,7 +8409,7 @@ function seekTo(e,wrapEl){
 
 /* ══ FLASH ANIMATIONS ══ */
 function flashSkip(dir){const e2=el(dir==='back'?'lv-skip-back':'lv-skip-fwd');if(!e2)return;e2.classList.remove('pop');void e2.offsetWidth;e2.classList.add('pop');setTimeout(()=>e2.classList.remove('pop'),700);}
-function flashTapIco(icon){const ind=el('lv-tap-indicator');if(!ind)return;ind.textContent=icon;ind.classList.remove('pop');void ind.offsetWidth;ind.classList.add('pop');setTimeout(()=>ind.classList.remove('pop'),500);}
+function flashTapIco(icon){const ind=el('lv-tap-indicator');if(!ind)return;ind.innerHTML=icon;ind.classList.remove('pop');void ind.offsetWidth;ind.classList.add('pop');setTimeout(()=>ind.classList.remove('pop'),500);}
 
 /* ══ SETTINGS SHEET ══ */
 function openSheet(){
@@ -8546,7 +8512,6 @@ function syncFsIcon(){
   const exitSVG='<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="3" y2="13"/><line x1="14" y1="4" x2="21" y2="11"/>';
   const enterSVG='<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
   const ico=el('lv-fs-ico');if(ico)ico.innerHTML=isFs?exitSVG:enterSVG;
-  const lico=el('lv-land-fs-ico');if(lico)lico.innerHTML=isFs?exitSVG:enterSVG;
 }
 
 /* ══ EVENTS ══ */
@@ -8567,7 +8532,7 @@ function attachPlayerEvents(){
   vid.addEventListener('playing',()=>{const s=el('lv-buf-spin');if(s)s.classList.remove('show');resetHideTimer();});
 
   stage.addEventListener('click',function(e){
-    if(e.target.closest('#lv-controls-overlay button')||e.target.closest('.lv-seek-wrap')||e.target.closest('#lv-settings-sheet')||e.target.closest('#lv-sheet-backdrop')||e.target.closest('.lv-landscape-panel'))return;
+    if(e.target.closest('#lv-controls-overlay button')||e.target.closest('.lv-seek-wrap')||e.target.closest('#lv-settings-sheet')||e.target.closest('#lv-sheet-backdrop'))return;
     if(_controlsVisible)hideControls();else showControls();
   });
 
@@ -8577,7 +8542,7 @@ function attachPlayerEvents(){
 
   let _dtCount=0,_dtSide=null,_dtTimer=null;
   stage.addEventListener('touchend',function(e){
-    if(e.target.closest('#lv-controls-overlay button,.lv-seek-wrap,#lv-settings-sheet,.lv-landscape-panel'))return;
+    if(e.target.closest('#lv-controls-overlay button,.lv-seek-wrap,#lv-settings-sheet'))return;
     const x=e.changedTouches[0].clientX,sw=stage.clientWidth;const side=x<sw*0.33?'left':x>sw*0.67?'right':null;if(!side)return;
     _dtCount++;_dtSide=side;clearTimeout(_dtTimer);
     _dtTimer=setTimeout(()=>{
@@ -8597,7 +8562,6 @@ function attachPlayerEvents(){
 
   function doOpenSheet(e){e.stopPropagation();openSheet();showControls();}
   el('lv-settings-btn').addEventListener('click',doOpenSheet);
-  el('lv-land-settings-btn').addEventListener('click',doOpenSheet);
   el('lv-sheet-backdrop').addEventListener('click',closeSheet);
   el('lv-sheet-quality-btn').addEventListener('click',showQualityPanel);
   el('lv-sheet-speed-btn').addEventListener('click',showSpeedPanel);
