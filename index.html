@@ -933,13 +933,68 @@ body::before{
 .ann-admin-msg{font-size:11px;color:var(--txt2);font-weight:600;line-height:1.5;
   overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .ann-admin-time{font-size:10px;color:var(--txt3);font-weight:600;margin-top:4px;}
-.ann-admin-del{
+.ann-admin-btns{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.ann-admin-del,.ann-admin-edit{
   width:30px;height:30px;border-radius:50%;border:none;flex-shrink:0;
-  background:rgba(255,107,107,0.1);color:var(--red);
   font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:transform .2s var(--bounce),background .15s;
 }
+.ann-admin-del{background:rgba(255,107,107,0.1);color:var(--red);}
 .ann-admin-del:active{transform:scale(0.82);background:rgba(255,107,107,0.3);}
+.ann-admin-edit{background:rgba(91,154,255,0.12);color:var(--blue);}
+.ann-admin-edit:active{transform:scale(0.82);background:rgba(91,154,255,0.28);}
+/* Edit announcement modal */
+#ann-edit-modal{
+  position:fixed;inset:0;z-index:3100;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(14px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;visibility:hidden;
+  transition:opacity .28s var(--smooth),visibility 0s linear .28s;
+}
+#ann-edit-modal.open{
+  opacity:1;pointer-events:all;visibility:visible;
+  transition:opacity .28s var(--smooth),visibility 0s;
+}
+.ann-edit-card{
+  background:var(--bg2);border:1px solid var(--card-border);
+  border-radius:24px 24px 0 0;padding:22px 18px 36px;
+  width:100%;max-width:520px;
+  transform:translateY(44px);transition:transform .35s var(--spring);
+}
+#ann-edit-modal.open .ann-edit-card{transform:translateY(0);}
+.ann-edit-hdr{
+  font-size:16px;font-weight:900;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ann-edit-close{
+  width:30px;height:30px;border:none;background:var(--sf);
+  border-radius:50%;font-size:16px;cursor:pointer;color:var(--txt2);
+  display:flex;align-items:center;justify-content:center;
+}
+.ann-edit-fg{margin-bottom:12px;}
+.ann-edit-label{
+  font-size:11px;font-weight:800;color:var(--txt2);
+  letter-spacing:.8px;text-transform:uppercase;
+  margin-bottom:5px;display:block;
+}
+.ann-edit-input{
+  width:100%;padding:11px 13px;
+  background:var(--sf);border:1.5px solid var(--br);
+  border-radius:13px;color:var(--txt);
+  font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;
+  outline:none;box-sizing:border-box;transition:border-color .2s;
+}
+.ann-edit-input:focus{border-color:var(--blue);}
+.ann-edit-textarea{resize:vertical;min-height:96px;line-height:1.55;}
+.ann-edit-save{
+  width:100%;padding:14px;margin-top:16px;
+  background:linear-gradient(135deg,#5b9aff,#7b6eff);
+  border:none;border-radius:14px;color:#fff;
+  font-size:15px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;
+  transition:opacity .2s;
+}
+.ann-edit-save:active{opacity:.82;}
 
 /* ADMIN LOGIN */
 #almodal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.65);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .32s var(--smooth),visibility 0s linear .32s;}
@@ -9040,28 +9095,41 @@ window._openLecViewer=function(lec){
 ══════════════════════════════════════════════════════ */
 
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
-         query, orderBy, onSnapshot, serverTimestamp, setDoc }
+         query, orderBy, onSnapshot, serverTimestamp, setDoc, updateDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 
-const _aDb  = getFirestore(getApp());
-const _aAuth = getAuth(getApp());
+/* ── Init Firebase instances (same default app as main module) ── */
+let _aDb, _aAuth;
+try {
+  _aDb   = getFirestore(getApp());
+  _aAuth = getAuth(getApp());
+} catch(e) {
+  console.error('[Notif] Firebase init error:', e);
+}
 
 /* ── State ── */
 let _announcements = [];
 let _seenIds       = new Set();
 let _currentUid    = null;
 let _annUnsub      = null;
-let _listenerReady = false; // fix #6: track first load
+let _listenerReady = false;
 
 /* ── Helpers ── */
 function _$(id){ return document.getElementById(id); }
 
+/* Get current uid — check stored value first, then auth.currentUser directly */
+function _getUid(){
+  if(_currentUid) return _currentUid;
+  if(_aAuth && _aAuth.currentUser) return _aAuth.currentUser.uid;
+  return null;
+}
+
 function _fmtDate(ts){
   if(!ts) return '';
-  const d   = ts.toDate ? ts.toDate() : new Date(ts);
+  const d    = ts.toDate ? ts.toDate() : new Date(ts);
   const diff = (Date.now() - d.getTime()) / 1000;
   if(diff < 60)    return 'Just now';
   if(diff < 3600)  return Math.floor(diff/60) + 'm ago';
@@ -9074,39 +9142,43 @@ function _toast(msg){ if(window.toast) window.toast(msg); }
 
 function _escHtml(s){
   if(!s) return '';
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ── fix #2 & #10: Badge update — always reads live _seenIds synchronously ── */
+/* Escape HTML then preserve newlines as <br> for display */
+function _nl2br(s){
+  return _escHtml(s).replace(/\n/g,'<br>');
+}
+
+/* ── Badge update: always reads live _seenIds, forces DOM synchronously ── */
 function _updateBadge(){
   const badge = _$('notif-badge');
   if(!badge) return;
   const unseen = _announcements.filter(a => !_seenIds.has(a.id)).length;
   if(unseen > 0){
     badge.textContent = unseen > 99 ? '99+' : String(unseen);
-    badge.style.display = 'flex';  // force immediate DOM update
+    badge.style.cssText = 'display:flex !important';
     badge.classList.remove('hidden');
   } else {
-    badge.style.display = 'none';  // force immediate hide
+    badge.style.cssText = 'display:none !important';
     badge.classList.add('hidden');
   }
 }
 
-/* ── fix #6: Show shimmer skeleton while first load is pending ── */
+/* ── Shimmer skeleton shown while Firestore data is loading ── */
 function _showSkeleton(){
   const list = _$('notif-list');
   if(!list) return;
   list.innerHTML = [1,2,3].map(()=>`
     <div class="notif-skeleton">
       <div class="notif-skel-line" style="width:55%;height:13px;"></div>
-      <div class="notif-skel-line" style="width:85%;height:10px;"></div>
-      <div class="notif-skel-line" style="width:40%;height:9px;"></div>
+      <div class="notif-skel-line" style="width:82%;height:10px;"></div>
+      <div class="notif-skel-line" style="width:38%;height:9px;"></div>
     </div>`).join('');
 }
 
-/* ── Render notification list panel ── */
+/* ── Render notification list ── */
 function _renderNotifList(){
   const list = _$('notif-list');
   if(!list) return;
@@ -9120,10 +9192,9 @@ function _renderNotifList(){
   }
   list.innerHTML = _announcements.map((a,i) => {
     const seen = _seenIds.has(a.id);
-    /* fix #5: onerror hides broken image; fix #1: object-fit:contain, height:auto */
-    const img = a.imageUrl
+    const img  = a.imageUrl
       ? `<img class="ann-img" src="${_escHtml(a.imageUrl)}" alt=""
-           onerror="this.style.display='none'" loading="lazy">`
+             onerror="this.style.display='none'" loading="lazy">`
       : '';
     return `<div class="ann-card${seen?'':' unseen'}" style="animation-delay:${Math.min(i,5)*0.04}s">
       <div class="ann-card-top">
@@ -9134,7 +9205,7 @@ function _renderNotifList(){
         </div>
         ${seen ? '' : '<div class="ann-unseen-dot"></div>'}
       </div>
-      <div class="ann-msg">${_escHtml(a.message)}</div>
+      <div class="ann-msg">${_nl2br(a.message)}</div>
       ${img}
     </div>`;
   }).join('');
@@ -9157,39 +9228,53 @@ function _renderAdminList(){
         <div class="ann-admin-msg">${_escHtml(a.message)}</div>
         <div class="ann-admin-time">${_fmtDate(a.createdAt)}</div>
       </div>
-      <button class="ann-admin-del" onclick="window._deleteAnnouncement('${a.id}')" title="Delete">🗑</button>
+      <div class="ann-admin-btns">
+        <button class="ann-admin-edit" onclick="window._editAnnouncement('${a.id}')" title="Edit">✏️</button>
+        <button class="ann-admin-del"  onclick="window._deleteAnnouncement('${a.id}')" title="Delete">🗑</button>
+      </div>
     </div>`).join('');
 }
 
-/* ── Load seen IDs for a user from Firestore ── */
+/* ── Load seen IDs from Firestore for logged-in user ── */
 async function _loadSeen(uid){
+  if(!_aDb) return;
   _seenIds = new Set();
   try{
-    const snap = await getDocs(collection(_aDb, 'users', uid, 'seenAnnouncements'));
+    const snap = await getDocs(collection(_aDb,'users',uid,'seenAnnouncements'));
     snap.forEach(d => _seenIds.add(d.id));
   }catch(e){ console.warn('[Notif] loadSeen error:', e); }
-  /* fix #2 & #10: update badge + list after seen IDs are loaded */
   _updateBadge();
   _renderNotifList();
 }
 
 /* ── Write seen IDs to Firestore (fire-and-forget) ── */
 function _writeSeen(uid, ids){
+  if(!_aDb || !uid || !ids.length) return;
   Promise.all(ids.map(id =>
     setDoc(doc(_aDb,'users',uid,'seenAnnouncements',id),{ seenAt: serverTimestamp() })
   )).catch(e => console.warn('[Notif] writeSeen error:', e));
 }
 
-/* ── Start real-time listener ── */
+/* ── Mark IDs as seen locally + persist ── */
+function _markSeen(ids){
+  if(!ids.length) return;
+  ids.forEach(id => _seenIds.add(id));
+  _updateBadge();
+  _renderNotifList();
+  const uid = _getUid();
+  if(uid) _writeSeen(uid, ids);
+}
+
+/* ── Real-time Firestore listener ── */
 function _startListener(){
+  if(!_aDb) return;
   if(_annUnsub) _annUnsub();
   _listenerReady = false;
-  _showSkeleton(); // show skeleton immediately
+  _showSkeleton();
   const q = query(collection(_aDb,'announcements'), orderBy('createdAt','desc'));
   _annUnsub = onSnapshot(q, snap => {
-    _announcements  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    _listenerReady  = true; // fix #6: first load done
-    /* fix #10: always re-compute badge from current _seenIds */
+    _announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _listenerReady = true;
     _updateBadge();
     _renderNotifList();
     _renderAdminList();
@@ -9200,46 +9285,34 @@ function _startListener(){
 }
 
 /* ═══════════════════════════════════════════
-   PUBLIC API — called from HTML onclick attrs
+   PUBLIC API — exposed to window for onclick
 ═══════════════════════════════════════════ */
 
 window.openNotifPanel = function(){
-  _$('notif-panel').classList.add('open');
+  const panel = _$('notif-panel');
+  if(panel) panel.classList.add('open');
   document.body.style.overflow = 'hidden';
-  if(_currentUid && _announcements.length){
-    const unseen = _announcements.filter(a => !_seenIds.has(a.id)).map(a => a.id);
-    if(unseen.length){
-      unseen.forEach(id => _seenIds.add(id));
-      /* fix #2: update badge synchronously before writing to Firestore */
-      _updateBadge();
-      _renderNotifList();
-      _writeSeen(_currentUid, unseen);
-    }
-  }
+  const unseen = _announcements.filter(a => !_seenIds.has(a.id)).map(a => a.id);
+  if(unseen.length) _markSeen(unseen);
 };
 
 window.closeNotifPanel = function(){
-  _$('notif-panel').classList.remove('open');
+  const panel = _$('notif-panel');
+  if(panel) panel.classList.remove('open');
   document.body.style.overflow = '';
 };
 
-/* fix #2: mark all read — badge resets instantly, Firestore write is async */
+/* MARK ALL READ — no dependency on _currentUid, works for any user state */
 window.markAllAnnouncementsSeen = function(){
-  if(!_currentUid || !_announcements.length) return;
   const unseen = _announcements.filter(a => !_seenIds.has(a.id)).map(a => a.id);
   if(!unseen.length){ _toast('✅ All caught up!'); return; }
-  /* 1. Update local state first — synchronous */
-  unseen.forEach(id => _seenIds.add(id));
-  /* 2. Force immediate badge hide + list re-render */
-  _updateBadge();
-  _renderNotifList();
-  /* 3. Persist to Firestore async (doesn't block UI) */
-  _writeSeen(_currentUid, unseen);
+  _markSeen(unseen);
   _toast('✅ All marked as read');
 };
 
-/* Admin: Create */
+/* Admin: Create announcement */
 window.createAnnouncement = async function(){
+  if(!_aDb){ _toast('❌ Not connected to database'); return; }
   const title    = (_$('ann-new-title').value||'').trim();
   const message  = (_$('ann-new-msg').value||'').trim();
   const imageUrl = (_$('ann-new-img').value||'').trim();
@@ -9249,45 +9322,117 @@ window.createAnnouncement = async function(){
   _$('ann-new-msg').classList.remove('err');
   try{
     await addDoc(collection(_aDb,'announcements'),{
-      title, message,
-      imageUrl: imageUrl || null,
-      createdAt: serverTimestamp()
+      title, message, imageUrl: imageUrl||null, createdAt: serverTimestamp()
     });
-    _$('ann-new-title').value = '';
-    _$('ann-new-msg').value   = '';
-    _$('ann-new-img').value   = '';
+    _$('ann-new-title').value='';
+    _$('ann-new-msg').value='';
+    _$('ann-new-img').value='';
     _toast('📢 Announcement published!');
   }catch(e){
     console.error('[Notif] createAnnouncement error:', e);
-    _toast('❌ Failed to publish: ' + e.message);
+    _toast('❌ Failed to publish: '+e.message);
   }
 };
 
-/* Admin: Delete */
+/* Admin: Delete announcement */
 window._deleteAnnouncement = async function(id){
+  if(!_aDb) return;
   if(!confirm('Delete this announcement?')) return;
   try{
     await deleteDoc(doc(_aDb,'announcements',id));
     _toast('🗑 Announcement deleted');
   }catch(e){
     console.error('[Notif] deleteAnnouncement error:', e);
-    _toast('❌ Delete failed: ' + e.message);
+    _toast('❌ Delete failed: '+e.message);
   }
 };
 
-/* ── Auth state → load seen IDs per user ── */
-onAuthStateChanged(_aAuth, user => {
-  _currentUid = user ? user.uid : null;
-  if(user){
-    _loadSeen(user.uid);
-  } else {
-    _seenIds = new Set();
-    _updateBadge();
-    _renderNotifList();
-  }
-});
+/* ── Edit modal ── */
+let _editingId = null;
 
-/* ── Start listener immediately (loads announcements for all users) ── */
+function _ensureEditModal(){
+  if(_$('ann-edit-modal')) return;
+  const m = document.createElement('div');
+  m.id = 'ann-edit-modal';
+  m.innerHTML = `
+    <div class="ann-edit-card">
+      <div class="ann-edit-hdr">
+        <span>✏️ Edit Announcement</span>
+        <button class="ann-edit-close" onclick="window._closeEditModal()">✕</button>
+      </div>
+      <div class="ann-edit-fg">
+        <label class="ann-edit-label">Title</label>
+        <input  class="ann-edit-input" id="ann-edit-title" type="text" placeholder="Announcement title">
+      </div>
+      <div class="ann-edit-fg">
+        <label class="ann-edit-label">Message</label>
+        <textarea class="ann-edit-input ann-edit-textarea" id="ann-edit-msg" placeholder="Your message…"></textarea>
+      </div>
+      <div class="ann-edit-fg">
+        <label class="ann-edit-label">Image URL (optional)</label>
+        <input  class="ann-edit-input" id="ann-edit-img" type="text" placeholder="https://…">
+      </div>
+      <button class="ann-edit-save" onclick="window._saveEditAnnouncement()">💾 Save Changes</button>
+    </div>`;
+  /* close on backdrop tap */
+  m.addEventListener('click', e => { if(e.target === m) window._closeEditModal(); });
+  document.body.appendChild(m);
+}
+
+window._editAnnouncement = function(id){
+  const ann = _announcements.find(a => a.id === id);
+  if(!ann) return;
+  _editingId = id;
+  _ensureEditModal();
+  _$('ann-edit-title').value = ann.title   || '';
+  _$('ann-edit-msg').value   = ann.message || '';
+  _$('ann-edit-img').value   = ann.imageUrl|| '';
+  requestAnimationFrame(() => _$('ann-edit-modal').classList.add('open'));
+};
+
+window._closeEditModal = function(){
+  const m = _$('ann-edit-modal');
+  if(m) m.classList.remove('open');
+  _editingId = null;
+};
+
+window._saveEditAnnouncement = async function(){
+  if(!_aDb || !_editingId) return;
+  const title   = (_$('ann-edit-title').value||'').trim();
+  const message = (_$('ann-edit-msg').value||'').trim();
+  const imageUrl= (_$('ann-edit-img').value||'').trim();
+  if(!title){   _toast('❌ Title cannot be empty'); return; }
+  if(!message){ _toast('❌ Message cannot be empty'); return; }
+  const btn = document.querySelector('.ann-edit-save');
+  if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+  try{
+    await updateDoc(doc(_aDb,'announcements',_editingId),{
+      title, message, imageUrl: imageUrl||null
+    });
+    _toast('✅ Announcement updated!');
+    window._closeEditModal();
+  }catch(e){
+    console.error('[Notif] saveEdit error:', e);
+    _toast('❌ Save failed: '+e.message);
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='💾 Save Changes'; }
+  }
+};
+
+/* ── Auth state listener ── */
+if(_aAuth){
+  onAuthStateChanged(_aAuth, user => {
+    _currentUid = user ? user.uid : null;
+    if(user) _loadSeen(user.uid);
+    else {
+      _seenIds = new Set();
+      _updateBadge();
+      _renderNotifList();
+    }
+  });
+}
+
+/* ── Kick off real-time announcements listener ── */
 _startListener();
 
 </script>
