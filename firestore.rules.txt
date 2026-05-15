@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Reads the admins/{uid} document; costs 1 read per request that uses it.
+    // Security rules engine caches the result within a single request.
+    function isAdmin() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ── admins collection ──────────────────────────────────────────────────
+    // Only the owner can read their own admin record.
+    // Nobody can write from the frontend — seed via Firebase Console or SDK.
+    match /admins/{uid} {
+      allow read:  if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ── announcements ──────────────────────────────────────────────────────
+    // All signed-in users can read; only admins can create/update/delete.
+    match /announcements/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── per-user seen-announcements ────────────────────────────────────────
+    // Users can only read/write their own seen-tracking sub-collection.
+    match /users/{userId}/seenAnnouncements/{annId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ── user documents ─────────────────────────────────────────────────────
+    // Any signed-in user can read (for display names etc.).
+    // Only the owner can write their own document.
+    match /users/{userId} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ── content files ──────────────────────────────────────────────────────
+    match /files/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── lectures ───────────────────────────────────────────────────────────
+    match /lectures/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── lecture folders ────────────────────────────────────────────────────
+    match /lecture_folders/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── categories ─────────────────────────────────────────────────────────
+    match /categories/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── YouTube channel records ────────────────────────────────────────────
+    match /yt_channels/{docId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── deny everything else ───────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

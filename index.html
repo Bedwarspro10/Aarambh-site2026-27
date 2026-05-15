@@ -2750,14 +2750,12 @@ button,
   <div class="sobody" id="sobody"></div>
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN LOGIN — now Firestore-role based, no passwords in frontend -->
 <div id="almodal">
   <div class="alcard">
-    <h3>🔐 Admin Login</h3>
-    <p>Enter credentials to manage content</p>
-    <div class="fg"><label class="fl">Admin ID</label><input class="fi" id="ai-id" type="text" placeholder="Admin ID" autocomplete="off"></div>
-    <div class="fg"><label class="fl">Password</label><input class="fi" id="ai-pw" type="password" placeholder="Password"></div>
-    <button class="btnm" onclick="tryLogin()">Login</button>
+    <h3>🔐 Admin Access</h3>
+    <p>Access is granted via your Google account. Make sure you are signed in with the admin account.</p>
+    <button class="btnm" onclick="tryLogin()" style="margin-bottom:8px;">Verify &amp; Open Panel</button>
     <button class="btng" onclick="closeAL()">Cancel</button>
   </div>
 </div>
@@ -3022,8 +3020,7 @@ button,
           Click <strong>Open Chat</strong> above — it opens the full chat where you can see all messages, reply in real time, and moderate as Admin (login with admin credentials inside the chat).
         </div>
         <div style="padding:14px;font-size:12px;color:var(--txt2);line-height:1.7;">
-          <div>🔐 Admin ID: <strong style="color:var(--blue);">power123</strong></div>
-          <div>🔑 Password: <strong style="color:var(--blue);">ujjawal2809</strong></div>
+          <div style="font-size:11px;opacity:0.7;">Admin access inside Chat is granted automatically to verified admin Google accounts. Sign in with your admin Google account, then click the 🛡 icon in the chat.</div>
           <div style="margin-top:8px;font-size:11px;opacity:0.6;">All student messages are stored in Firebase Firestore in real-time.</div>
         </div>
       </div>
@@ -3176,8 +3173,20 @@ googleProvider.addScope('profile');
 googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// Only this Google UID can see the admin panel button
-const ADMIN_UID = 'renXVa7BMpbfpoWvenincbDDZ6W2';
+/* ── Admin role: verified via Firestore admins/{uid} — never trust frontend ── */
+async function checkAdminRole(uid){
+  if(!uid) return false;
+  try{
+    const snap = await getDoc(doc(db,'admins',uid));
+    return snap.exists() && snap.data().role === 'admin';
+  }catch(e){
+    console.warn('[Auth] Admin role check error:', e);
+    return false;
+  }
+}
+/* Expose to other modules (chat) without leaking secrets */
+window._checkAdminRole = checkAdminRole;
+window._getMainAuth    = ()=> auth;
 
 /* ═══════════════════════════════════════════
    GOOGLE AUTH — POPUP-ONLY, PASSCODE-AWARE
@@ -3260,9 +3269,9 @@ function updateProfileUI(user){
       const firstName = (user.displayName || 'NextTopper').split(' ')[0];
       helloName.textContent = firstName;
     }
-    // Admin gear — only visible for the designated admin UID
-    if(gearBtn) gearBtn.style.display = (user.uid === ADMIN_UID) ? '' : 'none';
-    if(moreAdminBtn) moreAdminBtn.style.display = (user.uid === ADMIN_UID) ? 'flex' : 'none';
+    // Admin gear — shown only when Firestore confirms admin role
+    if(gearBtn) gearBtn.style.display = isAdmin ? '' : 'none';
+    if(moreAdminBtn) moreAdminBtn.style.display = isAdmin ? 'flex' : 'none';
   } else {
     if(ava){
       ava.style.background = '';
@@ -3356,11 +3365,11 @@ window.openLoginPopup  = openLoginPopup;
    Since we no longer use redirect, there is
    no race condition with getRedirectResult.
 ───────────────────────────────────────── */
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   console.log('[Auth] onAuthStateChanged → user:', user ? user.email : 'null');
   gUser = user || null;
-  // Always update UI — if the app div isn't visible yet, the DOM
-  // elements still get the correct values so they're right on show.
+  /* Verify admin role server-side before updating UI — no UID hardcoding */
+  isAdmin = user ? await checkAdminRole(user.uid) : false;
   updateProfileUI(gUser);
   if(gUser) closeLoginPopup();
   if(typeof refreshLhubIfOpen === 'function') refreshLhubIfOpen();
@@ -3382,7 +3391,7 @@ window._authReapply = function(){
 /* ═══════════════════════════════════════════
    APP CONSTANTS & STATE
 ═══════════════════════════════════════════ */
-const PIN='2113', AID='power123', APW='ujjawal2809';
+const PIN='2113'; /* Admin credentials removed — role verified via Firestore */
 const SUBJ={
   maths:{name:'Mathematics',icon:'📘',cats:['DPP','MODULE','NOTES']},
   science:{name:'Science',icon:'🔬',cats:['ACP','NOTES']},
@@ -4070,48 +4079,42 @@ function apSwitchTab(t){
   if(t==='lectures'){renderAPLectures();renderAPLecFolders();updateLecFolderSelect('lec-folder',document.getElementById('lec-subj')?.value||'english');}
 }
 
-/* ADMIN */
-function openAL(){
-  if(isAdmin){
-    // Already logged in — just open admin panel directly
-    document.getElementById('apanel').classList.add('open');
-    apSwitchTab('files');
-    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();renderAPLecFolders();
-    return;
-  }
-  document.getElementById('almodal').classList.add('open');
+/* ADMIN — role verified via Firestore, no hardcoded credentials */
+function _openAdminPanelUI(){
+  document.getElementById('apanel').classList.add('open');
+  document.getElementById('admin-badge').style.display='flex';
+  apSwitchTab('files');
+  renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();
+  renderFolderOrganizer();renderAPLectures();renderAPLecFolders();
 }
+
+async function openAL(){
+  if(isAdmin){ _openAdminPanelUI(); return; }
+  if(!gUser){ toast('⚠️ Sign in with Google first'); return; }
+  /* Re-verify from Firestore (e.g. after adminOut or delayed load) */
+  const ok = await checkAdminRole(gUser.uid);
+  if(ok){ isAdmin=true; _openAdminPanelUI(); }
+  else   { toast('❌ No admin access for this Google account'); }
+}
+
 function closeAL(){
   document.getElementById('almodal').classList.remove('open');
-  document.getElementById('ai-id').value='';
-  document.getElementById('ai-pw').value='';
-  ['ai-id','ai-pw'].forEach(id=>document.getElementById(id).classList.remove('err'));
 }
-function tryLogin(){
-  const id=document.getElementById('ai-id').value.trim();
-  const pw=document.getElementById('ai-pw').value.trim();
-  if(id===AID&&pw===APW){
-    isAdmin=true;closeAL();
-    document.getElementById('apanel').classList.add('open');
-    document.getElementById('admin-badge').style.display='flex';
-    apSwitchTab('files');
-    renderAF();renderAPFolders();updateAPFolderSelect();updateCatDropdown();renderFolderOrganizer();renderAPLectures();renderAPLecFolders();toast('✅ Admin logged in');
-  }else{
-    ['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.add('err'));
-    setTimeout(()=>['ai-id','ai-pw'].forEach(k=>document.getElementById(k).classList.remove('err')),1500);
-    toast('❌ Wrong credentials');
-  }
-}
+
+/* tryLogin kept for any stray onclick= references — now no-op */
+function tryLogin(){ closeAL(); openAL(); }
+
 function closeAP(){
   document.getElementById('apanel').classList.remove('open');
   if(curSubj)renderFiles(curSubj);
 }
+
 function adminOut(){
   isAdmin=false;
   document.getElementById('admin-badge').style.display='none';
   closeAP();
   if(curSubj)renderFiles(curSubj);
-  toast('🔒 Logged out from Admin');
+  toast('🔒 Admin session closed');
 }
 
 /* ═══════════════════════════════════════════
@@ -6974,17 +6977,15 @@ canvas#wc-bg-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opac
   </div>
 </div>
 
-<!-- Admin Login Modal -->
+<!-- Admin Login Modal — Firestore-role based, no passwords -->
 <div class="wc-overlay" id="wc-admin-modal">
   <div class="wc-modal">
-    <h2>🔐 Admin Login</h2>
-    <p>Enter credentials to unlock moderation tools.</p>
-    <div class="wc-mfield"><label>Admin ID</label><input type="text" id="wc-admin-id" placeholder="Admin ID"/></div>
-    <div class="wc-mfield"><label>Password</label><input type="password" id="wc-admin-pass" placeholder="Password"/></div>
+    <h2>🔐 Admin Verification</h2>
+    <p>Admin access is granted via your Google account. Sign in with your admin Google account on the main app first.</p>
     <span class="wc-merr" id="wc-admin-err"></span>
     <div class="wc-mactions">
       <button class="wc-btn-s" id="wc-admin-cancel">Cancel</button>
-      <button class="wc-btn-p" id="wc-admin-submit">Login</button>
+      <button class="wc-btn-p" id="wc-admin-submit">Verify Access</button>
     </div>
   </div>
 </div>
@@ -7045,7 +7046,7 @@ const wcApp=initializeApp(wcConfig,'wechat');
 const wcDb=getFirestore(wcApp);
 
 /* ═══ CONSTANTS ═══ */
-const WC_AID='power123', WC_APW='ujjawal2809';
+/* Chat admin credentials removed — verified via Firestore admins/{uid} */
 const WC_REACT=['❤️','😂','👍','😮','😢','🔥'];
 const WC_EMOJIS=['😀','😂','🥰','😍','🤩','😎','🤔','😮','😢','😡','👍','👎','❤️','🔥','🎉','💯','✅','⭐','💬','🚀','💎','🤝','👏','🙏','💪','🎶','🤯','😴','🥳','🫡'];
 
@@ -7714,15 +7715,42 @@ $('wc-admin-btn').addEventListener('click',()=>{
   setTimeout(()=>$('wc-admin-id').focus(),120);
 });
 $('wc-admin-cancel').addEventListener('click',()=>$('wc-admin-modal').classList.remove('show'));
-$('wc-admin-submit').addEventListener('click',()=>{
-  if($('wc-admin-id').value===WC_AID&&$('wc-admin-pass').value===WC_APW){
-    wcIsAdmin=true;$('wc-admin-modal').classList.remove('show');
-    $('wc-admin-badge').classList.add('show');
-    wcToast('👑 Admin mode on');
-    if(wcMode==='group')adminBar.classList.add('show');
-  }else{$('wc-admin-err').textContent='Wrong credentials.';$('wc-admin-pass').value='';}
+$('wc-admin-submit').addEventListener('click', async ()=>{
+  const errEl = $('wc-admin-err');
+  errEl.textContent = '';
+  /* Verify via Firestore using the main app's auth + admin role check */
+  const mainAuth = typeof window._getMainAuth === 'function' ? window._getMainAuth() : null;
+  const currentUser = mainAuth ? mainAuth.currentUser : null;
+  if(!currentUser){
+    errEl.textContent = 'Please sign in with Google on the main app first.';
+    return;
+  }
+  if(typeof window._checkAdminRole !== 'function'){
+    errEl.textContent = 'Admin check unavailable — please refresh.';
+    return;
+  }
+  $('wc-admin-submit').textContent = 'Verifying…';
+  $('wc-admin-submit').disabled = true;
+  try{
+    const ok = await window._checkAdminRole(currentUser.uid);
+    if(ok){
+      wcIsAdmin=true;
+      $('wc-admin-modal').classList.remove('show');
+      $('wc-admin-badge').classList.add('show');
+      wcToast('👑 Admin mode on');
+      if(wcMode==='group') adminBar.classList.add('show');
+    }else{
+      errEl.textContent = 'Your Google account does not have admin access.';
+    }
+  }catch(e){
+    errEl.textContent = 'Verification failed. Please try again.';
+    console.error('[Chat] Admin check error:', e);
+  }finally{
+    $('wc-admin-submit').textContent = 'Verify Access';
+    $('wc-admin-submit').disabled = false;
+  }
 });
-$('wc-admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('wc-admin-submit').click();});
+/* wc-admin-pass removed — no password-based auth */
 $('wc-logout-btn').addEventListener('click',()=>{
   wcIsAdmin=false;adminBar.classList.remove('show');$('wc-admin-badge').classList.remove('show');
   wcToast('Logged out');
