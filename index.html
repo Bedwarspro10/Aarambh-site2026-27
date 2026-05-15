@@ -2965,9 +2965,12 @@ button,
            style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"
            onerror="this.style.display='none';this.parentElement.textContent='🎬';">
     </button>
-    <button class="ntab" id="nt-profile" onclick="switchTab('profile')">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-      <span class="nl">Profile</span>
+    <button class="ntab" id="nt-chat" onclick="openWeChat()">
+      <div class="ni-img" style="position:relative;display:inline-flex;margin-bottom:2px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+        <span id="chat-badge"></span>
+      </div>
+      <span class="nl">Live Chat</span>
     </button>
     <button class="ntab" id="nt-more" onclick="switchTab('more')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:2px;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
