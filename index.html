@@ -2129,6 +2129,295 @@ button,
   line-height:1.4;
 }
 
+/* ══════════════════════════════════════════
+   LIGHT MODE COMPREHENSIVE FIXES
+   Overrides hardcoded dark colors for .lm
+══════════════════════════════════════════ */
+
+/* ── Search bar ── */
+.lm .sfield {
+  background: rgba(255,255,255,0.92) !important;
+  border-color: rgba(80,120,220,0.2);
+  color: var(--txt);
+}
+.lm .sfield:focus {
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+/* ── Hello banner — inline dark gradient override ── */
+.lm .hello-banner {
+  background: linear-gradient(135deg,rgba(224,235,255,0.95) 0%,rgba(210,225,255,0.95) 100%) !important;
+  border-color: rgba(37,99,235,0.2) !important;
+  color: var(--txt) !important;
+}
+
+/* ── Subject / home cards — override inline dark gradients ── */
+.lm .scard {
+  background: var(--card-bg) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+}
+.lm .scard:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 1px var(--br2) !important;
+}
+
+/* ── Progress bar track — invisible on white ── */
+.lm .ptr {
+  background: rgba(0,0,0,0.08) !important;
+}
+
+/* ── Big course cards — override inline dark gradients ── */
+.lm .bigcc {
+  background: var(--card-bg) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.lm .bigcc:hover {
+  box-shadow: 0 10px 32px rgba(0,0,0,0.1) !important;
+}
+.lm .bigcc::after {
+  display: none;
+}
+
+/* ── Lecture hub card — hardcoded dark gradient ── */
+.lm .lhub-card {
+  background: var(--card-bg) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+}
+.lm .lhub-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 1px var(--br2) !important;
+  border-color: var(--br2) !important;
+}
+.lm .lhub-card.lhub-private {
+  background: linear-gradient(135deg,rgba(255,107,107,0.05) 0%,rgba(255,255,255,0.92) 60%) !important;
+}
+
+/* ── Lecture folder blocks ── */
+.lm .lhub-folder-blk {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: var(--br2) !important;
+}
+.lm .lhub-folder-hdr:active {
+  background: rgba(37,99,235,0.06) !important;
+}
+.lm .lhub-parent-blk {
+  border-color: rgba(37,99,235,0.2) !important;
+  background: rgba(37,99,235,0.03) !important;
+}
+.lm .lhub-parent-hdr {
+  background: rgba(37,99,235,0.07) !important;
+}
+.lm .lhub-subfolder-blk {
+  border-color: rgba(124,58,237,0.18) !important;
+  background: rgba(124,58,237,0.03) !important;
+}
+.lm .lhub-subfolder-hdr {
+  background: rgba(124,58,237,0.06) !important;
+}
+
+/* ── YouTube channel cards ── */
+.lm .ytcard {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: rgba(80,120,220,0.18) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+}
+.lm .ytcard:hover {
+  background: #fff !important;
+  border-color: rgba(124,58,237,0.28) !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.09) !important;
+}
+.lm .ytrow {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: rgba(80,120,220,0.15) !important;
+}
+
+/* ── YouTube API main card ── */
+.lm .yt-api-card {
+  background: rgba(255,255,255,0.92) !important;
+  border-color: rgba(80,120,220,0.2) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+.lm .yt-api-card:hover {
+  box-shadow: 0 10px 36px rgba(0,0,0,0.12) !important;
+}
+.lm .yt-api-card::before,
+.lm .yt-api-card::after {
+  opacity: 0.3;
+}
+
+/* ── Shorts strip cards ── */
+.lm .short-card {
+  background: rgba(255,255,255,0.92) !important;
+  border-color: rgba(80,120,220,0.18) !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08) !important;
+}
+.lm .short-skeleton {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+.lm .short-skeleton-inner {
+  background: linear-gradient(90deg,rgba(0,0,0,0.03) 25%,rgba(0,0,0,0.07) 50%,rgba(0,0,0,0.03) 75%) !important;
+}
+
+/* ── Shorts header title — white gradient invisible on light bg ── */
+.lm .shorts-header-title {
+  background: linear-gradient(90deg,#0f172a,#334155) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+.lm .shorts-refresh-btn {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(80,120,220,0.2) !important;
+}
+.lm .shorts-refresh-btn:hover {
+  background: rgba(0,0,0,0.08) !important;
+}
+.lm .sheet-stat-pill {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(80,120,220,0.15) !important;
+}
+
+/* ── Passcode dots — white border invisible on light bg ── */
+.lm .dot {
+  border-color: rgba(15,23,42,0.25) !important;
+}
+.lm .dot.on {
+  box-shadow: 0 0 12px rgba(15,23,42,0.2) !important;
+}
+
+/* ── Teacher carousel dots ── */
+.lm .tc-dot {
+  background: rgba(15,23,42,0.18) !important;
+}
+.lm .tc-dot.active {
+  background: var(--blue) !important;
+}
+
+/* ── Drag rows in admin ── */
+.lm .afrow {
+  background: rgba(0,0,0,0.02) !important;
+  border-color: var(--br) !important;
+}
+.lm .afrow.drag-over {
+  background: rgba(37,99,235,0.08) !important;
+}
+
+/* ── Notification skeleton shimmer ── */
+.lm .notif-skeleton::after {
+  background: linear-gradient(90deg,transparent 0%,rgba(0,0,0,0.04) 50%,transparent 100%) !important;
+}
+.lm .notif-skel-line {
+  background: rgba(0,0,0,0.08) !important;
+}
+
+/* ── Select option — hardcoded dark bg ── */
+.lm .fi-sel option {
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+/* ── Form inputs ── */
+.lm .fi {
+  background: rgba(255,255,255,0.9);
+  border-color: var(--br2);
+  color: var(--txt);
+}
+.lm .ann-edit-input {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: var(--br2) !important;
+  color: var(--txt) !important;
+}
+.lm .fo-modal-sel {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: var(--br2) !important;
+  color: var(--txt) !important;
+}
+
+/* ── Google login button on profile — near-invisible border ── */
+.lm #prof-login-btn {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: rgba(80,120,220,0.28) !important;
+  color: var(--txt) !important;
+}
+
+/* ── Subject detail folder blocks ── */
+.lm .folder-blk {
+  background: rgba(255,255,255,0.78) !important;
+  border-color: rgba(255,202,44,0.28) !important;
+}
+.lm .folder-hdr:active {
+  background: rgba(255,202,44,0.12) !important;
+}
+
+/* ── Clkbar light tint ── */
+.lm .clkbar {
+  background: rgba(37,99,235,0.04) !important;
+}
+
+/* ── Admin tabs bg ── */
+.lm .ap-tabs {
+  background: rgba(238,242,252,0.85) !important;
+}
+
+/* ── Umode toggle buttons ── */
+.lm .umode-btn {
+  background: rgba(255,255,255,0.8);
+  border-color: var(--br2);
+  color: var(--txt2);
+}
+.lm .umode-btn.active {
+  background: rgba(37,99,235,0.1);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* ── Lhub filter buttons ── */
+.lm .lhub-filter-btn {
+  background: rgba(255,255,255,0.8);
+  border-color: var(--br);
+  color: var(--txt2);
+}
+.lm .lhub-filter-btn.active {
+  background: rgba(37,99,235,0.1);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* ── fo-file-row ── */
+.lm .fo-file-row:active {
+  background: rgba(37,99,235,0.08) !important;
+}
+
+/* ── Ann admin items ── */
+.lm .ann-admin-item {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: var(--card-border) !important;
+}
+
+/* ── Loader background ── */
+.lm #loader {
+  background: var(--bg) !important;
+}
+.lm .ltrack {
+  background: rgba(0,0,0,0.08) !important;
+}
+
+/* ── Notification panel overlay ── */
+.lm #notif-panel {
+  background: var(--bg) !important;
+}
+
+/* ── Viewer bar ── */
+.lm .vbar {
+  background: rgba(238,242,252,0.92) !important;
+}
+
+/* ── Profile login button border ── */
+.lm .pbatch {
+  background: rgba(37,99,235,0.08) !important;
+  border-color: rgba(37,99,235,0.2) !important;
+}
+
 
 </style>
 </head>
