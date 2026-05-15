@@ -7017,6 +7017,23 @@ function openWeChat(){
   if(typeof wcInitCanvasGlobal==='function')wcInitCanvasGlobal();
   // Always go back to mode selector when opening fresh
   if(typeof wcShowModeSelector==='function')wcShowModeSelector();
+  // Silently sync admin status from main app Firebase auth
+  (async()=>{
+    try{
+      const mainAuth = typeof window._getMainAuth === 'function' ? window._getMainAuth() : null;
+      const currentUser = mainAuth ? mainAuth.currentUser : null;
+      if(!currentUser || typeof window._checkAdminRole !== 'function') return;
+      const ok = await window._checkAdminRole(currentUser.uid);
+      if(ok && typeof wcIsAdmin !== 'undefined' && !wcIsAdmin){
+        wcIsAdmin = true;
+        const badge2 = document.getElementById('wc-admin-badge');
+        if(badge2) badge2.classList.add('show');
+        console.log('[Chat] Admin auto-granted via Firestore admins/'+currentUser.uid);
+      }
+    }catch(e){
+      console.warn('[Chat] openWeChat admin sync error:', e);
+    }
+  })();
 }
 function closeWeChat(){
   const panel=document.getElementById('wechat-panel');
@@ -7708,11 +7725,32 @@ $('wc-name-submit').addEventListener('click',wcSubmitName);
 $('wc-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')wcSubmitName();});
 
 /* ═══ ADMIN LOGIC ═══ */
-$('wc-admin-btn').addEventListener('click',()=>{
+$('wc-admin-btn').addEventListener('click', async ()=>{
   if(wcIsAdmin){adminBar.classList.toggle('show');return;}
-  $('wc-admin-id').value='';$('wc-admin-pass').value='';$('wc-admin-err').textContent='';
-  $('wc-admin-modal').classList.add('show');
-  setTimeout(()=>$('wc-admin-id').focus(),120);
+  // Auto-verify using the main app's Firebase auth + Firestore admins/{uid}
+  const mainAuth = typeof window._getMainAuth === 'function' ? window._getMainAuth() : null;
+  const currentUser = mainAuth ? mainAuth.currentUser : null;
+  if(!currentUser || typeof window._checkAdminRole !== 'function'){
+    $('wc-admin-err').textContent = '';
+    $('wc-admin-modal').classList.add('show');
+    return;
+  }
+  try{
+    const ok = await window._checkAdminRole(currentUser.uid);
+    if(ok){
+      wcIsAdmin=true;
+      $('wc-admin-badge').classList.add('show');
+      wcToast('👑 Admin mode on');
+      if(wcMode==='group') adminBar.classList.add('show');
+    }else{
+      $('wc-admin-err').textContent = '';
+      $('wc-admin-modal').classList.add('show');
+    }
+  }catch(e){
+    console.error('[Chat] Admin auto-check error:', e);
+    $('wc-admin-err').textContent = '';
+    $('wc-admin-modal').classList.add('show');
+  }
 });
 $('wc-admin-cancel').addEventListener('click',()=>$('wc-admin-modal').classList.remove('show'));
 $('wc-admin-submit').addEventListener('click', async ()=>{
