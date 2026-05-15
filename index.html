@@ -812,21 +812,19 @@ body::before{
    NOTIFICATION / ANNOUNCEMENT SYSTEM
 ══════════════════════════════════════════ */
 
-/* Bell button wrapper */
-.notif-bell-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+/* Bell button wrapper — fix #7 badge alignment */
+.notif-bell-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
 .notif-badge{
-  position:absolute;top:-3px;right:-3px;
-  min-width:16px;height:16px;padding:0 4px;
+  position:absolute;top:0px;right:0px;
+  min-width:15px;height:15px;padding:0 3px;
   border-radius:99px;background:#ff3b30;
-  font-size:9px;font-weight:900;color:#fff;
+  font-size:8.5px;font-weight:900;color:#fff;
   display:flex;align-items:center;justify-content:center;
   pointer-events:none;letter-spacing:-.2px;
-  border:2px solid var(--bg);
-  animation:badgePop .3s var(--bounce);
-  line-height:1;
+  border:1.5px solid var(--bg);
+  line-height:1;z-index:1;
 }
-@keyframes badgePop{0%{transform:scale(0);}100%{transform:scale(1);}}
-.notif-badge.hidden{display:none;}
+.notif-badge.hidden{display:none !important;}
 
 /* Notification Panel */
 #notif-panel{
@@ -842,11 +840,10 @@ body::before{
 
 .notif-panel-bar{
   display:flex;align-items:center;gap:12px;
-  padding:14px 16px 12px;
+  padding:13px 16px 11px;
   border-bottom:1px solid var(--br);
   background:rgba(6,11,23,0.85);backdrop-filter:blur(32px);
-  flex-shrink:0;
-  transition:background .4s;
+  flex-shrink:0;transition:background .4s;
 }
 .lm .notif-panel-bar{background:rgba(238,242,252,0.9);}
 .notif-panel-title{font-size:16px;font-weight:900;flex:1;letter-spacing:-.2px;}
@@ -860,43 +857,67 @@ body::before{
 
 .notif-scroll{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:14px 12px 90px;
+  padding:10px 12px 80px;
 }
 .notif-scroll::-webkit-scrollbar{display:none;}
 
+/* Loading skeleton — fix #6 */
+.notif-skeleton{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:16px;padding:12px;margin-bottom:9px;overflow:hidden;position:relative;
+}
+.notif-skeleton::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.04) 50%,transparent 100%);
+  animation:skelShimmer 1.4s ease-in-out infinite;
+}
+@keyframes skelShimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.notif-skel-line{background:var(--sf2);border-radius:6px;margin-bottom:7px;}
+
 .notif-empty{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:12px;padding:60px 20px;text-align:center;
+  gap:10px;padding:50px 20px;text-align:center;
 }
-.notif-empty-ico{font-size:52px;line-height:1;}
-.notif-empty-txt{font-size:14px;font-weight:700;color:var(--txt2);}
+.notif-empty-ico{font-size:44px;line-height:1;}
+.notif-empty-txt{font-size:13px;font-weight:700;color:var(--txt2);}
 
-/* Announcement card */
+/* Announcement card — fix #3 compact, #8 dot alignment, #9 timestamp, #4 url wrap */
 .ann-card{
   background:var(--card-bg);border:1px solid var(--card-border);
-  border-radius:20px;padding:16px;margin-bottom:12px;
+  border-radius:16px;padding:12px;margin-bottom:9px;
   transition:background .4s,border-color .25s;
   animation:msgAppear .3s var(--spring) both;
 }
-.ann-card.unseen{border-color:rgba(91,154,255,0.35);background:rgba(91,154,255,0.04);}
-.ann-card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.ann-card.unseen{border-color:rgba(91,154,255,0.38);background:rgba(91,154,255,0.05);}
+.ann-card-top{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
 .ann-icon{
-  width:38px;height:38px;border-radius:12px;
+  width:34px;height:34px;border-radius:10px;
   background:var(--grd-blue);flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 4px 12px rgba(91,154,255,0.3);
+  font-size:16px;box-shadow:0 3px 10px rgba(91,154,255,0.28);
 }
 .ann-hdr{flex:1;min-width:0;}
-.ann-title{font-size:14px;font-weight:900;letter-spacing:-.15px;margin-bottom:2px;}
-.ann-time{font-size:10px;font-weight:600;color:var(--txt3);}
-.ann-unseen-dot{
-  width:8px;height:8px;border-radius:50%;background:#ff3b30;
-  flex-shrink:0;margin-top:4px;
+.ann-title{
+  font-size:13.5px;font-weight:900;letter-spacing:-.1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.ann-msg{font-size:13px;color:var(--txt2);line-height:1.65;font-weight:600;}
+/* fix #9 timestamp readability */
+.ann-time{font-size:10.5px;font-weight:600;color:var(--txt2);margin-top:1px;}
+/* fix #8 dot alignment — centered with icon row */
+.ann-unseen-dot{
+  width:7px;height:7px;border-radius:50%;background:#ff3b30;
+  flex-shrink:0;align-self:center;
+}
+/* fix #4 url/message wrapping */
+.ann-msg{
+  font-size:12.5px;color:var(--txt2);line-height:1.6;font-weight:600;
+  word-break:break-word;overflow-wrap:anywhere;
+}
+/* fix #1 image — full ratio, no crop, fix #5 broken image hidden via onerror */
 .ann-img{
-  width:100%;border-radius:12px;margin-top:10px;
-  max-height:220px;object-fit:cover;display:block;
+  width:100%;height:auto;max-height:none;
+  border-radius:10px;margin-top:8px;
+  object-fit:contain;display:block;
   border:1px solid var(--br);background:var(--bg2);
 }
 
@@ -9029,90 +9050,94 @@ const _aDb  = getFirestore(getApp());
 const _aAuth = getAuth(getApp());
 
 /* ── State ── */
-let _announcements = [];   // [{id, title, message, imageUrl, createdAt}]
-let _seenIds = new Set();  // IDs the current user has already seen
-let _currentUid = null;
-let _annUnsub = null;
+let _announcements = [];
+let _seenIds       = new Set();
+let _currentUid    = null;
+let _annUnsub      = null;
+let _listenerReady = false; // fix #6: track first load
 
 /* ── Helpers ── */
 function _$(id){ return document.getElementById(id); }
 
 function _fmtDate(ts){
   if(!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  const now = new Date();
-  const diff = (now - d) / 1000;
-  if(diff < 60)   return 'Just now';
-  if(diff < 3600) return Math.floor(diff/60) + 'm ago';
-  if(diff < 86400)return Math.floor(diff/3600) + 'h ago';
+  const d   = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if(diff < 60)    return 'Just now';
+  if(diff < 3600)  return Math.floor(diff/60) + 'm ago';
+  if(diff < 86400) return Math.floor(diff/3600) + 'h ago';
   if(diff < 604800)return Math.floor(diff/86400) + 'd ago';
   return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 }
 
 function _toast(msg){ if(window.toast) window.toast(msg); }
 
-/* ── Badge update ── */
+function _escHtml(s){
+  if(!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── fix #2 & #10: Badge update — always reads live _seenIds synchronously ── */
 function _updateBadge(){
-  const unseen = _announcements.filter(a => !_seenIds.has(a.id)).length;
   const badge = _$('notif-badge');
   if(!badge) return;
+  const unseen = _announcements.filter(a => !_seenIds.has(a.id)).length;
   if(unseen > 0){
-    badge.textContent = unseen > 99 ? '99+' : unseen;
+    badge.textContent = unseen > 99 ? '99+' : String(unseen);
+    badge.style.display = 'flex';  // force immediate DOM update
     badge.classList.remove('hidden');
   } else {
+    badge.style.display = 'none';  // force immediate hide
     badge.classList.add('hidden');
   }
 }
 
-/* ── Load seen IDs for a user ── */
-async function _loadSeen(uid){
-  _seenIds = new Set();
-  try{
-    const snap = await getDocs(collection(_aDb, 'users', uid, 'seenAnnouncements'));
-    snap.forEach(d => _seenIds.add(d.id));
-  }catch(e){ console.warn('[Notif] loadSeen error:', e); }
-  _updateBadge();
-  _renderNotifList();
-}
-
-/* ── Mark all currently loaded announcements as seen ── */
-async function _writeSeen(uid, ids){
-  try{
-    await Promise.all(ids.map(id =>
-      setDoc(doc(_aDb, 'users', uid, 'seenAnnouncements', id), { seenAt: serverTimestamp() })
-    ));
-  }catch(e){ console.warn('[Notif] writeSeen error:', e); }
+/* ── fix #6: Show shimmer skeleton while first load is pending ── */
+function _showSkeleton(){
+  const list = _$('notif-list');
+  if(!list) return;
+  list.innerHTML = [1,2,3].map(()=>`
+    <div class="notif-skeleton">
+      <div class="notif-skel-line" style="width:55%;height:13px;"></div>
+      <div class="notif-skel-line" style="width:85%;height:10px;"></div>
+      <div class="notif-skel-line" style="width:40%;height:9px;"></div>
+    </div>`).join('');
 }
 
 /* ── Render notification list panel ── */
 function _renderNotifList(){
   const list = _$('notif-list');
   if(!list) return;
+  if(!_listenerReady){ _showSkeleton(); return; }
   if(!_announcements.length){
-    list.innerHTML = `<div class="notif-empty"><div class="notif-empty-ico">🔔</div><div class="notif-empty-txt">No announcements yet</div></div>`;
+    list.innerHTML = `<div class="notif-empty">
+      <div class="notif-empty-ico">🔔</div>
+      <div class="notif-empty-txt">No announcements yet</div>
+    </div>`;
     return;
   }
   list.innerHTML = _announcements.map((a,i) => {
     const seen = _seenIds.has(a.id);
-    const img  = a.imageUrl ? `<img class="ann-img" src="${a.imageUrl}" alt="" onerror="this.style.display='none'">` : '';
-    return `<div class="ann-card${seen?'':' unseen'}" style="animation-delay:${i*0.04}s">
+    /* fix #5: onerror hides broken image; fix #1: object-fit:contain, height:auto */
+    const img = a.imageUrl
+      ? `<img class="ann-img" src="${_escHtml(a.imageUrl)}" alt=""
+           onerror="this.style.display='none'" loading="lazy">`
+      : '';
+    return `<div class="ann-card${seen?'':' unseen'}" style="animation-delay:${Math.min(i,5)*0.04}s">
       <div class="ann-card-top">
         <div class="ann-icon">📣</div>
         <div class="ann-hdr">
           <div class="ann-title">${_escHtml(a.title)}</div>
           <div class="ann-time">${_fmtDate(a.createdAt)}</div>
         </div>
-        ${seen?'':'<div class="ann-unseen-dot"></div>'}
+        ${seen ? '' : '<div class="ann-unseen-dot"></div>'}
       </div>
       <div class="ann-msg">${_escHtml(a.message)}</div>
       ${img}
     </div>`;
   }).join('');
-}
-
-function _escHtml(s){
-  if(!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ── Render admin list ── */
@@ -9133,35 +9158,59 @@ function _renderAdminList(){
         <div class="ann-admin-time">${_fmtDate(a.createdAt)}</div>
       </div>
       <button class="ann-admin-del" onclick="window._deleteAnnouncement('${a.id}')" title="Delete">🗑</button>
-    </div>
-  `).join('');
+    </div>`).join('');
+}
+
+/* ── Load seen IDs for a user from Firestore ── */
+async function _loadSeen(uid){
+  _seenIds = new Set();
+  try{
+    const snap = await getDocs(collection(_aDb, 'users', uid, 'seenAnnouncements'));
+    snap.forEach(d => _seenIds.add(d.id));
+  }catch(e){ console.warn('[Notif] loadSeen error:', e); }
+  /* fix #2 & #10: update badge + list after seen IDs are loaded */
+  _updateBadge();
+  _renderNotifList();
+}
+
+/* ── Write seen IDs to Firestore (fire-and-forget) ── */
+function _writeSeen(uid, ids){
+  Promise.all(ids.map(id =>
+    setDoc(doc(_aDb,'users',uid,'seenAnnouncements',id),{ seenAt: serverTimestamp() })
+  )).catch(e => console.warn('[Notif] writeSeen error:', e));
 }
 
 /* ── Start real-time listener ── */
 function _startListener(){
   if(_annUnsub) _annUnsub();
-  const q = query(collection(_aDb, 'announcements'), orderBy('createdAt','desc'));
+  _listenerReady = false;
+  _showSkeleton(); // show skeleton immediately
+  const q = query(collection(_aDb,'announcements'), orderBy('createdAt','desc'));
   _annUnsub = onSnapshot(q, snap => {
-    _announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _announcements  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _listenerReady  = true; // fix #6: first load done
+    /* fix #10: always re-compute badge from current _seenIds */
     _updateBadge();
     _renderNotifList();
     _renderAdminList();
-  }, err => console.warn('[Notif] listener error:', err));
+  }, err => {
+    _listenerReady = true;
+    console.warn('[Notif] listener error:', err);
+  });
 }
 
-/* ═══════════════════════════
-   PUBLIC API (called from HTML onclick)
-═══════════════════════════ */
+/* ═══════════════════════════════════════════
+   PUBLIC API — called from HTML onclick attrs
+═══════════════════════════════════════════ */
 
-/* Open notification panel */
 window.openNotifPanel = function(){
   _$('notif-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
-  // Mark all as seen
   if(_currentUid && _announcements.length){
     const unseen = _announcements.filter(a => !_seenIds.has(a.id)).map(a => a.id);
     if(unseen.length){
       unseen.forEach(id => _seenIds.add(id));
+      /* fix #2: update badge synchronously before writing to Firestore */
       _updateBadge();
       _renderNotifList();
       _writeSeen(_currentUid, unseen);
@@ -9174,28 +9223,32 @@ window.closeNotifPanel = function(){
   document.body.style.overflow = '';
 };
 
+/* fix #2: mark all read — badge resets instantly, Firestore write is async */
 window.markAllAnnouncementsSeen = function(){
   if(!_currentUid || !_announcements.length) return;
   const unseen = _announcements.filter(a => !_seenIds.has(a.id)).map(a => a.id);
   if(!unseen.length){ _toast('✅ All caught up!'); return; }
+  /* 1. Update local state first — synchronous */
   unseen.forEach(id => _seenIds.add(id));
+  /* 2. Force immediate badge hide + list re-render */
   _updateBadge();
   _renderNotifList();
+  /* 3. Persist to Firestore async (doesn't block UI) */
   _writeSeen(_currentUid, unseen);
   _toast('✅ All marked as read');
 };
 
 /* Admin: Create */
 window.createAnnouncement = async function(){
-  const title = (_$('ann-new-title').value||'').trim();
-  const message = (_$('ann-new-msg').value||'').trim();
+  const title    = (_$('ann-new-title').value||'').trim();
+  const message  = (_$('ann-new-msg').value||'').trim();
   const imageUrl = (_$('ann-new-img').value||'').trim();
-  if(!title){ _toast('❌ Please enter a title'); _$('ann-new-title').classList.add('err'); return; }
-  if(!message){ _toast('❌ Please enter a message'); _$('ann-new-msg').classList.add('err'); return; }
+  if(!title){   _toast('❌ Please enter a title');   _$('ann-new-title').classList.add('err'); return; }
+  if(!message){ _toast('❌ Please enter a message'); _$('ann-new-msg').classList.add('err');  return; }
   _$('ann-new-title').classList.remove('err');
   _$('ann-new-msg').classList.remove('err');
   try{
-    await addDoc(collection(_aDb, 'announcements'), {
+    await addDoc(collection(_aDb,'announcements'),{
       title, message,
       imageUrl: imageUrl || null,
       createdAt: serverTimestamp()
@@ -9214,7 +9267,7 @@ window.createAnnouncement = async function(){
 window._deleteAnnouncement = async function(id){
   if(!confirm('Delete this announcement?')) return;
   try{
-    await deleteDoc(doc(_aDb, 'announcements', id));
+    await deleteDoc(doc(_aDb,'announcements',id));
     _toast('🗑 Announcement deleted');
   }catch(e){
     console.error('[Notif] deleteAnnouncement error:', e);
@@ -9222,19 +9275,19 @@ window._deleteAnnouncement = async function(id){
   }
 };
 
-/* ── Auth state → load seen IDs ── */
+/* ── Auth state → load seen IDs per user ── */
 onAuthStateChanged(_aAuth, user => {
   _currentUid = user ? user.uid : null;
   if(user){
     _loadSeen(user.uid);
-  }else{
+  } else {
     _seenIds = new Set();
     _updateBadge();
     _renderNotifList();
   }
 });
 
-/* ── Start listener immediately (public announcements) ── */
+/* ── Start listener immediately (loads announcements for all users) ── */
 _startListener();
 
 </script>
