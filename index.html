@@ -3512,18 +3512,18 @@ button,
     if(fill){fill.style.transition='width 0.6s cubic-bezier(0.22,1,0.36,1)';fill.style.width='100%';}
     if(pct)pct.textContent='100%';
     progStopped=true;
-    // Wait for bar to visually complete (600ms) + small buffer, THEN hide loader
+    // Wait for bar to visually complete, then transition to passcode
     setTimeout(function(){
       var ld=document.getElementById('loader');
       if(ld){
-        // Show passcode FIRST so it's behind the fading loader — no black gap
-        showPC();
+        ld.classList.add('out');
+        // Show passcode immediately as loader starts fading
+        if(typeof showPC==='function'){showPC();}
+        else{var pc=document.getElementById('passcode');if(pc){pc.classList.add('vis');}}
+        // Fully remove loader after its transition completes
         setTimeout(function(){
-          ld.classList.add('out');
-          setTimeout(function(){
-            ld.style.display='none';
-          },1300);
-        },80);
+          ld.style.display='none';
+        },1300);
       }
     },650);
   };
@@ -5099,6 +5099,13 @@ window.addEventListener('load', async () => {
 
   // Minimum loader display time — 2400ms so the animation feels complete
   setTimeout(() => { loaderDone = true; proceed(); }, 2400);
+
+  // Hard fallback — loader ALWAYS dismisses after 8s, no matter what
+  setTimeout(() => {
+    if(!firebaseReady){ firebaseReady = true; }
+    if(!loaderDone){ loaderDone = true; }
+    window._splashFinish && window._splashFinish();
+  }, 8000);
 });
 
 /* ═══════════════════════════════════════════
