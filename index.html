@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<!-- Preload critical background images -->
+<link rel="preload" as="image" href="https://bedwarspro10.github.io/Aarambh-site2026-27/loading.png">
+<link rel="preload" as="image" href="https://bedwarspro10.github.io/Aarambh-site2026-27/passcode.png">
+<link rel="preload" as="image" href="https://bedwarspro10.github.io/Aarambh-site2026-27/icon-192.png">
+
 <title>Aarambh Batch 2026–27 | NextToppers-Feed</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -59,7 +64,7 @@ body::before{
 ═══════════════════════════════════════════ */
 #loader{
   position:fixed;inset:0;z-index:9999;
-  background:url('https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/loading.png') center/cover no-repeat, #000d0a;
+  background:url('https://bedwarspro10.github.io/Aarambh-site2026-27/loading.png') center/cover no-repeat, #000d0a;
   display:flex;flex-direction:column;
   overflow:hidden;
   transition:opacity 1.2s cubic-bezier(0.4,0,0.2,1);
@@ -719,7 +724,7 @@ body::before{
 /* Full-screen background image */
 .pcbg{
   position:absolute;inset:0;z-index:0;
-  background:url('https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/passcode.png') center/cover no-repeat, #000d0a;
+  background:url('https://bedwarspro10.github.io/Aarambh-site2026-27/passcode.png') center/cover no-repeat, #000d0a;
 }
 /* Dark overlay for readability */
 .pcbg::after{
@@ -3151,7 +3156,7 @@ button,
 
 /* ── Loader background ── */
 .lm #loader {
-  background: url('https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/loading.png') center/cover no-repeat, #000d0a !important;
+  background: url('https://bedwarspro10.github.io/Aarambh-site2026-27/loading.png') center/cover no-repeat, #000d0a !important;
 }
 .lm .ltrack {
   background: rgba(0,0,0,0.08) !important;
@@ -3177,6 +3182,20 @@ button,
 </style>
 </head>
 <body>
+<script>
+/* ── Critical image preloader — runs before anything renders ── */
+(function(){
+  var IMGS=[
+    'https://bedwarspro10.github.io/Aarambh-site2026-27/loading.png',
+    'https://bedwarspro10.github.io/Aarambh-site2026-27/passcode.png',
+    'https://bedwarspro10.github.io/Aarambh-site2026-27/icon-192.png'
+  ];
+  IMGS.forEach(function(src){
+    var img=new Image();
+    img.src=src;
+  });
+})();
+</script>
 
 <!-- LOADER -->
 <div id="loader">
@@ -3555,7 +3574,7 @@ button,
       <div class="pc-logo-ring"></div>
       <div class="pc-logo-inner">
         <img class="pc-logo-img"
-          src="https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/icon-192.png"
+          src="https://bedwarspro10.github.io/Aarambh-site2026-27/icon-192.png"
           onerror="this.src='https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png'" alt="NT">
         <div class="pc-logo-shimmer"></div>
       </div>
