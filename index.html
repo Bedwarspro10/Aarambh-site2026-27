@@ -706,63 +706,222 @@ body::before{
 .lfill{height:100%;width:0%;border-radius:99px;background:var(--grd-blue);animation:lp 2s var(--spring) forwards;}
 @keyframes lp{to{width:100%;}}
 
-/* PASSCODE */
+/* ═══════════════════════════════════════════
+   PASSCODE — Cinematic Neon Design
+═══════════════════════════════════════════ */
 #passcode{
   position:fixed;inset:0;z-index:800;
-  display:flex;flex-direction:column;align-items:center;
-  background:var(--bg);
-  padding-top:max(70px,env(safe-area-inset-top,70px));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:max(40px,env(safe-area-inset-top,40px)) 24px max(32px,env(safe-area-inset-bottom,32px));
   opacity:0;pointer-events:none;visibility:hidden;
   transition:opacity .5s var(--smooth),transform .5s var(--spring),visibility 0s linear .5s;
+  overflow:hidden;
 }
 #passcode.vis{opacity:1;pointer-events:all;visibility:visible;transition:opacity .5s var(--smooth),transform .5s var(--spring),visibility 0s linear 0s;}
 #passcode.out{opacity:0;transform:scale(1.05) translateY(-20px);pointer-events:none;visibility:hidden;}
+
+/* Full-screen background image */
 .pcbg{
-  position:absolute;inset:0;z-index:-1;
-  background:radial-gradient(ellipse 80% 55% at 50% 20%,rgba(91,154,255,0.1) 0%,transparent 70%),
-             radial-gradient(ellipse 50% 40% at 80% 75%,rgba(155,109,255,0.07) 0%,transparent 60%),
-             var(--bg);
+  position:absolute;inset:0;z-index:0;
+  background:url('https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/passcode.png') center/cover no-repeat, #000d0a;
 }
-.pclock{
-  width:64px;height:64px;border-radius:50%;
-  background:var(--sf2);border:1.5px solid var(--br2);backdrop-filter:blur(20px);
-  display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:22px;
-  animation:lockIn .65s var(--bounce) both;
-  box-shadow:0 8px 32px rgba(91,154,255,0.12);
+/* Dark overlay for readability */
+.pcbg::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(0,5,10,0.45);
 }
-@keyframes lockIn{from{transform:scale(0.3) translateY(-30px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-.pctitle{font-size:24px;font-weight:900;margin-bottom:32px;letter-spacing:-.3px;}
-.pcdots{display:flex;gap:18px;margin-bottom:56px;}
+
+/* Neon wave overlays matching the design */
+.pcbg-wave1{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 40% at -10% 80%,rgba(0,230,180,0.18) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 50% at 110% 70%,rgba(47,232,160,0.14) 0%,transparent 55%);
+}
+.pcbg-wave2{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 30% at 50% 5%,rgba(0,200,140,0.08) 0%,transparent 60%);
+}
+
+/* Content sits above bg layers */
+.pc-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;
+}
+
+/* ── Logo section ── */
+.pc-logo-wrap{
+  position:relative;
+  width:120px;height:120px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;
+  animation:pcLogoIn .7s var(--bounce) both;
+}
+@keyframes pcLogoIn{from{transform:scale(0.3) translateY(-20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+
+/* Outer glowing ring — matches the neon circle in the image */
+.pc-logo-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2.5px solid transparent;
+  background:
+    linear-gradient(#000d0a,#000d0a) padding-box,
+    conic-gradient(from 120deg,#00e8b0,#2fe8a0 20%,#00bfff 45%,#000d0a 60%,#000d0a 75%,#00e8b0 100%) border-box;
+  box-shadow:0 0 20px rgba(47,232,160,0.5),0 0 40px rgba(47,232,160,0.2),inset 0 0 20px rgba(47,232,160,0.08);
+  animation:pcRingRotate 4s linear infinite;
+}
+@keyframes pcRingRotate{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(30deg);}}
+
+/* Inner dark circle behind logo */
+.pc-logo-inner{
+  width:96px;height:96px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#0d2a20,#061510,#020c09);
+  border:1px solid rgba(47,232,160,0.3);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px rgba(0,0,0,0.8),inset 0 1px 0 rgba(47,232,160,0.15);
+  overflow:hidden;
+  position:relative;
+}
+.pc-logo-img{
+  width:72px;height:72px;object-fit:contain;border-radius:50%;
+  animation:pcFloat 3s ease-in-out infinite;
+}
+@keyframes pcFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+/* Shimmer on logo */
+.pc-logo-shimmer{
+  position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,0.15) 48%,rgba(200,255,240,0.1) 54%,transparent 72%);
+  animation:pcShimmer 2.6s ease-in-out infinite;
+}
+@keyframes pcShimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+
+/* Glow halo around ring */
+.pc-logo-halo{
+  position:absolute;inset:-12px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(47,232,160,0.12) 0%,transparent 70%);
+  animation:pcHaloBreathe 2.8s ease-in-out infinite;
+}
+@keyframes pcHaloBreathe{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.3);opacity:1;}}
+
+/* ── App title ── */
+.pc-app-title{
+  font-size:clamp(22px,6vw,28px);font-weight:900;
+  text-align:center;letter-spacing:-.3px;
+  margin-bottom:6px;
+  animation:pcFadeUp .6s ease .2s both;
+}
+.pc-title-next{color:#fff;}
+.pc-title-toppers{
+  background:linear-gradient(90deg,#00ff99,#2fe8a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 10px rgba(47,232,160,0.6));
+}
+.pc-title-dash{color:rgba(255,255,255,0.35);}
+.pc-title-feed{
+  background:linear-gradient(90deg,#00e5ff,#00bfff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 10px rgba(0,191,255,0.5));
+}
+
+/* Thin divider */
+.pc-divider{
+  width:60px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(47,232,160,0.7),transparent);
+  box-shadow:0 0 8px rgba(47,232,160,0.5);
+  margin-bottom:20px;
+  animation:pcFadeUp .5s ease .3s both;
+}
+
+/* ── Enter passcode text ── */
+.pctitle{
+  font-size:20px;font-weight:800;
+  color:#fff;text-align:center;
+  margin-bottom:6px;letter-spacing:-.2px;
+  animation:pcFadeUp .5s ease .35s both;
+}
+.pc-subtitle{
+  font-size:13px;font-weight:500;
+  color:rgba(200,230,255,0.55);text-align:center;
+  margin-bottom:28px;
+  animation:pcFadeUp .5s ease .4s both;
+}
+
+/* ── Dots ── */
+.pcdots{display:flex;gap:20px;margin-bottom:40px;animation:pcFadeUp .5s ease .45s both;}
 .dot{
-  width:15px;height:15px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.25);background:transparent;
-  transition:transform .3s var(--bounce),background .2s,border-color .2s,box-shadow .2s;will-change:transform;
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(47,232,160,0.5);background:transparent;
+  transition:transform .3s var(--bounce),background .2s,border-color .2s,box-shadow .2s;
+  will-change:transform;
 }
-.dot.on{background:var(--txt);border-color:var(--txt);transform:scale(1.2);box-shadow:0 0 12px rgba(255,255,255,0.3);}
-.dot.err{background:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(255,107,107,0.4);}
-.dot.ok{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(47,232,160,0.4);}
-.kpad{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:min(296px,84vw);}
+.dot.on{
+  background:linear-gradient(135deg,#2fe8a0,#00ff99);
+  border-color:#2fe8a0;
+  transform:scale(1.25);
+  box-shadow:0 0 14px rgba(47,232,160,0.7),0 0 28px rgba(47,232,160,0.3);
+}
+.dot.err{background:#ff6b6b;border-color:#ff6b6b;box-shadow:0 0 14px rgba(255,107,107,0.6);}
+.dot.ok{background:linear-gradient(135deg,#2fe8a0,#00ff99);border-color:#2fe8a0;box-shadow:0 0 14px rgba(47,232,160,0.7);}
+
+/* ── Keypad ── */
+.kpad{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  width:min(288px,82vw);
+  animation:pcFadeUp .5s ease .5s both;
+}
 .kb{
-  aspect-ratio:1;border-radius:50%;border:none;
-  background:var(--sf2);backdrop-filter:blur(16px);border:1px solid var(--br);
-  color:var(--txt);font-family:'Nunito',sans-serif;
-  font-size:26px;font-weight:700;cursor:pointer;
+  aspect-ratio:1;border-radius:50%;
+  background:rgba(8,20,30,0.75);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1.5px solid rgba(47,232,160,0.2);
+  color:#fff;font-family:'Nunito',sans-serif;
+  font-size:clamp(20px,5.5vw,26px);font-weight:700;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:transform .2s var(--bounce),background .15s,box-shadow .2s;
+  transition:transform .18s var(--bounce),background .15s,box-shadow .2s,border-color .2s;
   will-change:transform;user-select:none;position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06);
 }
-.kb:active{transform:scale(0.86);background:rgba(91,154,255,0.22);box-shadow:0 0 22px rgba(91,154,255,0.35);}
-.ksub{font-size:9px;font-weight:800;letter-spacing:2px;color:var(--txt2);margin-top:1px;}
+.kb::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,0.07),transparent 65%);
+  pointer-events:none;
+}
+.kb:active{
+  transform:scale(0.84);
+  background:rgba(47,232,160,0.18);
+  border-color:rgba(47,232,160,0.6);
+  box-shadow:0 0 24px rgba(47,232,160,0.4),0 0 48px rgba(47,232,160,0.15),inset 0 1px 0 rgba(47,232,160,0.2);
+}
+.ksub{font-size:8.5px;font-weight:800;letter-spacing:2px;color:rgba(180,220,255,0.5);margin-top:1px;}
 .kb-blank{visibility:hidden;}
 .kb-zero{grid-column:2;}
-.pclink{margin-top:28px;font-size:13px;color:var(--txt2);cursor:pointer;transition:color .2s;}
-.pclink:hover{color:var(--blue);}
+.pclink{
+  margin-top:22px;font-size:13px;
+  color:rgba(180,220,255,0.45);cursor:pointer;
+  transition:color .2s;letter-spacing:.3px;
+  animation:pcFadeUp .5s ease .6s both;
+  position:relative;z-index:2;
+}
+.pclink:hover{color:rgba(47,232,160,0.8);}
+
+@keyframes pcFadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes shake{
   0%,100%{transform:translateX(0);}15%{transform:translateX(-10px);}
   30%{transform:translateX(9px);}45%{transform:translateX(-7px);}
   60%{transform:translateX(7px);}75%{transform:translateX(-4px);}90%{transform:translateX(3px);}
 }
 .shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97) both;}
+
+/* light mode adjustments for passcode */
+.lm #passcode .pcbg{background:#0a0f18 center/cover no-repeat;}
+.lm .kb{background:rgba(10,20,40,0.82);border-color:rgba(47,232,160,0.25);color:#fff;}
+.lm .pctitle{color:#fff;}
+.lm .pc-subtitle{color:rgba(180,220,255,0.6);}
+.lm .pc-title-next{color:#fff;}
 
 /* APP */
 #app{
@@ -2877,12 +3036,12 @@ button,
   border-color: rgba(80,120,220,0.15) !important;
 }
 
-/* ── Passcode dots — white border invisible on light bg ── */
+/* ── Passcode dots — light mode tweaks ── */
 .lm .dot {
-  border-color: rgba(15,23,42,0.25) !important;
+  border-color: rgba(47,232,160,0.4) !important;
 }
 .lm .dot.on {
-  box-shadow: 0 0 12px rgba(15,23,42,0.2) !important;
+  box-shadow: 0 0 14px rgba(47,232,160,0.5) !important;
 }
 
 /* ── Teacher carousel dots ── */
@@ -3233,19 +3392,15 @@ button,
     'Fetching <span class="sp-hl">lectures</span> and notes...',
     'Almost ready, future <span class="sp-hl">topper</span>...'
   ];
-  var qIdx=0,ltIdx=0,prog=0,progStopped=false;
+  var qIdx=0,ltIdx=0,prog=0,progStopped=false,finishing=false;
 
   /* ── LOW-END DEVICE DETECTION ── */
   var isLowEnd=(function(){
     var score=0;
-    // CPU cores — low-end phones typically have 4 or fewer
     if(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)score+=2;
-    // RAM (only Chrome/Android exposes this)
     if(navigator.deviceMemory&&navigator.deviceMemory<=2)score+=3;
-    // Small screen = likely budget device
     var px=window.screen.width*window.devicePixelRatio;
     if(px<720)score+=1;
-    // Connection quality
     var conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
     if(conn&&(conn.saveData||conn.effectiveType==='2g'||conn.effectiveType==='slow-2g'))score+=2;
     return score>=3;
@@ -3259,14 +3414,12 @@ button,
   function genStars(){
     var c=document.getElementById('sp-stars');
     if(!c)return;
-    // Fewer stars on low-end devices
     var count=isLowEnd?28:60;
     var frag=document.createDocumentFragment();
     for(var i=0;i<count;i++){
       var d=document.createElement('div');
       var sz=(Math.random()*2+0.5).toFixed(1);
       var op=(Math.random()*0.5+0.08).toFixed(2);
-      // Longer durations = fewer repaints per second
       var dur=(isLowEnd?6:3+Math.random()*3).toFixed(1);
       var del=(Math.random()*(isLowEnd?12:8)).toFixed(1);
       d.className='sp-star';
@@ -3274,7 +3427,6 @@ button,
       frag.appendChild(d);
     }
     c.appendChild(frag);
-    // Floating neon particles — skip entirely on low-end
     if(isLowEnd)return;
     if(!document.getElementById('sp-particle-kf')){
       var s=document.createElement('style');s.id='sp-particle-kf';
@@ -3284,7 +3436,6 @@ button,
     var bg=document.querySelector('.sp-bg');
     if(!bg)return;
     var colors=['rgba(47,232,160,','rgba(91,154,255,','rgba(155,109,255,','rgba(0,255,180,'];
-    // Reduced particle count (18 → 10) even on high-end
     for(var j=0;j<10;j++){
       var p=document.createElement('div');
       var psz=(Math.random()*3+1.5).toFixed(1);
@@ -3326,41 +3477,53 @@ button,
     setTimeout(function(){el.innerHTML=html;el.style.opacity='1';},290);
   }
 
-  /* ── RAF-BASED PROGRESS — single rAF loop, no thrashing ── */
+  /* ── RAF PROGRESS — faster curve, stops at 92% until _splashFinish() is called ── */
   var lastProg=0;
   function tickProgress(){
     if(progStopped)return;
-    var fill=document.getElementById('sp-bar-fill');
-    var pct=document.getElementById('sp-percent');
-    if(!fill||!pct)return;
-    if(prog<82){prog+=(82-prog)*0.025+0.18;}
-    else if(prog<96){prog+=0.06;}
-    var p=Math.min(96,prog);
-    // Only update DOM if value visibly changed (skip sub-pixel updates)
+    // Faster approach: reach 92% quickly, hold there until Firebase signals done
+    if(prog<72){prog+=(72-prog)*0.04+0.5;}       // fast early phase
+    else if(prog<88){prog+=(88-prog)*0.03+0.25;}  // still quick mid phase
+    else if(prog<92){prog+=0.15;}                  // slow crawl — waiting for data
+    // Hard stop at 92 until finish is called
+    var p=Math.min(finishing?100:92,prog);
     var rounded=Math.round(p);
     if(rounded!==lastProg){
-      fill.style.width=p.toFixed(1)+'%';
-      pct.textContent=rounded+'%';
+      var fill=document.getElementById('sp-bar-fill');
+      var pct=document.getElementById('sp-percent');
+      if(fill)fill.style.width=p.toFixed(1)+'%';
+      if(pct)pct.textContent=rounded+'%';
       lastProg=rounded;
     }
-    if(p<96)requestAnimationFrame(tickProgress);
+    if(!progStopped)requestAnimationFrame(tickProgress);
   }
 
-  function watchForHide(){
-    var ld=document.getElementById('loader');
-    if(!ld)return;
-    var obs=new MutationObserver(function(){
-      if(ld.classList.contains('out')){
-        progStopped=true;
-        var fill=document.getElementById('sp-bar-fill');
-        var pct=document.getElementById('sp-percent');
-        if(fill){fill.style.transition='width 0.5s ease';fill.style.width='100%';}
-        if(pct)pct.textContent='100%';
-        obs.disconnect();
+  /* ── Called by main app when Firebase + min-time are both satisfied ── */
+  window._splashFinish=function(){
+    if(finishing)return;
+    finishing=true;
+    // Update load text to final message
+    var ltEl=document.getElementById('sp-load-text');
+    if(ltEl){ltEl.style.opacity='0';setTimeout(function(){ltEl.innerHTML='Almost ready, future <span class="sp-hl">topper</span>...';ltEl.style.opacity='1';},150);}
+    // Sprint bar from current position to 100%
+    var fill=document.getElementById('sp-bar-fill');
+    var pct=document.getElementById('sp-percent');
+    if(fill){fill.style.transition='width 0.6s cubic-bezier(0.22,1,0.36,1)';fill.style.width='100%';}
+    if(pct)pct.textContent='100%';
+    progStopped=true;
+    // Wait for bar to visually complete (600ms) + small buffer, THEN hide loader
+    setTimeout(function(){
+      var ld=document.getElementById('loader');
+      if(ld){
+        ld.classList.add('out');
+        // Wait for loader fade-out transition (1200ms per CSS), then show passcode
+        setTimeout(function(){
+          ld.style.display='none';
+          showPC();
+        },1250);
       }
-    });
-    obs.observe(ld,{attributes:true,attributeFilter:['class']});
-  }
+    },650);
+  };
 
   function init(){
     genStars();
@@ -3371,7 +3534,6 @@ button,
     setInterval(function(){qIdx=(qIdx+1)%QUOTES.length;setQuote(QUOTES[qIdx]);},3500);
     setInterval(function(){ltIdx=(ltIdx+1)%LOAD_TEXTS.length;setLoadText(LOAD_TEXTS[ltIdx]);},2800);
     requestAnimationFrame(tickProgress);
-    watchForHide();
   }
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
@@ -3381,30 +3543,64 @@ button,
 
 <!-- PASSCODE -->
 <div id="passcode">
+  <!-- Background layers -->
   <div class="pcbg"></div>
-  <div class="pclock">🔒</div>
-  <div class="pctitle">Enter Passcode</div>
-  <div class="pcdots" id="pcdots">
-    <div class="dot" id="pd0"></div>
-    <div class="dot" id="pd1"></div>
-    <div class="dot" id="pd2"></div>
-    <div class="dot" id="pd3"></div>
+  <div class="pcbg-wave1"></div>
+  <div class="pcbg-wave2"></div>
+
+  <!-- All content above bg -->
+  <div class="pc-content">
+
+    <!-- Logo -->
+    <div class="pc-logo-wrap">
+      <div class="pc-logo-halo"></div>
+      <div class="pc-logo-ring"></div>
+      <div class="pc-logo-inner">
+        <img class="pc-logo-img"
+          src="https://raw.githubusercontent.com/nexttoppersfeed/nexttoppersfeed.github.io/main/icon-192.png"
+          onerror="this.src='https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png'" alt="NT">
+        <div class="pc-logo-shimmer"></div>
+      </div>
+    </div>
+
+    <!-- App name -->
+    <div class="pc-app-title">
+      <span class="pc-title-next">Next </span><span class="pc-title-toppers">Toppers</span><span class="pc-title-dash">- </span><span class="pc-title-feed">Feed</span>
+    </div>
+
+    <!-- Thin neon divider -->
+    <div class="pc-divider"></div>
+
+    <!-- Enter passcode heading -->
+    <div class="pctitle">Enter Passcode</div>
+    <div class="pc-subtitle">Enter 4-digit passcode to continue</div>
+
+    <!-- Dots -->
+    <div class="pcdots" id="pcdots">
+      <div class="dot" id="pd0"></div>
+      <div class="dot" id="pd1"></div>
+      <div class="dot" id="pd2"></div>
+      <div class="dot" id="pd3"></div>
+    </div>
+
+    <!-- Keypad -->
+    <div class="kpad">
+      <button class="kb" data-n="1" onclick="kp('1')">1</button>
+      <button class="kb" data-n="2" onclick="kp('2')">2<div class="ksub">ABC</div></button>
+      <button class="kb" data-n="3" onclick="kp('3')">3<div class="ksub">DEF</div></button>
+      <button class="kb" data-n="4" onclick="kp('4')">4<div class="ksub">GHI</div></button>
+      <button class="kb" data-n="5" onclick="kp('5')">5<div class="ksub">JKL</div></button>
+      <button class="kb" data-n="6" onclick="kp('6')">6<div class="ksub">MNO</div></button>
+      <button class="kb" data-n="7" onclick="kp('7')">7<div class="ksub">PQRS</div></button>
+      <button class="kb" data-n="8" onclick="kp('8')">8<div class="ksub">TUV</div></button>
+      <button class="kb" data-n="9" onclick="kp('9')">9<div class="ksub">WXYZ</div></button>
+      <div class="kb-blank"></div>
+      <button class="kb kb-zero" onclick="kp('0')">0</button>
+      <button class="kb" onclick="kdel()">&#x232B;</button>
+    </div>
+
+    <div class="pclink" onclick="toast('Default PIN: 2113')">Emergency ›</div>
   </div>
-  <div class="kpad">
-    <button class="kb" data-n="1" onclick="kp('1')">1</button>
-    <button class="kb" data-n="2" onclick="kp('2')">2<div class="ksub">ABC</div></button>
-    <button class="kb" data-n="3" onclick="kp('3')">3<div class="ksub">DEF</div></button>
-    <button class="kb" data-n="4" onclick="kp('4')">4<div class="ksub">GHI</div></button>
-    <button class="kb" data-n="5" onclick="kp('5')">5<div class="ksub">JKL</div></button>
-    <button class="kb" data-n="6" onclick="kp('6')">6<div class="ksub">MNO</div></button>
-    <button class="kb" data-n="7" onclick="kp('7')">7<div class="ksub">PQRS</div></button>
-    <button class="kb" data-n="8" onclick="kp('8')">8<div class="ksub">TUV</div></button>
-    <button class="kb" data-n="9" onclick="kp('9')">9<div class="ksub">WXYZ</div></button>
-    <div class="kb-blank"></div>
-    <button class="kb kb-zero" onclick="kp('0')">0</button>
-    <button class="kb" onclick="kdel()">⌫</button>
-  </div>
-  <div class="pclink" onclick="toast('Default PIN: 2113')">Emergency ›</div>
 </div>
 
 <!-- APP -->
@@ -4875,24 +5071,20 @@ function fixDrive(u){
    LOADER — waits for Firebase data
 ═══════════════════════════════════════════ */
 window.addEventListener('load', async () => {
-  // Start loading Firebase data in background during loader animation
   let firebaseReady = false;
   let loaderDone = false;
 
   const proceed = () => {
     if (firebaseReady && loaderDone) {
-      const ld = document.getElementById('loader');
-      ld.classList.add('out');
-      setTimeout(() => { ld.style.display = 'none'; showPC(); }, 650);
+      // Signal the splash JS to sprint bar to 100%, then dismiss
+      window._splashFinish && window._splashFinish();
     }
   };
 
   // Firebase load
   try {
     await Promise.all([fbLoadFiles(), fbLoadYT(), fbLoadFolders()]);
-    // Load lectures separately — don't block startup if collection is missing/empty
     try { await Promise.all([fbLoadLectures(), fbLoadLectureFolders()]); } catch(e){ console.warn('[Lectures] Load skipped:', e); }
-    // One-time cleanup: fix any existing docs with missing/empty category
     await fixMissingCategories();
     firebaseReady = true;
   } catch(e) {
@@ -4902,8 +5094,8 @@ window.addEventListener('load', async () => {
   }
   proceed();
 
-  // Minimum loader display time (1800ms for animation)
-  setTimeout(() => { loaderDone = true; proceed(); }, 1800);
+  // Minimum loader display time — 2400ms so the animation feels complete
+  setTimeout(() => { loaderDone = true; proceed(); }, 2400);
 });
 
 /* ═══════════════════════════════════════════
