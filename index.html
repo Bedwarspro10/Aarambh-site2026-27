@@ -5085,6 +5085,11 @@ window.closeLecViewer = function(){
 let _lhubFilter = 'all'; // 'all' | 'english' | 'hindi'
 
 window.openLecturesHub = function(){
+  if(!gUser){
+    toast('🔒 Please sign in to view lectures');
+    openLoginPopup();
+    return;
+  }
   const panel = document.getElementById('lhub-panel');
   if(!panel) return;
   panel.classList.add('open');
