@@ -64,7 +64,7 @@ body::before{
   overflow:hidden;
   transition:opacity 1.2s cubic-bezier(0.4,0,0.2,1);
 }
-#loader.out{opacity:0;pointer-events:none;visibility:hidden;}
+#loader.out{opacity:0;pointer-events:none;visibility:hidden;transition:opacity 1.2s cubic-bezier(0.4,0,0.2,1),visibility 0s linear 1.2s;}
 
 /* ── DEEP CINEMATIC BACKGROUND ── */
 .sp-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
@@ -713,6 +713,7 @@ body::before{
   position:fixed;inset:0;z-index:800;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:max(40px,env(safe-area-inset-top,40px)) 24px max(32px,env(safe-area-inset-bottom,32px));
+  background:#000d0a;
   opacity:0;pointer-events:none;visibility:hidden;
   transition:opacity .5s var(--smooth),transform .5s var(--spring),visibility 0s linear .5s;
   overflow:hidden;
@@ -3515,12 +3516,14 @@ button,
     setTimeout(function(){
       var ld=document.getElementById('loader');
       if(ld){
-        ld.classList.add('out');
-        // Wait for loader fade-out transition (1200ms per CSS), then show passcode
+        // Show passcode FIRST so it's behind the fading loader — no black gap
+        showPC();
         setTimeout(function(){
-          ld.style.display='none';
-          showPC();
-        },1250);
+          ld.classList.add('out');
+          setTimeout(function(){
+            ld.style.display='none';
+          },1300);
+        },80);
       }
     },650);
   };
