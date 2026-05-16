@@ -54,30 +54,630 @@ body::before{
 }
 .lm body::before{display:none;}
 
-/* LOADER */
+/* ═══════════════════════════════════════════
+   PREMIUM CINEMATIC SPLASH SCREEN — V3
+═══════════════════════════════════════════ */
 #loader{
-  position:fixed;inset:0;z-index:9999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  transition:opacity .7s var(--smooth);
+  position:fixed;inset:0;z-index:9999;
+  background:#000d0a;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:opacity 1.2s cubic-bezier(0.4,0,0.2,1);
 }
 #loader.out{opacity:0;pointer-events:none;visibility:hidden;}
-.lorb{
-  width:90px;height:90px;border-radius:26px;
-  background:var(--grd-blue);
+
+/* ── DEEP CINEMATIC BACKGROUND ── */
+.sp-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+
+/* Layered depth gradients */
+.sp-bg-base{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%,   rgba(0,255,140,0.09) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 50% at 20% 80%,  rgba(47,232,160,0.07) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 55% at 80% 30%,  rgba(91,154,255,0.07) 0%,transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 50%, rgba(0,8,12,0.0) 0%,#000d0a 75%),
+    linear-gradient(180deg,#000c09 0%,#00100d 40%,#000e0c 100%);
+}
+
+/* Fog layers */
+.sp-fog-1{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 130% 55% at 50% -10%,rgba(47,232,160,0.08) 0%,transparent 55%);
+  animation:sp-fog-drift 14s ease-in-out infinite;
+}
+.sp-fog-2{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 40% at 80% 110%,rgba(91,154,255,0.07) 0%,transparent 50%);
+  animation:sp-fog-drift 18s ease-in-out infinite reverse;
+}
+.sp-fog-3{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 30% at 10% 60%,rgba(155,109,255,0.055) 0%,transparent 55%);
+  animation:sp-fog-drift 11s ease-in-out 2s infinite;
+}
+@keyframes sp-fog-drift{
+  0%,100%{transform:translate3d(0,0,0);}
+  33%{transform:translate3d(14px,-10px,0);}
+  66%{transform:translate3d(-10px,14px,0);}
+}
+
+/* Particle field */
+.sp-stars{position:absolute;inset:0;}
+.sp-star{position:absolute;border-radius:50%;background:#fff;animation:sp-twinkle 3s ease-in-out infinite;}
+@keyframes sp-twinkle{0%,100%{opacity:var(--op,0.4);}50%{opacity:0.04;}}
+
+/* Subtle perspective grid — slowed down to reduce repaint frequency */
+.sp-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(47,232,160,0.038) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(47,232,160,0.038) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 85% 65% at 50% 60%,black 20%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 85% 65% at 50% 60%,black 20%,transparent 80%);
+  animation:sp-grid-drift 38s linear infinite;
+  opacity:0.6;
+  contain:strict;
+}
+@keyframes sp-grid-drift{from{background-position:0 0;}to{background-position:52px 52px;}}
+
+/* Ambient glow blobs */
+.sp-aurora-1{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(ellipse,rgba(47,232,160,0.13) 0%,transparent 70%);top:-140px;left:-100px;animation:sp-aurora 10s ease-in-out infinite;}
+.sp-aurora-2{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(ellipse,rgba(91,154,255,0.11) 0%,transparent 70%);bottom:-100px;right:-80px;animation:sp-aurora 14s ease-in-out infinite reverse;}
+.sp-aurora-3{position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(ellipse,rgba(155,109,255,0.09) 0%,transparent 70%);top:42%;left:50%;transform:translate(-50%,-50%);animation:sp-aurora-pulse 8s ease-in-out infinite;}
+.sp-aurora-4{position:absolute;width:160px;height:160px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,255,180,0.07) 0%,transparent 70%);top:15%;right:10%;animation:sp-aurora 7s ease-in-out 3s infinite;}
+@keyframes sp-aurora{0%,100%{transform:translate3d(0,0,0);}33%{transform:translate3d(32px,-22px,0);}66%{transform:translate3d(-22px,32px,0);}}
+@keyframes sp-aurora-pulse{0%,100%{transform:translate3d(-50%,-50%,0) scale(1);opacity:0.5;}50%{transform:translate3d(-50%,-50%,0) scale(1.6);opacity:1;}}
+
+/* Light streaks */
+.sp-streak{position:absolute;height:1px;border-radius:1px;}
+.sp-streak-1{width:130px;top:16%;left:-130px;background:linear-gradient(90deg,transparent,rgba(47,232,160,0.7),transparent);animation:sp-streak-fly 4.5s linear 0.3s infinite;}
+.sp-streak-2{width:90px;top:49%;left:-90px;background:linear-gradient(90deg,transparent,rgba(47,232,160,0.5),transparent);animation:sp-streak-fly 5.8s linear 2.1s infinite;}
+.sp-streak-3{width:170px;top:76%;left:-170px;background:linear-gradient(90deg,transparent,rgba(91,154,255,0.55),transparent);animation:sp-streak-fly 3.9s linear 0.9s infinite;}
+.sp-streak-4{width:110px;top:33%;left:-110px;background:linear-gradient(90deg,transparent,rgba(155,109,255,0.45),transparent);animation:sp-streak-fly 6.5s linear 3.5s infinite;}
+.sp-streak-5{width:80px;top:62%;left:-80px;background:linear-gradient(90deg,transparent,rgba(0,255,200,0.4),transparent);animation:sp-streak-fly 4.2s linear 1.8s infinite;}
+@keyframes sp-streak-fly{from{transform:translate3d(0,0,0);}to{transform:translate3d(calc(100vw + 250px),0,0);}}
+
+/* Scan line — uses transform (not top) to stay on compositor thread */
+.sp-scan{position:absolute;width:100%;height:2px;left:0;top:0;background:linear-gradient(90deg,transparent,rgba(47,232,160,0.35),rgba(91,154,255,0.35),transparent);box-shadow:0 0 8px rgba(47,232,160,0.25),0 0 20px rgba(47,232,160,0.1);animation:sp-scan-line 9s linear infinite;}
+@keyframes sp-scan-line{from{transform:translate3d(0,-2px,0);}to{transform:translate3d(0,100vh,0);}}
+
+/* Floating particles */
+.sp-particle{position:absolute;border-radius:50%;pointer-events:none;}
+
+/* ── CONTENT WRAPPER ── */
+.sp-content{
+  position:relative;z-index:1;flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 18px 12px;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── HEADER ── */
+.sp-hdr{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0 8px;
+  animation:sp-fade-dn 0.7s ease both;
+}
+.sp-ver{
+  font-size:11px;font-weight:900;
+  color:rgba(47,232,160,0.8);letter-spacing:1px;
+  background:rgba(47,232,160,0.08);
+  border:1px solid rgba(47,232,160,0.2);
+  border-radius:20px;padding:3px 9px;
+  box-shadow:0 0 12px rgba(47,232,160,0.15);
+}
+.sp-status{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(180,220,255,0.5);max-width:58%;text-align:right;}
+.sp-dot-live{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+  background:#2fe8a0;
+  box-shadow:0 0 0 2px rgba(47,232,160,0.25),0 0 8px #2fe8a0;
+  animation:sp-blink 1.4s ease-in-out infinite;
+}
+@keyframes sp-blink{0%,100%{opacity:1;box-shadow:0 0 0 2px rgba(47,232,160,0.25),0 0 8px #2fe8a0;}50%{opacity:0.3;box-shadow:0 0 0 2px rgba(47,232,160,0.05),0 0 2px #2fe8a0;}}
+
+/* ── HERO LOGO ── */
+.sp-logo-section{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:230px;height:230px;
+  margin:0 auto 6px;
+  animation:sp-logo-in 1s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+}
+@keyframes sp-logo-in{from{transform:scale(0.2) translateZ(0);opacity:0;}to{transform:scale(1) translateZ(0);opacity:1;}}
+
+/* Outer ring glow halo */
+.sp-logo-halo{
+  position:absolute;
+  width:195px;height:195px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(47,232,160,0.18) 0%,rgba(47,232,160,0.06) 42%,transparent 70%);
+  animation:sp-halo-breathe 3s ease-in-out infinite;
+}
+@keyframes sp-halo-breathe{
+  0%,100%{transform:scale(1);opacity:0.7;}
+  50%{transform:scale(1.3);opacity:1;}
+}
+
+/* Orbit rings — elliptical for depth */
+.sp-orbit{position:absolute;border-radius:50%;border:1.5px solid transparent;}
+.sp-orbit-1{
+  width:178px;height:178px;
+  border-color:rgba(47,232,160,0.5);
+  box-shadow:0 0 18px rgba(47,232,160,0.18),inset 0 0 18px rgba(47,232,160,0.07);
+  animation:sp-spin 8s linear infinite;
+}
+.sp-orbit-2{
+  width:208px;height:112px;
+  border-color:rgba(91,154,255,0.35);
+  box-shadow:0 0 12px rgba(91,154,255,0.12);
+  animation:sp-spin 12s linear infinite reverse;
+}
+.sp-orbit-3{
+  width:220px;height:86px;
+  border-color:rgba(155,109,255,0.28);
+  box-shadow:0 0 10px rgba(155,109,255,0.1);
+  animation:sp-spin 5s linear infinite;
+}
+@keyframes sp-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+.sp-orbit-dot{
+  width:7px;height:7px;border-radius:50%;
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+}
+.sp-orbit-1 .sp-orbit-dot{
+  background:#2fe8a0;
+  box-shadow:0 0 10px #2fe8a0,0 0 24px rgba(47,232,160,0.7),0 0 40px rgba(47,232,160,0.3);
+}
+.sp-orbit-2 .sp-orbit-dot{
+  background:#5b9aff;
+  box-shadow:0 0 10px #5b9aff,0 0 20px rgba(91,154,255,0.6);
+}
+.sp-orbit-3 .sp-orbit-dot{
+  background:#c084fc;
+  box-shadow:0 0 10px #c084fc,0 0 20px rgba(155,109,255,0.6);
+}
+
+/* Logo core glow */
+.sp-logo-glow{
+  position:absolute;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(47,232,160,0.38) 0%,rgba(47,232,160,0.14) 40%,transparent 70%);
+  animation:sp-glow-breathe 2.6s ease-in-out infinite;
+}
+@keyframes sp-glow-breathe{
+  0%,100%{transform:scale(1);opacity:0.65;}
+  50%{transform:scale(1.7);opacity:1;}
+}
+
+/* Logo image container — PERFECT CIRCLE — premium sci-fi reactor */
+.sp-logo-img-wrap{
+  position:relative;
+  width:118px;height:118px;
+  border-radius:50%;
+  overflow:hidden;
+  background:radial-gradient(circle at 35% 35%,#0d2535,#071825,#030f18);
+  border:2px solid rgba(47,232,160,0.55);
+  box-shadow:
+    0 0 0 4px rgba(47,232,160,0.08),
+    0 0 0 8px rgba(47,232,160,0.04),
+    0 0 28px rgba(47,232,160,0.55),
+    0 0 60px rgba(47,232,160,0.22),
+    0 0 100px rgba(47,232,160,0.08),
+    0 16px 48px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+  animation:sp-float 3s ease-in-out infinite;
+}
+.sp-logo-img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+@keyframes sp-float{0%,100%{transform:translate3d(0,0,0);}50%{transform:translate3d(0,-9px,0);}}
+
+/* Holographic shine sweep on circle */
+.sp-logo-shimmer{
+  position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,0.18) 45%,rgba(200,255,240,0.12) 52%,transparent 72%);
+  animation:sp-holo-sweep 2.4s ease-in-out infinite;
+}
+
+/* Extra neon ring accent outside the circle */
+.sp-logo-img-wrap::after{
+  content:'';
+  position:absolute;inset:-5px;
+  border-radius:50%;
+  border:1px solid rgba(47,232,160,0.22);
+  pointer-events:none;
+}
+@keyframes sp-holo-sweep{
+  0%{transform:translate3d(-100%,0,0);}
+  100%{transform:translate3d(100%,0,0);}
+}
+
+/* ── TITLE / TYPOGRAPHY ── */
+.sp-title{
+  font-size:clamp(26px,7vw,34px);
+  font-weight:900;
+  letter-spacing:-.5px;
+  text-align:center;line-height:1.05;
+  margin-bottom:6px;
+  position:relative;
+  animation:sp-fade-up 0.8s ease 0.5s both;
+}
+.sp-title-nt{
+  background:linear-gradient(125deg,#00ff99 0%,#2fe8a0 30%,#5bf5c0 55%,#2fe8a0 80%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:sp-title-shimmer 3.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 18px rgba(47,232,160,0.55));
+}
+@keyframes sp-title-shimmer{
+  0%,100%{background-position:0% 0;}
+  50%{background-position:100% 0;}
+}
+.sp-title-dash{
+  -webkit-text-fill-color:rgba(255,255,255,0.18);
+  color:rgba(255,255,255,0.18);
+}
+.sp-title-feed{
+  background:linear-gradient(125deg,#60a5fa 0%,#818cf8 45%,#a78bfa 80%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:sp-title-shimmer 3.5s ease-in-out 0.5s infinite;
+  filter:drop-shadow(0 0 16px rgba(99,102,241,0.5));
+}
+.sp-subtitle{
+  font-size:9.5px;font-weight:800;
+  letter-spacing:4px;
+  color:rgba(160,210,255,0.4);
+  text-align:center;margin-bottom:14px;
+  animation:sp-fade-up 0.7s ease 0.7s both;
+}
+
+/* Divider gem */
+.sp-divider{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;
+  animation:sp-fade-up 0.6s ease 0.8s both;
+}
+.sp-divider-line{flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(47,232,160,0.3));}
+.sp-divider-line.right{background:linear-gradient(90deg,rgba(47,232,160,0.3),transparent);}
+.sp-divider-gem{
+  width:6px;height:6px;
+  background:#2fe8a0;
+  transform:rotate(45deg);
+  box-shadow:0 0 10px #2fe8a0,0 0 20px rgba(47,232,160,0.5);
+}
+
+/* ── FEATURE CARDS — Premium Compact Glassmorphism Chips ── */
+.sp-cards{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:7px;width:100%;margin-bottom:11px;
+}
+.sp-card{
+  position:relative;overflow:hidden;
+  background:rgba(255,255,255,0.035);
+  backdrop-filter:blur(32px) saturate(1.6);
+  -webkit-backdrop-filter:blur(32px) saturate(1.6);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:9px 10px 8px;
+  animation:sp-card-in 0.6s cubic-bezier(0.34,1.3,0.64,1) both;
+  transition:transform 0.35s ease,box-shadow 0.35s ease;
+}
+/* Top highlight edge */
+.sp-card::before{
+  content:'';position:absolute;
+  top:0;left:8%;right:8%;
+  height:1px;
+  border-radius:0 0 3px 3px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent);
+}
+/* Bottom left edge glow */
+.sp-card::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;
+  height:1px;
+  border-radius:14px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
+}
+.sp-card-1{
+  animation-delay:0.65s;
+  border-color:rgba(47,232,160,0.22);
+  box-shadow:0 2px 16px rgba(0,0,0,0.5),0 0 0 1px rgba(47,232,160,0.07),inset 0 1px 0 rgba(47,232,160,0.09);
+  animation:sp-card-in 0.6s cubic-bezier(0.34,1.3,0.64,1) 0.65s both, sp-float-card-1 3.8s ease-in-out 1.5s infinite;
+}
+.sp-card-2{
+  animation-delay:0.8s;
+  border-color:rgba(91,154,255,0.22);
+  box-shadow:0 2px 16px rgba(0,0,0,0.5),0 0 0 1px rgba(91,154,255,0.07),inset 0 1px 0 rgba(91,154,255,0.09);
+  animation:sp-card-in 0.6s cubic-bezier(0.34,1.3,0.64,1) 0.8s both, sp-float-card-2 4.2s ease-in-out 1.8s infinite;
+}
+.sp-card-3{
+  animation-delay:0.95s;
+  border-color:rgba(255,200,50,0.18);
+  box-shadow:0 2px 16px rgba(0,0,0,0.5),0 0 0 1px rgba(255,200,50,0.06),inset 0 1px 0 rgba(255,200,50,0.08);
+  animation:sp-card-in 0.6s cubic-bezier(0.34,1.3,0.64,1) 0.95s both, sp-float-card-3 3.5s ease-in-out 2.1s infinite;
+}
+.sp-card-4{
+  animation-delay:1.1s;
+  border-color:rgba(155,109,255,0.22);
+  box-shadow:0 2px 16px rgba(0,0,0,0.5),0 0 0 1px rgba(155,109,255,0.07),inset 0 1px 0 rgba(155,109,255,0.09);
+  animation:sp-card-in 0.6s cubic-bezier(0.34,1.3,0.64,1) 1.1s both, sp-float-card-4 4.5s ease-in-out 2.4s infinite;
+}
+@keyframes sp-card-in{from{opacity:0;transform:translate3d(0,18px,0) scale(0.9);}to{opacity:1;transform:translate3d(0,0,0) scale(1);}}
+@keyframes sp-float-card-1{0%,100%{transform:translate3d(0,0px,0);}50%{transform:translate3d(0,-3px,0);}}
+@keyframes sp-float-card-2{0%,100%{transform:translate3d(0,0px,0);}50%{transform:translate3d(0,-4px,0);}}
+@keyframes sp-float-card-3{0%,100%{transform:translate3d(0,0px,0);}50%{transform:translate3d(0,-3px,0);}}
+@keyframes sp-float-card-4{0%,100%{transform:translate3d(0,0px,0);}50%{transform:translate3d(0,-4px,0);}}
+
+.sp-card-num{
+  font-size:7px;font-weight:900;letter-spacing:1.5px;
+  margin-bottom:5px;
+  opacity:0.45;
+}
+.sp-card-1 .sp-card-num{color:#2fe8a0;}
+.sp-card-2 .sp-card-num{color:#5b9aff;}
+.sp-card-3 .sp-card-num{color:#ffca2c;}
+.sp-card-4 .sp-card-num{color:#c084fc;}
+
+/* SVG icon container */
+.sp-card-icon-wrap{
+  width:28px;height:28px;border-radius:8px;
   display:flex;align-items:center;justify-content:center;
-  font-size:30px;font-weight:900;color:#fff;
-  box-shadow:0 0 0 0 rgba(91,154,255,0.5),0 8px 32px rgba(91,154,255,0.35);
-  animation:loaderPulse 1.6s ease-in-out infinite;will-change:transform,box-shadow;
-  letter-spacing:-1px;overflow:hidden;padding:0;
+  margin-bottom:6px;
+  position:relative;
 }
-.lorb img{width:100%;height:100%;object-fit:cover;border-radius:26px;display:block;}
-@keyframes loaderPulse{
-  0%{transform:scale(1);box-shadow:0 0 0 0 rgba(91,154,255,0.5),0 8px 32px rgba(91,154,255,0.35);}
-  50%{transform:scale(1.08);box-shadow:0 0 0 22px rgba(91,154,255,0),0 12px 40px rgba(91,154,255,0.45);}
-  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(91,154,255,0),0 8px 32px rgba(91,154,255,0.35);}
+.sp-card-1 .sp-card-icon-wrap{background:rgba(47,232,160,0.13);box-shadow:0 0 12px rgba(47,232,160,0.25),inset 0 1px 0 rgba(47,232,160,0.18);}
+.sp-card-2 .sp-card-icon-wrap{background:rgba(91,154,255,0.13);box-shadow:0 0 12px rgba(91,154,255,0.25),inset 0 1px 0 rgba(91,154,255,0.18);}
+.sp-card-3 .sp-card-icon-wrap{background:rgba(255,202,44,0.11);box-shadow:0 0 12px rgba(255,202,44,0.22),inset 0 1px 0 rgba(255,202,44,0.15);}
+.sp-card-4 .sp-card-icon-wrap{background:rgba(155,109,255,0.13);box-shadow:0 0 12px rgba(155,109,255,0.25),inset 0 1px 0 rgba(155,109,255,0.18);}
+.sp-card-icon-wrap svg{width:14px;height:14px;}
+
+.sp-card-title{font-size:10px;font-weight:800;color:rgba(220,238,255,0.92);margin-bottom:2px;letter-spacing:-.1px;}
+.sp-card-desc{font-size:7.5px;color:rgba(140,185,230,0.48);line-height:1.4;}
+
+/* Corner glow accent */
+.sp-card-glow{position:absolute;bottom:-24px;right:-16px;width:55px;height:55px;border-radius:50%;opacity:0.45;pointer-events:none;}
+.sp-card-1 .sp-card-glow{background:radial-gradient(circle,rgba(47,232,160,0.65),transparent);}
+.sp-card-2 .sp-card-glow{background:radial-gradient(circle,rgba(91,154,255,0.65),transparent);}
+.sp-card-3 .sp-card-glow{background:radial-gradient(circle,rgba(255,202,44,0.55),transparent);}
+.sp-card-4 .sp-card-glow{background:radial-gradient(circle,rgba(155,109,255,0.65),transparent);}
+
+/* ── QUOTE — Premium Glass Panel ── */
+.sp-quote-wrap{
+  width:100%;margin-bottom:12px;
+  background:rgba(255,255,255,0.035);
+  backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  border:1px solid rgba(47,232,160,0.15);
+  border-radius:18px;
+  padding:14px 16px 12px;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.07);
+  animation:sp-fade-up 0.7s ease 1.25s both;
 }
-.llbl{font-size:20px;font-weight:900;letter-spacing:.3px;background:var(--grd-blue);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.lsub{font-size:12.5px;color:var(--txt2);}
+.sp-quote-wrap::before{
+  content:'';position:absolute;inset:0;border-radius:18px;
+  background:linear-gradient(145deg,rgba(47,232,160,0.04),transparent 60%,rgba(91,154,255,0.03));
+  pointer-events:none;
+}
+/* Top edge shimmer */
+.sp-quote-wrap::after{
+  content:'';position:absolute;
+  top:0;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(47,232,160,0.35),transparent);
+}
+.sp-quote-qmark{
+  font-size:28px;line-height:1;
+  font-family:Georgia,serif;
+  display:block;
+  background:linear-gradient(135deg,#2fe8a0,#5b9aff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:0.7;
+  filter:drop-shadow(0 0 8px rgba(47,232,160,0.4));
+}
+.sp-quote-qmark.sp-close{text-align:right;margin-top:4px;}
+.sp-quote-text{
+  font-size:12px;font-weight:700;
+  color:rgba(215,238,255,0.82);
+  line-height:1.6;text-align:center;
+  min-height:38px;padding:3px 4px;
+  transition:opacity 0.4s ease,transform 0.4s ease;
+}
+.sp-quote-text.sp-q-exit{opacity:0;transform:translateY(-6px);}
+.sp-quote-text.sp-q-enter{opacity:0;transform:translateY(6px);}
+.sp-quote-div{
+  width:48px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(47,232,160,0.5),transparent);
+  margin:8px auto 0;
+  box-shadow:0 0 6px rgba(47,232,160,0.3);
+}
+
+/* ── LOADING SECTION — Premium ── */
+.sp-loading-section{width:100%;animation:sp-fade-up 0.7s ease 1.45s both;}
+
+/* Rocket row with SVG rocket */
+.sp-rocket-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.sp-rocket-svg{
+  width:28px;height:28px;flex-shrink:0;
+  animation:sp-rocket-fly 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 8px rgba(47,232,160,0.7)) drop-shadow(0 0 16px rgba(47,232,160,0.4));
+}
+@keyframes sp-rocket-fly{
+  0%,100%{transform:translate3d(0,0,0) rotate(-42deg);}
+  50%{transform:translate3d(0,-7px,0) rotate(-42deg);}
+}
+/* Rocket flame pulse */
+@keyframes sp-flame-flicker{
+  0%,100%{opacity:1;transform:scaleY(1);}
+  25%{opacity:0.7;transform:scaleY(0.85);}
+  75%{opacity:0.9;transform:scaleY(1.1);}
+}
+.sp-rocket-flame{animation:sp-flame-flicker 0.3s ease-in-out infinite;transform-origin:top center;}
+
+.sp-load-text{
+  font-size:12px;font-weight:700;
+  color:rgba(180,215,255,0.7);
+  margin-bottom:0;
+  transition:opacity 0.35s ease;
+}
+.sp-load-text .sp-hl{color:#2fe8a0;font-weight:800;}
+
+/* Premium progress bar */
+.sp-bar-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.sp-bar-wrap{
+  flex:1;
+  height:8px;border-radius:99px;
+  background:rgba(255,255,255,0.05);
+  overflow:visible;position:relative;
+  border:1px solid rgba(47,232,160,0.1);
+  box-shadow:0 0 0 3px rgba(47,232,160,0.04),inset 0 1px 3px rgba(0,0,0,0.4);
+}
+.sp-bar-fill{
+  height:100%;border-radius:99px;width:0%;
+  background:linear-gradient(90deg,#00c87a,#2fe8a0 40%,#5bf5c0 65%,#3b82f6 85%,#818cf8);
+  box-shadow:
+    0 0 12px rgba(47,232,160,0.7),
+    0 0 24px rgba(47,232,160,0.35),
+    0 0 40px rgba(47,232,160,0.15);
+  transition:width 0.12s ease-out;
+  position:relative;overflow:hidden;
+}
+/* Shine sweep on bar — uses transform (not left) */
+.sp-bar-shine{
+  position:absolute;top:0;left:0;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.55),rgba(255,255,255,0.2),transparent);
+  border-radius:99px;
+  animation:sp-shine-move 1.8s ease-in-out infinite;
+}
+@keyframes sp-shine-move{from{transform:translate3d(-120%,0,0);}to{transform:translate3d(300%,0,0);}}
+
+/* Glowing percentage */
+.sp-percent{
+  font-size:13px;font-weight:900;
+  color:#2fe8a0;
+  min-width:38px;text-align:right;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 12px rgba(47,232,160,0.7),0 0 24px rgba(47,232,160,0.3);
+  letter-spacing:-.3px;
+}
+
+.sp-tip{
+  display:flex;align-items:flex-start;gap:6px;
+  font-size:9.5px;color:rgba(120,170,225,0.42);
+  margin-top:9px;line-height:1.45;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:10px;padding:6px 9px;
+}
+.sp-tip-icon{font-size:11px;flex-shrink:0;margin-top:1px;opacity:0.7;}
+
+/* ── FOOTER ── */
+.sp-footer{
+  font-size:11px;font-weight:800;
+  color:rgba(47,232,160,0.5);
+  text-align:center;margin-top:10px;letter-spacing:.5px;
+  animation:sp-fade-up 0.6s ease 1.65s both;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.sp-footer-heart{
+  display:inline-block;
+  color:#2fe8a0;
+  animation:sp-heart-beat 1.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 6px rgba(47,232,160,0.6));
+}
+@keyframes sp-heart-beat{
+  0%,100%{transform:scale(1);}
+  14%{transform:scale(1.25);}
+  28%{transform:scale(1);}
+  42%{transform:scale(1.15);}
+}
+
+/* ── KEYFRAMES ── */
+@keyframes sp-fade-up{from{opacity:0;transform:translate3d(0,16px,0);}to{opacity:1;transform:translate3d(0,0,0);}}
+@keyframes sp-fade-dn{from{opacity:0;transform:translate3d(0,-10px,0);}to{opacity:1;transform:translate3d(0,0,0);}}
+
+/* Legacy stubs — keep to avoid any JS errors */
+.lorb,.llbl,.lsub{display:none!important;}
+
+/* ── GPU COMPOSITING HINTS — all animated elements ── */
+.sp-logo-section,
+.sp-logo-img-wrap,
+.sp-logo-halo,
+.sp-logo-glow,
+.sp-orbit,
+.sp-orbit-dot,
+.sp-logo-shimmer,
+.sp-fog-1,.sp-fog-2,.sp-fog-3,
+.sp-aurora-1,.sp-aurora-2,.sp-aurora-3,.sp-aurora-4,
+.sp-streak,
+.sp-scan,
+.sp-bar-fill,
+.sp-bar-shine,
+.sp-rocket-svg,
+.sp-rocket-flame,
+.sp-footer-heart,
+.sp-card,
+.sp-star,
+.sp-particle{
+  will-change:transform;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+}
+
+/* contain:strict on background layer so it doesn't affect layout */
+.sp-bg{contain:strict;}
+.sp-bg-base,.sp-grid{contain:strict;}
+
+/* ── LOW-END / REDUCED-MOTION: strip heavy effects ── */
+@media (prefers-reduced-motion:reduce){
+  .sp-fog-1,.sp-fog-2,.sp-fog-3,
+  .sp-aurora-1,.sp-aurora-2,.sp-aurora-3,.sp-aurora-4,
+  .sp-streak,.sp-scan,.sp-grid,
+  .sp-star,.sp-particle,
+  .sp-logo-halo,.sp-logo-shimmer,
+  .sp-bar-shine,
+  .sp-rocket-flame,
+  .sp-footer-heart{animation:none!important;}
+  .sp-orbit-1{animation-duration:16s!important;}
+  .sp-orbit-2{animation-duration:22s!important;}
+  .sp-orbit-3{animation-duration:10s!important;}
+  .sp-logo-img-wrap{animation-duration:6s!important;}
+  .sp-logo-glow{animation-duration:5s!important;}
+}
+
+/* ── PERF CLASS: applied by JS on slow devices ── */
+.sp-low-end .sp-fog-1,
+.sp-low-end .sp-fog-2,
+.sp-low-end .sp-fog-3,
+.sp-low-end .sp-aurora-3,
+.sp-low-end .sp-aurora-4,
+.sp-low-end .sp-scan,
+.sp-low-end .sp-grid,
+.sp-low-end .sp-streak-2,
+.sp-low-end .sp-streak-4,
+.sp-low-end .sp-bar-shine,
+.sp-low-end .sp-logo-shimmer,
+.sp-low-end .sp-rocket-flame{display:none!important;}
+
+.sp-low-end .sp-star{animation-duration:6s!important;}
+.sp-low-end .sp-orbit-1{animation-duration:14s!important;}
+.sp-low-end .sp-orbit-2{animation-duration:20s!important;}
+.sp-low-end .sp-orbit-3{animation-duration:9s!important;}
+.sp-low-end .sp-logo-img-wrap{animation-duration:5s!important;}
+.sp-low-end .sp-logo-halo{animation-duration:5s!important;}
+.sp-low-end .sp-logo-glow{animation-duration:5s!important;}
+.sp-low-end .sp-rocket-svg{animation-duration:3s!important;}
+.sp-low-end .sp-aurora-1{animation-duration:18s!important;}
+.sp-low-end .sp-aurora-2{animation-duration:24s!important;}
+
+/* On low-end, reduce card blur (expensive on WebKit) */
+.sp-low-end .sp-card{
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+}
+.sp-low-end .sp-quote-wrap{
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+}
 
 /* ── GREEN GRADIENT TEXT (Next Toppers - Feed) ── */
 @keyframes ntHighlight{
@@ -2425,11 +3025,359 @@ button,
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="lorb"><img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png" alt="NT" onerror="this.parentElement.textContent='NT'"></div>
-  <div class="llbl nt-gradient-text">Next Toppers - Feed</div>
-  <div class="lsub">2026–27 · NextToppers Fanpage</div>
-  <div class="ltrack"><div class="lfill"></div></div>
+  <!-- Cinematic background layers -->
+  <div class="sp-bg">
+    <div class="sp-bg-base"></div>
+    <div class="sp-fog-1"></div>
+    <div class="sp-fog-2"></div>
+    <div class="sp-fog-3"></div>
+    <div class="sp-stars" id="sp-stars"></div>
+    <div class="sp-grid"></div>
+    <div class="sp-aurora-1"></div>
+    <div class="sp-aurora-2"></div>
+    <div class="sp-aurora-3"></div>
+    <div class="sp-aurora-4"></div>
+    <div class="sp-streak sp-streak-1"></div>
+    <div class="sp-streak sp-streak-2"></div>
+    <div class="sp-streak sp-streak-3"></div>
+    <div class="sp-streak sp-streak-4"></div>
+    <div class="sp-streak sp-streak-5"></div>
+    <div class="sp-scan"></div>
+  </div>
+
+  <!-- Main content -->
+  <div class="sp-content">
+
+    <!-- Header bar -->
+    <div class="sp-hdr">
+      <div class="sp-ver">⚡ v2.0</div>
+      <div class="sp-status">
+        <span class="sp-dot-live"></span>
+        <span id="sp-status-txt">Preparing something amazing...</span>
+      </div>
+    </div>
+
+    <!-- HERO LOGO — Large, Premium, Orbiting -->
+    <div class="sp-logo-section">
+      <div class="sp-logo-halo"></div>
+      <div class="sp-orbit sp-orbit-1"><div class="sp-orbit-dot"></div></div>
+      <div class="sp-orbit sp-orbit-2"><div class="sp-orbit-dot"></div></div>
+      <div class="sp-orbit sp-orbit-3"><div class="sp-orbit-dot"></div></div>
+      <div class="sp-logo-glow"></div>
+      <!-- Outer neon circular frame -->
+      <div style="position:absolute;width:134px;height:134px;border-radius:50%;border:1.5px solid rgba(47,232,160,0.6);box-shadow:0 0 22px rgba(47,232,160,0.45),0 0 50px rgba(47,232,160,0.15),inset 0 0 22px rgba(47,232,160,0.08);pointer-events:none;"></div>
+      <div class="sp-logo-img-wrap">
+        <img src="https://res.cloudinary.com/dkesefgtg/image/upload/v1778487407/1000049837_1_j1tvdh.png"
+             class="sp-logo-img" alt="NT"
+             onerror="this.parentElement.innerHTML='<span style=&quot;font-size:44px;font-weight:900;background:linear-gradient(135deg,#2fe8a0,#5b9aff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;&quot;>NT</span>'">
+        <div class="sp-logo-shimmer"></div>
+      </div>
+    </div>
+
+    <!-- TITLE — Large cinematic -->
+    <div class="sp-title">
+      <span class="sp-title-nt">Next Toppers</span><span class="sp-title-dash"> - </span><span class="sp-title-feed">Feed</span>
+    </div>
+    <div class="sp-subtitle">YOUR JOURNEY. OUR MISSION.</div>
+
+    <!-- Divider gem -->
+    <div class="sp-divider">
+      <div class="sp-divider-line"></div>
+      <div class="sp-divider-gem"></div>
+      <div class="sp-divider-line right"></div>
+    </div>
+
+    <!-- FEATURE CARDS — Premium Glassmorphism -->
+    <div class="sp-cards">
+      <div class="sp-card sp-card-1">
+        <div class="sp-card-num">01</div>
+        <div class="sp-card-icon-wrap">
+          <!-- Book SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2fe8a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="sp-card-title">Quality Content</div>
+        <div class="sp-card-desc">Curated with care for your success.</div>
+        <div class="sp-card-glow"></div>
+      </div>
+      <div class="sp-card sp-card-2">
+        <div class="sp-card-num">02</div>
+        <div class="sp-card-icon-wrap">
+          <!-- Lightning SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5b9aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div class="sp-card-title">Fast &amp; Smooth</div>
+        <div class="sp-card-desc">Optimized for seamless learning.</div>
+        <div class="sp-card-glow"></div>
+      </div>
+      <div class="sp-card sp-card-3">
+        <div class="sp-card-num">03</div>
+        <div class="sp-card-icon-wrap">
+          <!-- Shield SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffca2c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+        <div class="sp-card-title">Safe &amp; Secure</div>
+        <div class="sp-card-desc">Your data is always protected.</div>
+        <div class="sp-card-glow"></div>
+      </div>
+      <div class="sp-card sp-card-4">
+        <div class="sp-card-num">04</div>
+        <div class="sp-card-icon-wrap">
+          <!-- Graduation SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div class="sp-card-title">Built for Students</div>
+        <div class="sp-card-desc">By students, for students.</div>
+        <div class="sp-card-glow"></div>
+      </div>
+    </div>
+
+    <!-- QUOTE — Premium glass panel -->
+    <div class="sp-quote-wrap">
+      <span class="sp-quote-qmark">&#8220;</span>
+      <div class="sp-quote-text" id="sp-quote"></div>
+      <span class="sp-quote-qmark sp-close">&#8221;</span>
+      <div class="sp-quote-div"></div>
+    </div>
+
+    <!-- LOADING SECTION — Premium -->
+    <div class="sp-loading-section">
+      <div class="sp-rocket-row">
+        <!-- Premium SVG Rocket -->
+        <svg class="sp-rocket-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Rocket body -->
+          <path d="M16 3C16 3 10 8 10 17H22C22 8 16 3 16 3Z" fill="url(#rkt-body)" stroke="rgba(47,232,160,0.6)" stroke-width="0.8"/>
+          <!-- Window -->
+          <circle cx="16" cy="13" r="2.5" fill="rgba(180,240,255,0.9)" stroke="rgba(47,232,160,0.8)" stroke-width="0.8"/>
+          <circle cx="15.3" cy="12.3" r="0.9" fill="rgba(255,255,255,0.7)"/>
+          <!-- Side fins -->
+          <path d="M10 16L7 21H10V16Z" fill="url(#rkt-fin)" stroke="rgba(47,232,160,0.4)" stroke-width="0.6"/>
+          <path d="M22 16L25 21H22V16Z" fill="url(#rkt-fin)" stroke="rgba(47,232,160,0.4)" stroke-width="0.6"/>
+          <!-- Nozzle -->
+          <path d="M13 21H19L18 24H14L13 21Z" fill="#1a3a2a" stroke="rgba(47,232,160,0.5)" stroke-width="0.6"/>
+          <!-- Flame -->
+          <g class="sp-rocket-flame">
+            <path d="M14 24C14 24 13 27 16 29C19 27 18 24 18 24Z" fill="url(#rkt-flame1)"/>
+            <path d="M15 25C15 25 14.5 28 16 29.5C17.5 28 16.5 25 16.5 25Z" fill="url(#rkt-flame2)" opacity="0.9"/>
+          </g>
+          <!-- Glow highlight on body -->
+          <path d="M14 6C14 6 13 9 13 13" stroke="rgba(255,255,255,0.25)" stroke-width="1.2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="rkt-body" x1="16" y1="3" x2="16" y2="21" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1a4a35"/>
+              <stop offset="50%" stop-color="#0d2a1f"/>
+              <stop offset="100%" stop-color="#1a3a2a"/>
+            </linearGradient>
+            <linearGradient id="rkt-fin" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#1a4a35"/>
+              <stop offset="100%" stop-color="#0a1f15"/>
+            </linearGradient>
+            <linearGradient id="rkt-flame1" x1="16" y1="24" x2="16" y2="29" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2fe8a0"/>
+              <stop offset="50%" stop-color="#00ff88"/>
+              <stop offset="100%" stop-color="#ffff00" stop-opacity="0.3"/>
+            </linearGradient>
+            <linearGradient id="rkt-flame2" x1="16" y1="25" x2="16" y2="29.5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#2fe8a0" stop-opacity="0.2"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="sp-load-text" id="sp-load-text"></div>
+      </div>
+      <div class="sp-bar-row">
+        <div class="sp-bar-wrap">
+          <div class="sp-bar-fill" id="sp-bar-fill">
+            <div class="sp-bar-shine"></div>
+          </div>
+        </div>
+        <div class="sp-percent" id="sp-percent">0%</div>
+      </div>
+      <div class="sp-tip">
+        <span class="sp-tip-icon">💡</span>
+        <span><strong>Tip:</strong> Stay focused — every session brings you closer to your goal.</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sp-footer">
+      <span class="sp-footer-heart">♥</span>
+      Stay Focused. Keep <span style="color:#2fe8a0;text-shadow:0 0 10px rgba(47,232,160,0.5);">Growing.</span>
+    </div>
+
+  </div>
 </div>
+
+<script>
+/* ── PREMIUM SPLASH SCREEN LOGIC ── */
+(function(){
+  var QUOTES=[
+    'The harder you work for something, the greater you\'ll feel when you achieve it.',
+    'Success doesn\'t come from what you do occasionally. It comes from what you do consistently.',
+    'Small daily improvements lead to stunning long-term results.',
+    'Dream big, start small, but most importantly \u2014 start.',
+    'Discipline is choosing what you want most over what you want now.',
+    'Every topper was once a beginner who refused to quit.'
+  ];
+  var LOAD_TEXTS=[
+    'Loading <span class="sp-hl">amazing</span> content for you...',
+    'Preparing your <span class="sp-hl">learning</span> experience...',
+    'Optimizing your <span class="sp-hl">study</span> dashboard...',
+    'Fetching <span class="sp-hl">lectures</span> and notes...',
+    'Almost ready, future <span class="sp-hl">topper</span>...'
+  ];
+  var qIdx=0,ltIdx=0,prog=0,progStopped=false;
+
+  /* ── LOW-END DEVICE DETECTION ── */
+  var isLowEnd=(function(){
+    var score=0;
+    // CPU cores — low-end phones typically have 4 or fewer
+    if(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)score+=2;
+    // RAM (only Chrome/Android exposes this)
+    if(navigator.deviceMemory&&navigator.deviceMemory<=2)score+=3;
+    // Small screen = likely budget device
+    var px=window.screen.width*window.devicePixelRatio;
+    if(px<720)score+=1;
+    // Connection quality
+    var conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+    if(conn&&(conn.saveData||conn.effectiveType==='2g'||conn.effectiveType==='slow-2g'))score+=2;
+    return score>=3;
+  })();
+
+  if(isLowEnd){
+    var loader=document.getElementById('loader');
+    if(loader)loader.classList.add('sp-low-end');
+  }
+
+  function genStars(){
+    var c=document.getElementById('sp-stars');
+    if(!c)return;
+    // Fewer stars on low-end devices
+    var count=isLowEnd?28:60;
+    var frag=document.createDocumentFragment();
+    for(var i=0;i<count;i++){
+      var d=document.createElement('div');
+      var sz=(Math.random()*2+0.5).toFixed(1);
+      var op=(Math.random()*0.5+0.08).toFixed(2);
+      // Longer durations = fewer repaints per second
+      var dur=(isLowEnd?6:3+Math.random()*3).toFixed(1);
+      var del=(Math.random()*(isLowEnd?12:8)).toFixed(1);
+      d.className='sp-star';
+      d.style.cssText='left:'+Math.floor(Math.random()*100)+'%;top:'+Math.floor(Math.random()*100)+'%;width:'+sz+'px;height:'+sz+'px;--op:'+op+';animation-duration:'+dur+'s;animation-delay:'+del+'s';
+      frag.appendChild(d);
+    }
+    c.appendChild(frag);
+    // Floating neon particles — skip entirely on low-end
+    if(isLowEnd)return;
+    if(!document.getElementById('sp-particle-kf')){
+      var s=document.createElement('style');s.id='sp-particle-kf';
+      s.textContent='@keyframes sp-particle-float{0%,100%{transform:translateY(0) scale(1);opacity:var(--pop,0.5);}50%{transform:translateY(-28px) scale(1.2);opacity:1;}}';
+      document.head.appendChild(s);
+    }
+    var bg=document.querySelector('.sp-bg');
+    if(!bg)return;
+    var colors=['rgba(47,232,160,','rgba(91,154,255,','rgba(155,109,255,','rgba(0,255,180,'];
+    // Reduced particle count (18 → 10) even on high-end
+    for(var j=0;j<10;j++){
+      var p=document.createElement('div');
+      var psz=(Math.random()*3+1.5).toFixed(1);
+      var col=colors[Math.floor(Math.random()*colors.length)];
+      var pop=(Math.random()*0.4+0.15).toFixed(2);
+      var px=Math.floor(Math.random()*100);
+      var py=Math.floor(Math.random()*100);
+      var pdur=(Math.random()*8+10).toFixed(1);
+      var pdel=(Math.random()*8).toFixed(1);
+      p.className='sp-particle';
+      p.style.cssText=[
+        'left:'+px+'%','top:'+py+'%',
+        'width:'+psz+'px','height:'+psz+'px',
+        '--pop:'+pop,
+        'background:'+col+pop+')',
+        'box-shadow:0 0 '+(parseFloat(psz)*3).toFixed(0)+'px '+col+'0.5)',
+        'animation:sp-particle-float '+pdur+'s ease-in-out '+pdel+'s infinite'
+      ].join(';');
+      bg.appendChild(p);
+    }
+  }
+
+  function setQuote(txt){
+    var el=document.getElementById('sp-quote');
+    if(!el)return;
+    el.classList.add('sp-q-exit');
+    setTimeout(function(){
+      el.textContent=txt;
+      el.classList.remove('sp-q-exit');
+      el.classList.add('sp-q-enter');
+      requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.remove('sp-q-enter');});});
+    },370);
+  }
+
+  function setLoadText(html){
+    var el=document.getElementById('sp-load-text');
+    if(!el)return;
+    el.style.opacity='0';
+    setTimeout(function(){el.innerHTML=html;el.style.opacity='1';},290);
+  }
+
+  /* ── RAF-BASED PROGRESS — single rAF loop, no thrashing ── */
+  var lastProg=0;
+  function tickProgress(){
+    if(progStopped)return;
+    var fill=document.getElementById('sp-bar-fill');
+    var pct=document.getElementById('sp-percent');
+    if(!fill||!pct)return;
+    if(prog<82){prog+=(82-prog)*0.025+0.18;}
+    else if(prog<96){prog+=0.06;}
+    var p=Math.min(96,prog);
+    // Only update DOM if value visibly changed (skip sub-pixel updates)
+    var rounded=Math.round(p);
+    if(rounded!==lastProg){
+      fill.style.width=p.toFixed(1)+'%';
+      pct.textContent=rounded+'%';
+      lastProg=rounded;
+    }
+    if(p<96)requestAnimationFrame(tickProgress);
+  }
+
+  function watchForHide(){
+    var ld=document.getElementById('loader');
+    if(!ld)return;
+    var obs=new MutationObserver(function(){
+      if(ld.classList.contains('out')){
+        progStopped=true;
+        var fill=document.getElementById('sp-bar-fill');
+        var pct=document.getElementById('sp-percent');
+        if(fill){fill.style.transition='width 0.5s ease';fill.style.width='100%';}
+        if(pct)pct.textContent='100%';
+        obs.disconnect();
+      }
+    });
+    obs.observe(ld,{attributes:true,attributeFilter:['class']});
+  }
+
+  function init(){
+    genStars();
+    var qEl=document.getElementById('sp-quote');
+    if(qEl)qEl.textContent=QUOTES[0];
+    var ltEl=document.getElementById('sp-load-text');
+    if(ltEl)ltEl.innerHTML=LOAD_TEXTS[0];
+    setInterval(function(){qIdx=(qIdx+1)%QUOTES.length;setQuote(QUOTES[qIdx]);},3500);
+    setInterval(function(){ltIdx=(ltIdx+1)%LOAD_TEXTS.length;setLoadText(LOAD_TEXTS[ltIdx]);},2800);
+    requestAnimationFrame(tickProgress);
+    watchForHide();
+  }
+
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
+  else{init();}
+})();
+</script>
 
 <!-- PASSCODE -->
 <div id="passcode">
